@@ -11,6 +11,7 @@ package com.ssafy.triplog.user.controller;
 //특정 회원 정보 조회	GET	/api/users/{userNo}
 
 import com.ssafy.triplog.user.dto.*;
+import com.ssafy.triplog.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +27,22 @@ import java.util.List;
 @Slf4j
 public class UserController {
 
+    private final UserService userService;
+
     @Operation(summary = "회원가입", description = "사용자 이메일과 비밀번호 등 기본 정보를 이용하여 회원가입을 처리합니다.")
     @PostMapping("/signup")
     public ResponseEntity<UserResponse> signup(@Valid @RequestBody UserServiceDto request) {
         log.debug("signup -----> request : {} ", request);
-        return ResponseEntity.ok(new UserResponse());
+        UserResponse response = userService.registerUser(request);
+        return ResponseEntity.ok(response);
     }
+
+//    @Operation(summary = "회원가입", description = "사용자 이메일과 비밀번호 등 기본 정보를 이용하여 회원가입을 처리합니다.")
+//    @PostMapping("/signup")
+//    public ResponseEntity<UserResponse> signup(@Valid @RequestBody UserServiceDto request) {
+//        log.debug("signup -----> request : {} ", request);
+//        return ResponseEntity.ok(new UserResponse());
+//    }
 
 
     @Operation(summary = "회원탈퇴", description = "인증된 사용자가 자신의 계정을 탈퇴합니다. no는 토큰 사용 시 삭제될 예정입니다. ")
