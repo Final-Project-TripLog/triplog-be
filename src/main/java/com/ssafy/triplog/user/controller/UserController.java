@@ -115,7 +115,8 @@ public class UserController {
     @GetMapping("/{userNo}")
     public ResponseEntity<UserServiceDto> getUserById(@PathVariable Long userNo) {
         log.debug("getUserById -----> userNo : {} ", userNo);
-        return ResponseEntity.ok(new UserServiceDto());
+        UserServiceDto userDto = userService.getUserDetail(userNo);
+        return ResponseEntity.ok(userDto);
     }
 
     @Operation(summary = "나의 팔로워 조회", description = "userNo 팔로워 list 를 조회합니다. ")
