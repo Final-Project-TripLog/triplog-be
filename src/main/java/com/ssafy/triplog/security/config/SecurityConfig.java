@@ -3,7 +3,6 @@ package com.ssafy.triplog.security.config;
 import com.ssafy.triplog.security.jwt.JWTFilter;
 import com.ssafy.triplog.security.jwt.JWTUtil;
 import com.ssafy.triplog.security.jwt.LoginFilter;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,46 +55,70 @@ public class SecurityConfig {
         http.httpBasic(httpBasic -> httpBasic.disable());
 
         // 경로별 권한 설정
-        // 경로별 권한 설정
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/users/signup")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/users/login")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui/**")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui.html")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/v3/api-docs/**")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/api-docs/**")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/**")).hasRole("ADMIN")
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/users/signup"),
-                        AntPathRequestMatcher.antMatcher("/triplog/api/users/signup")).permitAll()
+                // Swagger 관련 경로
+                .requestMatchers(
+                        AntPathRequestMatcher.antMatcher("/**/swagger-ui/**"),
+                        AntPathRequestMatcher.antMatcher("/**/swagger-ui.html"),
+                        AntPathRequestMatcher.antMatcher("/**/v3/api-docs/**"),
+                        AntPathRequestMatcher.antMatcher("/**/api-docs/**")
+                ).permitAll()
+                // 인증이 필요 없는 API 경로들
+                .requestMatchers(
+                        AntPathRequestMatcher.antMatcher("/**/api/users/signup"),
+                        AntPathRequestMatcher.antMatcher("/**/api/users/login"),
+                        AntPathRequestMatcher.antMatcher("/**/api/users/find-email"),
+                        AntPathRequestMatcher.antMatcher("/**/api/users/find-password"),
+                        AntPathRequestMatcher.antMatcher("/**")
+                ).permitAll()
+                // 관리자 기능
+                .requestMatchers(
+                        AntPathRequestMatcher.antMatcher("/**/api/admin/**")
+                ).hasRole("ADMIN")
+                // 인증된 사용자만 접근 가능한 경로들
+                .requestMatchers(
+                        AntPathRequestMatcher.antMatcher("/**/api/users/{userNo}/**"),
+                        AntPathRequestMatcher.antMatcher("/**/api/attraction/**"),
+                        AntPathRequestMatcher.antMatcher("/**/api/review/**"),
+                        AntPathRequestMatcher.antMatcher("/**/api/bookmarks/**"),
+                        AntPathRequestMatcher.antMatcher("/**/api/myplans/**"),
+                        AntPathRequestMatcher.antMatcher("/**/api/planposts/**"),
+                        AntPathRequestMatcher.antMatcher("/**/api/plan-comments/**")
+                ).authenticated()
+                // 그 외 모든 요청은 인증 필요
                 .anyRequest().authenticated());
 
+        // CORS 설정
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+
         // 로그인 필터 추가
-        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
-                UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAt(
+                new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
+                UsernamePasswordAuthenticationFilter.class
+        );
 
         // JWT 필터 추가
-        http.addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
-
-        // CORS 설정
-        http.cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
-            @Override
-            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                CorsConfiguration configuration = new CorsConfiguration();
-                configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                configuration.setAllowCredentials(true);
-                configuration.setAllowedHeaders(Collections.singletonList("*"));
-                configuration.setMaxAge(3600L);
-                configuration.setExposedHeaders(Collections.singletonList("Authorization"));
-                return configuration;
-            }
-        }));
+        http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         // 세션 관리 설정
         http.sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Collections.singletonList("*")); // 패턴으로 허용
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization")); // JWT를 위한 헤더 노출
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

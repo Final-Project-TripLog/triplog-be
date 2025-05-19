@@ -13,6 +13,7 @@ package com.ssafy.triplog.user.controller;
 import com.ssafy.triplog.user.dto.*;
 import com.ssafy.triplog.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "User API", description = "사용자 관리 API")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+// @CrossOrigin(origins = "*", allowedHeaders = "*") - 이전 코드
+@CrossOrigin(origins = "http://localhost:8080", allowedHeaders = "*") // 명시적인 출처로 변경
+// 또는 이 어노테이션을 완전히 제거하고 전역 설정에만 의존
 public class UserController {
 
     private final UserService userService;
