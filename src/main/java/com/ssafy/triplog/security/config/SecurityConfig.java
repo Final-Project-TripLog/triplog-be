@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -54,9 +55,18 @@ public class SecurityConfig {
         http.httpBasic(httpBasic -> httpBasic.disable());
 
         // 경로별 권한 설정
+        // 경로별 권한 설정
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/triplog/api/users/signup", "/triplog/api/users/login", "/triplog/swagger-ui/**", "/triplog/api-docs/**", "/triplog/").permitAll()
-                .requestMatchers("/triplog/api/admin/**").hasRole("ADMIN")
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/users/signup")).permitAll()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/users/login")).permitAll()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui/**")).permitAll()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui.html")).permitAll()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/v3/api-docs/**")).permitAll()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api-docs/**")).permitAll()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/")).permitAll()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/**")).hasRole("ADMIN")
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/users/signup"),
+                        AntPathRequestMatcher.antMatcher("/triplog/api/users/signup")).permitAll()
                 .anyRequest().authenticated());
 
         // 로그인 필터 추가

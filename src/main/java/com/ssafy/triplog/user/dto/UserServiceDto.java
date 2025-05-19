@@ -18,6 +18,7 @@ public class UserServiceDto {
     private String name;                // 진짜 이름
     private String profileUrl;          // 프로필 사진
     private String phone;               // 전화번호 (010-0000-0000 형식)
+    private String role;
     private String address;             // 기본 주소
     private String addressDetail;       // 상세 주소
     private Integer followCount;         // 팔로우 수
