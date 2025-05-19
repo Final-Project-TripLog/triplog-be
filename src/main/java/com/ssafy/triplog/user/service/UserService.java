@@ -1,5 +1,6 @@
 package com.ssafy.triplog.user.service;
 
+import com.ssafy.triplog.user.dto.UserDto;
 import com.ssafy.triplog.user.dto.UserResponse;
 import com.ssafy.triplog.user.dto.UserServiceDto;
 import com.ssafy.triplog.user.repository.UserRepository;
@@ -44,5 +45,25 @@ public class UserService {
         response.setProfileUrl(userServiceDto.getProfileUrl());
 
         return response;
+    }
+
+    public UserServiceDto getUserDetail(Long userNo) {
+        UserDto userDto = userRepository.findById(userNo);
+        if (userDto == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다: " + userNo);
+        }
+
+        // UserDto를 UserServiceDto로 변환
+        UserServiceDto userServiceDto = new UserServiceDto();
+        userServiceDto.setEmail(userDto.getEmail());
+        userServiceDto.setNickname(userDto.getNickname());
+        userServiceDto.setName(userDto.getName());
+        userServiceDto.setProfileUrl(userDto.getProfileUrl());
+        userServiceDto.setPhone(userDto.getPhone());
+        userServiceDto.setAddress(userDto.getAddress());
+        userServiceDto.setAddressDetail(userDto.getAddressDetail());
+        // 다른 필드도 설정...
+
+        return userServiceDto;
     }
 }

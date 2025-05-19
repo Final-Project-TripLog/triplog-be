@@ -12,4 +12,6 @@ public interface UserMapper {
     void save(UserServiceDto userServiceDto);
     Long getLastInsertId();
     // 기타 필요한 메소드들...
+    UserDto findById(@Param("id") Long id);
+
 }

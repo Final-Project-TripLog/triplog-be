@@ -7,4 +7,5 @@ public interface UserRepository {
     UserDto findByEmail(String email);
     boolean existsByEmail(String email);
     Long save(UserServiceDto userServiceDto);
+    UserDto findById(Long id);
 }

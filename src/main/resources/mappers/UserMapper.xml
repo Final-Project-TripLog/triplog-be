@@ -33,4 +33,16 @@
     <select id="getLastInsertId" resultType="long">
         SELECT LAST_INSERT_ID()
     </select>
+
+    <select id="findById" resultType="com.ssafy.triplog.user.dto.UserDto">
+        SELECT
+            no, email, password, social_type as socialType, social_id as socialId,
+            nickname, name, profile_url as profileUrl, created_at as createdAt,
+            role, phone, address, address_detail as addressDetail,
+            follow_count as followCount, follower_count as followerCount
+        FROM
+            users
+        WHERE
+            no = #{id}
+    </select>
 </mapper>

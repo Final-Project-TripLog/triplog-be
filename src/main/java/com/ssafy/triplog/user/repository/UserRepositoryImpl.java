@@ -7,7 +7,8 @@ import com.ssafy.triplog.user.repository.mapper.UserMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class UserRepositoryImpl implements UserRepository {
+public
+class UserRepositoryImpl implements UserRepository {
 
     private final UserMapper userMapper;
 
@@ -29,5 +30,9 @@ public class UserRepositoryImpl implements UserRepository {
     public Long save(UserServiceDto userServiceDto) {
         userMapper.save(userServiceDto);
         return userMapper.getLastInsertId();
+    }
+    @Override
+    public UserDto findById(Long id) {
+        return userMapper.findById(id);
     }
 }

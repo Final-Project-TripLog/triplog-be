@@ -42,6 +42,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+
 //    @Operation(summary = "회원가입", description = "사용자 이메일과 비밀번호 등 기본 정보를 이용하여 회원가입을 처리합니다.")
 //    @PostMapping("/signup")
 //    public ResponseEntity<UserResponse> signup(@Valid @RequestBody UserServiceDto request) {
