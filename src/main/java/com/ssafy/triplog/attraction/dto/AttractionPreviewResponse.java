@@ -16,5 +16,4 @@ public class AttractionPreviewResponse {
     private Double rating;                 // 평점
     private Integer attractionTypeNo;      // 관광지 분류
     private String address;                // 기본 주소
-
 }
