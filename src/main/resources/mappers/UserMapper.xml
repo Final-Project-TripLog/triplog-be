@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.triplog.user.repository.mapper.UserMapper">
+
+    <select id="findByEmail" resultType="com.ssafy.triplog.user.dto.UserDto">
+        SELECT
+            no, email, password, social_type as socialType, social_id as socialId,
+            nickname, name, profile_url as profileUrl, created_at as createdAt,
+            role, phone, address, address_detail as addressDetail,
+            follow_count as followCount, follower_count as followerCount
+        FROM
+            users
+        WHERE
+            email = #{email}
+    </select>
+
+    <select id="existsByEmail" resultType="int">
+        SELECT COUNT(*) FROM users WHERE email = #{email}
+    </select>
+
+    <insert id="save" parameterType="com.ssafy.triplog.user.dto.UserServiceDto">
+        INSERT INTO users (
+            email, password, social_type, social_id, nickname, name,
+            profile_url, created_at, role, phone, address, address_detail,
+            follow_count, follower_count
+        ) VALUES (
+                     #{email}, #{password}, #{socialType}, #{socialId}, #{nickname}, #{name},
+                     #{profileUrl}, NOW(), #{role}, #{phone}, #{address}, #{addressDetail},
+                     0, 0
+                 )
+    </insert>
+
+    <select id="getLastInsertId" resultType="long">
+        SELECT LAST_INSERT_ID()
+    </select>
+
+    <select id="findById" resultType="com.ssafy.triplog.user.dto.UserDto">
+        SELECT
+            no, email, password, social_type as socialType, social_id as socialId,
+            nickname, name, profile_url as profileUrl, created_at as createdAt,
+            role, phone, address, address_detail as addressDetail,
+            follow_count as followCount, follower_count as followerCount
+        FROM
+            users
+        WHERE
+            no = #{id}
+    </select>
+</mapper>
