@@ -1,328 +1,43 @@
+// src/main/java/com/ssafy/triplog/user/service/UserService.java
 package com.ssafy.triplog.user.service;
 
 import com.ssafy.triplog.user.dto.*;
-import com.ssafy.triplog.user.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-@Service
-public class UserService {
+public interface UserService {
+    // 회원가입
+    UserResponse registerUser(UserServiceDto userServiceDto);
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    // 회원 상세 정보 조회
+    UserServiceDto getUserDetail(Long userNo);
 
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    // 회원탈퇴
+    boolean withdrawUser(Long userNo, String password);
 
-    // 기존 메서드: 사용자 등록 (회원가입)
-    public UserResponse registerUser(UserServiceDto userServiceDto) {
-        // 이메일 중복 확인
-        if (userRepository.existsByEmail(userServiceDto.getEmail())) {
-            throw new RuntimeException("이미 등록된 이메일입니다.");
-        }
+    // 회원정보 수정
+    UserResponse updateUser(Long userNo, UserDto userDto);
 
-        // 비밀번호 암호화
-        userServiceDto.setPassword(passwordEncoder.encode(userServiceDto.getPassword()));
+    // 모든 회원 조회 (관리자)
+    List<UserServiceDto> getAllUsers();
 
-        // 기본 권한 설정
-        userServiceDto.setRole("ROLE_USER");
+    // 이메일 찾기
+    UserFindEmailResponse findUserEmail(UserFindEmailRequest request);
 
-        // 소셜 타입 설정
-        if (userServiceDto.getSocialType() == null) {
-            userServiceDto.setSocialType("LOCAL");
-        }
+    // 비밀번호 찾기
+    String findUserPassword(UserFindPasswordRequest request);
 
-        // 사용자 DB에 저장
-        Long userNo = userRepository.save(userServiceDto);
+    // 팔로워 목록 조회
+    List<UserFollowInfoResponse> getUserFollowers(Long userNo);
 
-        // 응답 객체 생성
-        UserResponse response = new UserResponse();
-        response.setNo(userNo);
-        response.setNickname(userServiceDto.getNickname());
-        response.setProfileUrl(userServiceDto.getProfileUrl());
+    // 팔로잉 목록 조회
+    List<UserFollowInfoResponse> getUserFollowing(Long userNo);
 
-        return response;
-    }
+    // 팔로우
+    boolean followUser(Long followerId, Long followingId);
 
-    // 기존 메서드: 사용자 상세 정보 조회
-    public UserServiceDto getUserDetail(Long userNo) {
-        UserDto userDto = userRepository.findById(userNo);
-        if (userDto == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다: " + userNo);
-        }
+    // 언팔로우
+    boolean unfollowUser(Long followerId, Long followingId);
 
-        // UserDto를 UserServiceDto로 변환
-        UserServiceDto userServiceDto = new UserServiceDto();
-        userServiceDto.setEmail(userDto.getEmail());
-        userServiceDto.setNickname(userDto.getNickname());
-        userServiceDto.setName(userDto.getName());
-        userServiceDto.setProfileUrl(userDto.getProfileUrl());
-        userServiceDto.setPhone(userDto.getPhone());
-        userServiceDto.setAddress(userDto.getAddress());
-        userServiceDto.setAddressDetail(userDto.getAddressDetail());
-        userServiceDto.setFollowCount(userDto.getFollowCount());
-        userServiceDto.setFollowerCount(userDto.getFollowerCount());
-        userServiceDto.setRole(userDto.getRole());
-        userServiceDto.setSocialType(userDto.getSocialType());
-
-        return userServiceDto;
-    }
-
-    // 새로 추가: 회원 탈퇴
-    @Transactional
-    public boolean withdrawUser(Long userNo, String password) {
-        // 현재 사용자의 비밀번호 확인
-        UserDto userDto = userRepository.findById(userNo);
-        if (userDto == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
-
-        // 비밀번호 검증
-        if (!passwordEncoder.matches(password, userDto.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
-        }
-
-        // 사용자 삭제
-        return userRepository.deleteUser(userNo);
-    }
-
-    // 새로 추가: 회원 정보 수정
-    @Transactional
-    public UserResponse updateUser(Long userNo, UserDto userDto) {
-        // 사용자 존재 여부 확인
-        UserDto existingUser = userRepository.findById(userNo);
-        if (existingUser == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
-
-        // 비밀번호가 제공된 경우 암호화
-        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
-            userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        }
-
-        // 사용자 ID 설정
-        userDto.setNo(userNo);
-
-        // 사용자 정보 업데이트
-        userRepository.updateUser(userDto);
-
-        // 업데이트된 사용자 정보로 응답 생성
-        UserResponse response = new UserResponse();
-        response.setNo(userNo);
-        response.setNickname(userDto.getNickname());
-        response.setProfileUrl(userDto.getProfileUrl());
-
-        return response;
-    }
-
-    // 새로 추가: 관리자 - 모든 사용자 조회
-    public List<UserServiceDto> getAllUsers() {
-        List<UserDto> userDtoList = userRepository.findAllUsers();
-        List<UserServiceDto> result = new ArrayList<>();
-
-        for (UserDto userDto : userDtoList) {
-            UserServiceDto userServiceDto = new UserServiceDto();
-            userServiceDto.setEmail(userDto.getEmail());
-            userServiceDto.setNickname(userDto.getNickname());
-            userServiceDto.setName(userDto.getName());
-            userServiceDto.setProfileUrl(userDto.getProfileUrl());
-            userServiceDto.setPhone(userDto.getPhone());
-            userServiceDto.setAddress(userDto.getAddress());
-            userServiceDto.setAddressDetail(userDto.getAddressDetail());
-            userServiceDto.setFollowCount(userDto.getFollowCount());
-            userServiceDto.setFollowerCount(userDto.getFollowerCount());
-            userServiceDto.setRole(userDto.getRole());
-            userServiceDto.setSocialType(userDto.getSocialType());
-
-            result.add(userServiceDto);
-        }
-
-        return result;
-    }
-
-    // 새로 추가: 아이디(이메일) 찾기
-    public UserFindEmailResponse findUserEmail(UserFindEmailRequest request) {
-        UserDto userDto = userRepository.findByNameAndPhone(request.getName(), request.getPhone());
-        if (userDto == null) {
-            throw new RuntimeException("해당 정보로 등록된 사용자를 찾을 수 없습니다.");
-        }
-
-        UserFindEmailResponse response = new UserFindEmailResponse();
-        response.setNo(userDto.getNo());
-        response.setEmail(userDto.getEmail());
-
-        return response;
-    }
-
-    // 새로 추가: 비밀번호 찾기 (임시 비밀번호 발급)
-    @Transactional
-    public String findUserPassword(UserFindPasswordRequest request) {
-        // 사용자 정보 확인
-        UserDto userDto = userRepository.findByEmailAndNameAndPhone(
-                request.getEmail(), request.getName(), request.getPhone());
-
-        if (userDto == null) {
-            throw new RuntimeException("해당 정보로 등록된 사용자를 찾을 수 없습니다.");
-        }
-
-        // 임시 비밀번호 생성 (8자리 랜덤 문자열)
-        String temporaryPassword = generateTemporaryPassword();
-
-        // 임시 비밀번호 암호화 후 저장
-        userRepository.updatePassword(userDto.getNo(), passwordEncoder.encode(temporaryPassword));
-
-        // 실제 애플리케이션에서는 여기서 이메일로 임시 비밀번호를 전송하는 코드가 추가되어야 함
-        // emailService.sendTemporaryPassword(userDto.getEmail(), temporaryPassword);
-
-        return temporaryPassword;
-    }
-
-    // 임시 비밀번호 생성 (8자리 랜덤 문자열)
-    private String generateTemporaryPassword() {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder sb = new StringBuilder(8);
-        Random random = new Random();
-
-        for (int i = 0; i < 8; i++) {
-            int index = random.nextInt(characters.length());
-            sb.append(characters.charAt(index));
-        }
-
-        return sb.toString();
-    }
-
-    // 새로 추가: 팔로워 목록 조회
-    public List<UserFollowInfoResponse> getUserFollowers(Long userNo) {
-        // 사용자 존재 여부 확인
-        UserDto userDto = userRepository.findById(userNo);
-        if (userDto == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
-
-        // 팔로워 정보 조회
-        List<UserFollowInfoDto> followers = userRepository.findFollowersByUserNo(userNo);
-        List<UserFollowInfoResponse> result = new ArrayList<>();
-
-        // 각 팔로워의 기본 정보 조회 및 변환
-        for (UserFollowInfoDto follower : followers) {
-            UserFollowInfoResponse followInfo = userRepository.findUserBasicInfoById(follower.getFollower());
-            if (followInfo != null) {
-                result.add(followInfo);
-            }
-        }
-
-        return result;
-    }
-
-    // 새로 추가: 팔로잉 목록 조회
-    public List<UserFollowInfoResponse> getUserFollowing(Long userNo) {
-        // 사용자 존재 여부 확인
-        UserDto userDto = userRepository.findById(userNo);
-        if (userDto == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
-
-        // 팔로잉 정보 조회
-        List<UserFollowInfoDto> following = userRepository.findFollowingByUserNo(userNo);
-        List<UserFollowInfoResponse> result = new ArrayList<>();
-
-        // 각 팔로잉의 기본 정보 조회 및 변환
-        for (UserFollowInfoDto follow : following) {
-            UserFollowInfoResponse followInfo = userRepository.findUserBasicInfoById(follow.getFollow());
-            if (followInfo != null) {
-                result.add(followInfo);
-            }
-        }
-
-        return result;
-    }
-
-    // 새로 추가: 팔로우
-    @Transactional
-    public boolean followUser(Long followerId, Long followingId) {
-        // 사용자 존재 여부 확인
-        UserDto follower = userRepository.findById(followerId);
-        UserDto following = userRepository.findById(followingId);
-
-        if (follower == null || following == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
-
-        // 자기 자신을 팔로우할 수 없음
-        if (followerId.equals(followingId)) {
-            throw new RuntimeException("자기 자신을 팔로우할 수 없습니다.");
-        }
-
-        return userRepository.addFollow(followingId, followerId);
-    }
-
-    // 새로 추가: 언팔로우
-    @Transactional
-    public boolean unfollowUser(Long followerId, Long followingId) {
-        // 사용자 존재 여부 확인
-        UserDto follower = userRepository.findById(followerId);
-        UserDto following = userRepository.findById(followingId);
-
-        if (follower == null || following == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
-
-        return userRepository.removeFollow(followingId, followerId);
-    }
-
-    // 새로 추가: 소셜 로그인 처리
-    @Transactional
-    public UserResponse processSocialLogin(String socialType, String socialId, UserServiceDto socialUserInfo) {
-        // 기존 소셜 계정 확인
-        UserDto existingUser = userRepository.findBySocialIdAndType(socialId, socialType);
-
-        // 기존 계정이 있는 경우
-        if (existingUser != null) {
-            UserResponse response = new UserResponse();
-            response.setNo(existingUser.getNo());
-            response.setNickname(existingUser.getNickname());
-            response.setProfileUrl(existingUser.getProfileUrl());
-            return response;
-        }
-
-        // 새 계정 생성
-        socialUserInfo.setSocialId(socialId);
-        socialUserInfo.setSocialType(socialType);
-        socialUserInfo.setRole("ROLE_USER");
-        // 소셜 로그인은 비밀번호가 없으므로 랜덤 문자열로 설정
-        socialUserInfo.setPassword(passwordEncoder.encode(generateTemporaryPassword()));
-
-        Long userNo = userRepository.save(socialUserInfo);
-
-        UserResponse response = new UserResponse();
-        response.setNo(userNo);
-        response.setNickname(socialUserInfo.getNickname());
-        response.setProfileUrl(socialUserInfo.getProfileUrl());
-
-        return response;
-    }
-
-    // 이 메서드는 실제 구현 시에는 각 소셜 로그인 제공자의 API를 사용하여 구현해야 함
-    public UserResponse handleSocialLogin(String provider, UserSocialLoginRequest request) {
-        // 여기서는 예시로 간단히 처리
-        // 실제로는 provider에 따라 다른 API 요청 및 처리 로직이 필요함
-
-        // 예시 코드 - 실제 구현 필요
-        String socialId = "social_" + request.getAuthorizationCode(); // 실제로는 토큰 교환 후 사용자 정보 조회 필요
-        String email = "user_" + System.currentTimeMillis() + "@" + provider + ".com"; // 실제로는 API에서 받아와야 함
-
-        UserServiceDto socialUserInfo = new UserServiceDto();
-        socialUserInfo.setEmail(email);
-        socialUserInfo.setNickname("User_" + provider.substring(0, 1).toUpperCase() + provider.substring(1));
-        socialUserInfo.setProfileUrl(null); // 실제로는 소셜 API에서 받아온 프로필 URL
-
-        return processSocialLogin(provider.toUpperCase(), socialId, socialUserInfo);
-    }
+    // 소셜 로그인 처리
+    UserResponse handleSocialLogin(String provider, UserSocialLoginRequest request);
 }

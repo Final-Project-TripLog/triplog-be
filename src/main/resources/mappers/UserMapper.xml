@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssafy.triplog.user.repository.mapper.UserMapper">
+<mapper namespace="com.ssafy.triplog.user.mapper.UserMapper">
 
     <!-- 기존 쿼리 유지 -->
     <select id="findByEmail" resultType="com.ssafy.triplog.user.dto.UserDto">

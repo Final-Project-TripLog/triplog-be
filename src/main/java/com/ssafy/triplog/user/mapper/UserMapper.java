@@ -1,4 +1,4 @@
-package com.ssafy.triplog.user.repository.mapper;
+package com.ssafy.triplog.user.mapper;
 
 import com.ssafy.triplog.user.dto.UserDto;
 import com.ssafy.triplog.user.dto.UserFollowInfoDto;
