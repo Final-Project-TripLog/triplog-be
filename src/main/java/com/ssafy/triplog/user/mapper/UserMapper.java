@@ -14,11 +14,12 @@ public interface UserMapper {
     // 기존 메서드
     UserDto findByEmail(@Param("email") String email);
     int existsByEmail(@Param("email") String email);
+    // 닉네임 중복 확인 (추가)
+    int existsByNickname(@Param("nickname") String nickname);
     void save(UserServiceDto userServiceDto);
     Long getLastInsertId();
     UserDto findById(@Param("id") Long id);
 
-    // 새로 추가할 메서드
     boolean deleteUser(@Param("userNo") Long userNo);
     String findPasswordById(@Param("userNo") Long userNo);
     int updateUser(UserDto userDto);

@@ -74,6 +74,8 @@ public class SecurityConfig {
                         AntPathRequestMatcher.antMatcher("/**/api/users/login"),
                         AntPathRequestMatcher.antMatcher("/**/api/users/find-email"),
                         AntPathRequestMatcher.antMatcher("/**/api/users/find-password"),
+                        AntPathRequestMatcher.antMatcher("/**/api/users/check-email"),
+                        AntPathRequestMatcher.antMatcher("/**/api/users/check-nickname"),
                         AntPathRequestMatcher.antMatcher("/**") // 테스트를 위해 일시적으로 모든 경로 허용 (실제 운영에서는 제거 필요)
                 ).permitAll()
                 // 관리자 기능 - ADMIN 역할을 가진 사용자만 접근 가능
@@ -121,15 +123,36 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Collections.singletonList("*")); // 모든 출처 허용 (패턴 방식)
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 허용할 HTTP 메서드
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept")); // 허용할 헤더
-        configuration.setExposedHeaders(Arrays.asList("Authorization")); // JWT를 위한 헤더 노출
-        configuration.setAllowCredentials(true); // 쿠키 포함 여부
-        configuration.setMaxAge(3600L); // 프리플라이트 요청 캐시 시간 (초)
 
+        // ✅ 여러 출처 허용
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:8080"
+//                "http://127.0.0.1:5173",
+//                "https://dev.triplog.com",
+//                "https://triplog.com"
+        ));
+
+        // ✅ 허용할 메서드 지정
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // ✅ 허용할 헤더 지정
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+
+        // ✅ 클라이언트에서 Authorization 헤더 확인 가능
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+
+        // ✅ 쿠키, 인증 정보 포함 요청 허용
+        configuration.setAllowCredentials(true);
+
+        // ✅ 프리플라이트 요청 캐시 1시간
+        configuration.setMaxAge(3600L);
+
+        // ✅ 모든 경로에 적용 >> 규칙 적용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // 모든 경로에 CORS 설정 적용
+        source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
+
 }

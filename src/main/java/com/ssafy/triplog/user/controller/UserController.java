@@ -17,7 +17,7 @@ import java.util.List;
 @Tag(name = "User API", description = "사용자 관리 API")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "http://localhost:8080", allowedHeaders = "*")
+//@CrossOrigin(origins = "http://localhost:8080", allowedHeaders = "*")
 public class UserController {
 
     private final UserService userService;
@@ -29,7 +29,21 @@ public class UserController {
         UserResponse response = userService.registerUser(request);
         return ResponseEntity.ok(response);
     }
+    @Operation(summary = "이메일 중복 확인", description = "입력된 이메일의 사용 가능 여부를 확인합니다.")
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmailDuplicate(@RequestParam String email) {
+        log.debug("checkEmailDuplicate -----> email: {}", email);
+        boolean isDuplicate = userService.checkEmailDuplicate(email);
+        return ResponseEntity.ok(isDuplicate);
+    }
 
+    @Operation(summary = "닉네임 중복 확인", description = "입력된 닉네임의 사용 가능 여부를 확인합니다.")
+    @GetMapping("/check-nickname")
+    public ResponseEntity<Boolean> checkNicknameDuplicate(@RequestParam String nickname) {
+        log.debug("checkNicknameDuplicate -----> nickname: {}", nickname);
+        boolean isDuplicate = userService.checkNicknameDuplicate(nickname);
+        return ResponseEntity.ok(isDuplicate);
+    }
     @Operation(summary = "회원탈퇴", description = "인증된 사용자가 자신의 계정을 탈퇴합니다.")
     @DeleteMapping("/{userNo}")
     public ResponseEntity<String> withdrawUser(@PathVariable Long userNo, @RequestBody String password) {

@@ -26,6 +26,12 @@ public interface UserService {
     // 비밀번호 찾기
     String findUserPassword(UserFindPasswordRequest request);
 
+    // 이메일 중복 확인 (추가)
+    boolean checkEmailDuplicate(String email);
+
+    // 닉네임 중복 확인 (추가)
+    boolean checkNicknameDuplicate(String nickname);
+
     // 팔로워 목록 조회
     List<UserFollowInfoResponse> getUserFollowers(Long userNo);
 

@@ -53,7 +53,17 @@ public class UserServiceImpl implements UserService {
 
         return response;
     }
+    // 이메일 중복 확인 (추가)
+    @Override
+    public boolean checkEmailDuplicate(String email) {
+        return userMapper.existsByEmail(email) > 0;
+    }
 
+    // 닉네임 중복 확인 (추가)
+    @Override
+    public boolean checkNicknameDuplicate(String nickname) {
+        return userMapper.existsByNickname(nickname) > 0;
+    }
     // 사용자 상세 정보 조회
     @Override
     public UserServiceDto getUserDetail(Long userNo) {
