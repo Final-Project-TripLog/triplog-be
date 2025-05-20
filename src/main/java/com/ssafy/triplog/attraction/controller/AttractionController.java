@@ -13,12 +13,16 @@ package com.ssafy.triplog.attraction.controller;
 
 import com.ssafy.triplog.attraction.dto.AttractionDto;
 import com.ssafy.triplog.attraction.dto.AttractionPreviewResponse;
+import com.ssafy.triplog.attraction.dto.AttractionRequest;
+import com.ssafy.triplog.attraction.service.AttractionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,11 +32,23 @@ import java.util.List;
 @Slf4j
 public class AttractionController {
 
+    private final AttractionService attractionService;
+
+
+    @Operation(summary = "파일 swagger 테스트", description = "스웨거에서 파일을 입력받아 넘겨주는 테스트를 진행 ")
+    @PostMapping("file/test")
+    public ResponseEntity<String> uploadFile(
+            @Parameter(description = "업로드할 파일", required = true)
+            @RequestParam("file") MultipartFile file) {
+
+        return ResponseEntity.ok("파일 이름: " + file.getOriginalFilename());
+    }
+
     @Operation(summary = "관광지 등록", description = "새로운 관광지 정보를 등록합니다. 등록 후 등록 된 attraction no 리턴합니다.")
     @PostMapping
-    public ResponseEntity<Long> createAttraction(@Valid @RequestBody AttractionDto request) {
+    public ResponseEntity<Long> createAttraction(@Valid @ModelAttribute AttractionRequest request) {
         log.debug("createAttraction -----> request : {}", request);
-        return ResponseEntity.ok(0L);
+        return ResponseEntity.ok(attractionService.createAttractionWithImages(request));
     }
 
     @Operation(summary = "관광지 수정", description = "기존 관광지 정보를 수정합니다. 수정 후 attraction no 리턴합니다. ")
