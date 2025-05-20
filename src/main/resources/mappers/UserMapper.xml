@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.triplog.user.repository.mapper.UserMapper">
 
+    <!-- 기존 쿼리 유지 -->
     <select id="findByEmail" resultType="com.ssafy.triplog.user.dto.UserDto">
         SELECT
             no, email, password, social_type as socialType, social_id as socialId,
@@ -44,5 +45,155 @@
             users
         WHERE
             no = #{id}
+    </select>
+
+    <!-- 새로 추가할 쿼리 -->
+    <!-- 회원 탈퇴 -->
+    <delete id="deleteUser" parameterType="long">
+        DELETE FROM users WHERE no = #{userNo}
+    </delete>
+
+    <!-- 비밀번호 조회 -->
+    <select id="findPasswordById" resultType="string">
+        SELECT password FROM users WHERE no = #{userNo}
+    </select>
+
+    <!-- 회원정보 수정 -->
+    <update id="updateUser" parameterType="com.ssafy.triplog.user.dto.UserDto">
+        UPDATE users
+        SET
+        nickname = #{nickname},
+        name = #{name},
+        profile_url = #{profileUrl},
+        phone = #{phone},
+        address = #{address},
+        address_detail = #{addressDetail}
+        <if test="password != null and password != ''">
+            , password = #{password}
+        </if>
+        WHERE no = #{no}
+    </update>
+
+    <!-- 관리자: 모든 회원 조회 -->
+    <select id="findAllUsers" resultType="com.ssafy.triplog.user.dto.UserDto">
+        SELECT
+            no, email, password, social_type as socialType, social_id as socialId,
+            nickname, name, profile_url as profileUrl, created_at as createdAt,
+            role, phone, address, address_detail as addressDetail,
+            follow_count as followCount, follower_count as followerCount
+        FROM
+            users
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 아이디 찾기: 이름과 전화번호로 사용자 조회 -->
+    <select id="findByNameAndPhone" resultType="com.ssafy.triplog.user.dto.UserDto">
+        SELECT
+            no, email, password, social_type as socialType, social_id as socialId,
+            nickname, name, profile_url as profileUrl, created_at as createdAt,
+            role, phone, address, address_detail as addressDetail,
+            follow_count as followCount, follower_count as followerCount
+        FROM
+            users
+        WHERE
+            name = #{name} AND phone = #{phone}
+    </select>
+
+    <!-- 비밀번호 찾기: 이메일, 이름, 전화번호로 사용자 조회 -->
+    <select id="findByEmailAndNameAndPhone" resultType="com.ssafy.triplog.user.dto.UserDto">
+        SELECT
+            no, email, password, social_type as socialType, social_id as socialId,
+            nickname, name, profile_url as profileUrl, created_at as createdAt,
+            role, phone, address, address_detail as addressDetail,
+            follow_count as followCount, follower_count as followerCount
+        FROM
+            users
+        WHERE
+            email = #{email} AND name = #{name} AND phone = #{phone}
+    </select>
+
+    <!-- 임시 비밀번호 업데이트 -->
+    <update id="updatePassword">
+        UPDATE users SET password = #{password} WHERE no = #{userNo}
+    </update>
+
+    <!-- 팔로워 조회 -->
+    <select id="findFollowersByUserNo" resultType="com.ssafy.triplog.user.dto.UserFollowInfoDto">
+        SELECT
+            fi.no,
+            fi.follow,
+            fi.follower,
+            fi.create_at as createAt
+        FROM
+            follow_info fi
+        WHERE
+            fi.follow = #{userNo}
+    </select>
+
+    <!-- 팔로잉 조회 -->
+    <select id="findFollowingByUserNo" resultType="com.ssafy.triplog.user.dto.UserFollowInfoDto">
+        SELECT
+            fi.no,
+            fi.follow,
+            fi.follower,
+            fi.create_at as createAt
+        FROM
+            follow_info fi
+        WHERE
+            fi.follower = #{userNo}
+    </select>
+
+    <!-- 사용자 기본 정보 조회 (팔로워/팔로잉 목록 용) -->
+    <select id="findUserBasicInfoById" resultType="com.ssafy.triplog.user.dto.UserFollowInfoResponse">
+        SELECT
+            no,
+            nickname,
+            profile_url as profileUrl
+        FROM
+            users
+        WHERE
+            no = #{userNo}
+    </select>
+
+    <!-- 팔로우 추가 -->
+    <insert id="addFollow">
+        INSERT INTO follow_info (follow, follower, create_at)
+        VALUES (#{followId}, #{followerId}, NOW())
+    </insert>
+
+    <!-- 팔로우 삭제 -->
+    <delete id="removeFollow">
+        DELETE FROM follow_info
+        WHERE follow = #{followId} AND follower = #{followerId}
+    </delete>
+
+    <!-- 팔로우/팔로워 카운트 업데이트 -->
+    <update id="increaseFollowCount">
+        UPDATE users SET follow_count = follow_count + 1 WHERE no = #{userNo}
+    </update>
+
+    <update id="increaseFollowerCount">
+        UPDATE users SET follower_count = follower_count + 1 WHERE no = #{userNo}
+    </update>
+
+    <update id="decreaseFollowCount">
+        UPDATE users SET follow_count = follow_count - 1 WHERE no = #{userNo}
+    </update>
+
+    <update id="decreaseFollowerCount">
+        UPDATE users SET follower_count = follower_count - 1 WHERE no = #{userNo}
+    </update>
+
+    <!-- 이메일로 사용자 확인 (소셜 로그인) -->
+    <select id="findBySocialIdAndType" resultType="com.ssafy.triplog.user.dto.UserDto">
+        SELECT
+            no, email, password, social_type as socialType, social_id as socialId,
+            nickname, name, profile_url as profileUrl, created_at as createdAt,
+            role, phone, address, address_detail as addressDetail,
+            follow_count as followCount, follower_count as followerCount
+        FROM
+            users
+        WHERE
+            social_id = #{socialId} AND social_type = #{socialType}
     </select>
 </mapper>
