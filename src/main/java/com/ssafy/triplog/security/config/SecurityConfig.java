@@ -3,6 +3,7 @@ package com.ssafy.triplog.security.config;
 import com.ssafy.triplog.security.jwt.JWTFilter;
 import com.ssafy.triplog.security.jwt.JWTUtil;
 import com.ssafy.triplog.security.jwt.LoginFilter;
+import com.ssafy.triplog.security.jwt.UserResourceOwnershipFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,42 +22,46 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.Collections;
 
-@Configuration
-@EnableWebSecurity
+@Configuration // Spring의 설정 클래스임을 명시
+@EnableWebSecurity // Spring Security 활성화
 public class SecurityConfig {
 
-    private final AuthenticationConfiguration authenticationConfiguration;
-    private final JWTUtil jwtUtil;
+    private final AuthenticationConfiguration authenticationConfiguration; // 인증 관리자 설정을 위한 객체
+    private final JWTUtil jwtUtil; // JWT 관련 유틸리티
 
+    // 생성자 주입
     public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
     }
 
+    // 인증 관리자 Bean 등록 - 사용자 인증 처리를 담당
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+    // 비밀번호 암호화를 위한 인코더 Bean 등록
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // 보안 필터 체인 구성 - 애플리케이션의 보안 정책을 정의
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // CSRF 비활성화
+        // CSRF 비활성화 - REST API에서는 일반적으로 CSRF 보호가 불필요
         http.csrf(csrf -> csrf.disable());
 
-        // 폼 로그인 비활성화
+        // 폼 로그인 비활성화 - JWT 기반 인증을 사용하므로
         http.formLogin(formLogin -> formLogin.disable());
 
-        // HTTP Basic 인증 비활성화
+        // HTTP Basic 인증 비활성화 - JWT를 사용하므로 필요 없음
         http.httpBasic(httpBasic -> httpBasic.disable());
 
         // 경로별 권한 설정
         http.authorizeHttpRequests(auth -> auth
-                // Swagger 관련 경로
+                // Swagger 관련 경로는 인증 없이 접근 가능
                 .requestMatchers(
                         AntPathRequestMatcher.antMatcher("/**/swagger-ui/**"),
                         AntPathRequestMatcher.antMatcher("/**/swagger-ui.html"),
@@ -69,9 +74,9 @@ public class SecurityConfig {
                         AntPathRequestMatcher.antMatcher("/**/api/users/login"),
                         AntPathRequestMatcher.antMatcher("/**/api/users/find-email"),
                         AntPathRequestMatcher.antMatcher("/**/api/users/find-password"),
-                        AntPathRequestMatcher.antMatcher("/**")
+                        AntPathRequestMatcher.antMatcher("/**") // 테스트를 위해 일시적으로 모든 경로 허용 (실제 운영에서는 제거 필요)
                 ).permitAll()
-                // 관리자 기능
+                // 관리자 기능 - ADMIN 역할을 가진 사용자만 접근 가능
                 .requestMatchers(
                         AntPathRequestMatcher.antMatcher("/**/api/admin/**")
                 ).hasRole("ADMIN")
@@ -91,34 +96,40 @@ public class SecurityConfig {
         // CORS 설정
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
-        // 로그인 필터 추가
+        // 로그인 필터 추가 - /api/users/login 경로에서 인증 처리
         http.addFilterAt(
                 new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
                 UsernamePasswordAuthenticationFilter.class
         );
 
-        // JWT 필터 추가
+        // JWT 필터 추가 - 모든 요청에 대해 JWT 토큰 검증
         http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-        // 세션 관리 설정
+        // 사용자 자원 소유권 필터 추가 - JWT 인증 이후 리소스 접근 권한 검증
+        // JWTFilter 다음에 실행되어, 인증된 사용자의 리소스 접근 권한을 확인
+        http.addFilterAfter(new UserResourceOwnershipFilter(jwtUtil), JWTFilter.class);
+
+
+        // 세션 관리 설정 - JWT를 사용하므로 세션은 STATELESS로 설정
         http.sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
 
+    // CORS 설정을 위한 Bean
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Collections.singletonList("*")); // 패턴으로 허용
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+        configuration.setAllowedOriginPatterns(Collections.singletonList("*")); // 모든 출처 허용 (패턴 방식)
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 허용할 HTTP 메서드
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept")); // 허용할 헤더
         configuration.setExposedHeaders(Arrays.asList("Authorization")); // JWT를 위한 헤더 노출
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+        configuration.setAllowCredentials(true); // 쿠키 포함 여부
+        configuration.setMaxAge(3600L); // 프리플라이트 요청 캐시 시간 (초)
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", configuration); // 모든 경로에 CORS 설정 적용
         return source;
     }
 }
