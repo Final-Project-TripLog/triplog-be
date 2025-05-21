@@ -286,3 +286,50 @@ ALTER TABLE `plan_post`
 
 ALTER TABLE `bookmark_types`
     ADD CONSTRAINT `FK_users_TO_bookmark_types_1` FOREIGN KEY (`user_no`) REFERENCES `users` (`no`);
+
+-- 외래 키 제약조건 비활성화
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 기존 my_plan 테이블 데이터 백업
+CREATE TEMPORARY TABLE temp_my_plan AS SELECT * FROM my_plan;
+
+-- 기존 테이블 삭제
+DROP TABLE IF EXISTS `my_plan`;
+
+-- 새로운 스키마로 테이블 재생성
+CREATE TABLE `my_plan` (
+                           `no` BIGINT NOT NULL AUTO_INCREMENT,
+                           `title` VARCHAR(255) NOT NULL,
+                           `description` TEXT NULL,
+                           `user_no` BIGINT NOT NULL,
+                           `startDay` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+                           `endDay` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+                           `updated_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+                           `totalMember` BIGINT NULL DEFAULT 0,
+                           PRIMARY KEY (`no`)
+);
+
+-- 외래 키 제약조건 추가
+ALTER TABLE `my_plan`
+    ADD CONSTRAINT `FK_users_TO_my_plan_1` FOREIGN KEY (`user_no`) REFERENCES `users` (`no`);
+
+-- 기존 데이터 복원 (새로운 필드는 기본값 사용)
+INSERT INTO
+    `my_plan` (
+    `no`,
+    `title`,
+    `description`,
+    `user_no`
+)
+SELECT
+    `no`,
+    `title`,
+    `description`,
+    `user_no`
+FROM temp_my_plan;
+
+-- 임시 테이블 삭제
+DROP TEMPORARY TABLE temp_my_plan;
+
+-- 외래 키 제약조건 활성화
+SET FOREIGN_KEY_CHECKS = 1;

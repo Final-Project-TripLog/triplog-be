@@ -125,4 +125,10 @@ public class ReviewServiceImpl implements ReviewService {
             attractionMapper.decreaseReviewCount(attractionNo);
         }
     }
+    // ReviewServiceImpl 구현
+    @Override
+    @Transactional(readOnly = true)
+    public AttractionReviewResponseDto findReviewById(Long reviewNo) {
+        return reviewMapper.findReviewById(reviewNo);
+    }
 }

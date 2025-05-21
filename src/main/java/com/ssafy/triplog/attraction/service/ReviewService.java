@@ -56,4 +56,9 @@ public interface ReviewService {
      * @throws RuntimeException 리뷰를 찾을 수 없는 경우
      */
     void deleteReview(Long reviewNo);
+
+    // ReviewService 인터페이스에 추가
+    AttractionReviewResponseDto findReviewById(Long reviewNo);
+
+
 }
