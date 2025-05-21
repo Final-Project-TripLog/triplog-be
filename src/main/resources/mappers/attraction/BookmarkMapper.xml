@@ -78,4 +78,22 @@
         FROM bookmark
         WHERE bookmark_type_no = #{bookmarkTypeNo}
     </select>
+    <!-- 북마크 타입 수정 -->
+    <update id="updateBookmarkType" parameterType="com.ssafy.triplog.attraction.dto.BookmarkTypeDto">
+        UPDATE bookmark_types
+        SET name = #{name}
+        WHERE no = #{no}
+    </update>
+
+    <!-- 북마크 타입 삭제 -->
+    <delete id="deleteBookmarkType">
+        DELETE FROM bookmark_types
+        WHERE no = #{bookmarkTypeNo}
+    </delete>
+
+    <!-- 북마크 타입에 속한 모든 북마크 삭제 -->
+    <delete id="deleteAllBookmarksByType">
+        DELETE FROM bookmark
+        WHERE bookmark_type_no = #{bookmarkTypeNo}
+    </delete>
 </mapper>

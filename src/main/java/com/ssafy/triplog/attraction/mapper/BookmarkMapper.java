@@ -24,6 +24,15 @@ public interface BookmarkMapper {
 
     void insertBookmarkType(BookmarkTypeDto bookmarkTypeDto);
     Long getLastInsertId();
+    // 북마크 타입 수정
+    int updateBookmarkType(BookmarkTypeDto bookmarkTypeDto);
+
+    // 북마크 타입 삭제
+    int deleteBookmarkType(@Param("bookmarkTypeNo") Long bookmarkTypeNo);
+
+    // 북마크 타입에 속한 모든 북마크 삭제
+    void deleteAllBookmarksByType(@Param("bookmarkTypeNo") Long bookmarkTypeNo);
+
     // 북마크 타입의 마지막 order 값 조회
     int getLastOrderByBookmarkTypeNo(@Param("bookmarkTypeNo") Long bookmarkTypeNo);
 }

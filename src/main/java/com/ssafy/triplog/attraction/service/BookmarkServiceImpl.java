@@ -88,6 +88,8 @@ public class BookmarkServiceImpl implements BookmarkService {
 
         return bookmarkTypeNo;
     }
+
+
     @Override
     @Transactional
     public BookmarkTypeResponseDto createBookmarkType(BookmarkTypeDto bookmarkTypeDto) {
@@ -99,4 +101,33 @@ public class BookmarkServiceImpl implements BookmarkService {
         return bookmarkMapper.findBookmarkTypeById(bookmarkTypeNo);
     }
 
+    @Override
+    @Transactional
+    public BookmarkTypeResponseDto updateBookmarkType(BookmarkTypeDto bookmarkTypeDto) {
+        // 북마크 타입 존재 여부 확인
+        if (bookmarkMapper.findBookmarkTypeById(bookmarkTypeDto.getNo()) == null) {
+            throw new RuntimeException("북마크 타입을 찾을 수 없습니다: " + bookmarkTypeDto.getNo());
+        }
+
+        // 북마크 타입 수정
+        bookmarkMapper.updateBookmarkType(bookmarkTypeDto);
+
+        // 수정된 북마크 타입 정보 조회
+        return bookmarkMapper.findBookmarkTypeById(bookmarkTypeDto.getNo());
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteBookmarkType(Long bookmarkTypeNo) {
+        // 북마크 타입 존재 여부 확인
+        if (bookmarkMapper.findBookmarkTypeById(bookmarkTypeNo) == null) {
+            throw new RuntimeException("북마크 타입을 찾을 수 없습니다: " + bookmarkTypeNo);
+        }
+
+        // 해당 북마크 타입에 속한 모든 북마크 삭제
+        bookmarkMapper.deleteAllBookmarksByType(bookmarkTypeNo);
+
+        // 북마크 타입 삭제
+        return bookmarkMapper.deleteBookmarkType(bookmarkTypeNo) > 0;
+    }
 }

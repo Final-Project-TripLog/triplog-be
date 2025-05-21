@@ -48,6 +48,7 @@ public interface BookmarkService {
      * @throws RuntimeException 북마크가 존재하지 않는 경우
      */
     Long removeBookmark(Long bookmarkTypeNo, Long attractionNo);
+
     /**
      * 북마크 타입을 생성합니다.
      *
@@ -55,4 +56,21 @@ public interface BookmarkService {
      * @return 생성된 북마크 타입 정보
      */
     BookmarkTypeResponseDto createBookmarkType(BookmarkTypeDto bookmarkTypeDto);
+
+    /**
+     * 북마크 타입을 수정합니다.
+     *
+     * @param bookmarkTypeDto 수정할 북마크 타입 정보
+     * @return 수정된 북마크 타입 정보
+     */
+    BookmarkTypeResponseDto updateBookmarkType(BookmarkTypeDto bookmarkTypeDto);
+
+    /**
+     * 북마크 타입을 삭제합니다.
+     *
+     * @param bookmarkTypeNo 삭제할 북마크 타입 번호
+     * @return 삭제 성공 여부
+     */
+    boolean deleteBookmarkType(Long bookmarkTypeNo);
+
 }
