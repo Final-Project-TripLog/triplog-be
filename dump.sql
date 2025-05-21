@@ -36,7 +36,7 @@ VALUES
     ('가고 싶은 곳', 1);
 
 -- bookmark
-INSERT INTO bookmark (booknark_type_no, attraction_no, `order`)
+INSERT INTO bookmark (bookmark_type_no, attraction_no, `order`)
 VALUES
     (1, 2, 1);
 

@@ -44,17 +44,17 @@ public class BookmarkServiceImpl implements BookmarkService {
         log.debug("addBookmark: {}", bookmarkDto);
 
         // 북마크 타입 존재 여부 확인
-        if (bookmarkMapper.findBookmarkTypeById(bookmarkDto.getBooknarkTypeNo()) == null) {
-            throw new RuntimeException("북마크 타입을 찾을 수 없습니다: " + bookmarkDto.getBooknarkTypeNo());
+        if (bookmarkMapper.findBookmarkTypeById(bookmarkDto.getBookmarkTypeNo()) == null) {
+            throw new RuntimeException("북마크 타입을 찾을 수 없습니다: " + bookmarkDto.getBookmarkTypeNo());
         }
 
         // 북마크 추가
         bookmarkMapper.insertBookmark(bookmarkDto);
 
         // 북마크 타입의 관광지 수 증가
-        bookmarkMapper.increaseAttractionCount(bookmarkDto.getBooknarkTypeNo());
+        bookmarkMapper.increaseAttractionCount(bookmarkDto.getBookmarkTypeNo());
 
-        return bookmarkDto.getBooknarkTypeNo();
+        return bookmarkDto.getBookmarkTypeNo();
     }
 
     @Override

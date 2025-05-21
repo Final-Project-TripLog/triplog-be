@@ -117,7 +117,7 @@ CREATE TABLE `attraction_image` (
 );
 
 CREATE TABLE `bookmark` (
-                            `booknark_type_no` BIGINT NOT NULL,
+                            `bookmark_type_no` BIGINT NOT NULL,
                             `attraction_no` BIGINT NOT NULL,
                             `order` INT NOT NULL
 );
@@ -208,7 +208,7 @@ CREATE TABLE `bookmark_types` (
 -- 복합 키(Composite Key)가 필요한 테이블들에 대한 PRIMARY KEY 설정
 ALTER TABLE `bookmark`
     ADD CONSTRAINT `PK_BOOKMARK` PRIMARY KEY (
-                                              `booknark_type_no`,
+                                              `bookmark_type_no`,
                                               `attraction_no`
         );
 
@@ -249,7 +249,7 @@ ALTER TABLE `attraction_image`
     ADD CONSTRAINT `FK_attraction_review_TO_attraction_image_1` FOREIGN KEY (`attraction_review_no`) REFERENCES `attraction_review` (`no`);
 
 ALTER TABLE `bookmark`
-    ADD CONSTRAINT `FK_bookmark_types_TO_bookmark_1` FOREIGN KEY (`booknark_type_no`) REFERENCES `bookmark_types` (`no`);
+    ADD CONSTRAINT `FK_bookmark_types_TO_bookmark_1` FOREIGN KEY (`bookmark_type_no`) REFERENCES `bookmark_types` (`no`);
 
 ALTER TABLE `bookmark`
     ADD CONSTRAINT `FK_attractions_TO_bookmark_1` FOREIGN KEY (`attraction_no`) REFERENCES `attractions` (`no`);
