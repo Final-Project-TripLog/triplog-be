@@ -1,6 +1,7 @@
 package com.ssafy.triplog.attraction.service;
 
 import com.ssafy.triplog.attraction.dto.BookmarkResponseDto;
+import com.ssafy.triplog.attraction.dto.BookmarkTypeDto;
 import com.ssafy.triplog.attraction.dto.BookmarkTypeResponseDto;
 
 import java.util.List;
@@ -47,4 +48,11 @@ public interface BookmarkService {
      * @throws RuntimeException 북마크가 존재하지 않는 경우
      */
     Long removeBookmark(Long bookmarkTypeNo, Long attractionNo);
+    /**
+     * 북마크 타입을 생성합니다.
+     *
+     * @param bookmarkTypeDto 북마크 타입 정보
+     * @return 생성된 북마크 타입 정보
+     */
+    BookmarkTypeResponseDto createBookmarkType(BookmarkTypeDto bookmarkTypeDto);
 }

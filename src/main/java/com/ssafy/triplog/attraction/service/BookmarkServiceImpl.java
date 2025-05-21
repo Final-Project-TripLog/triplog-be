@@ -1,6 +1,7 @@
 package com.ssafy.triplog.attraction.service;
 
 import com.ssafy.triplog.attraction.dto.BookmarkResponseDto;
+import com.ssafy.triplog.attraction.dto.BookmarkTypeDto;
 import com.ssafy.triplog.attraction.dto.BookmarkTypeResponseDto;
 import com.ssafy.triplog.attraction.mapper.BookmarkMapper;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,15 @@ public class BookmarkServiceImpl implements BookmarkService {
             throw new RuntimeException("북마크 타입을 찾을 수 없습니다: " + bookmarkDto.getBookmarkTypeNo());
         }
 
+        // 이미 해당 북마크 타입에 관광지가 등록되어 있는지 확인
+        if (bookmarkMapper.existsBookmark(bookmarkDto.getBookmarkTypeNo(), bookmarkDto.getAttractionNo()) > 0) {
+            throw new RuntimeException("이미 북마크에 등록된 관광지입니다.");
+        }
+
+        // 마지막 order 값 조회 후 +1 설정
+        int lastOrder = bookmarkMapper.getLastOrderByBookmarkTypeNo(bookmarkDto.getBookmarkTypeNo());
+        bookmarkDto.setOrder(lastOrder + 1);
+
         // 북마크 추가
         bookmarkMapper.insertBookmark(bookmarkDto);
 
@@ -78,4 +88,15 @@ public class BookmarkServiceImpl implements BookmarkService {
 
         return bookmarkTypeNo;
     }
+    @Override
+    @Transactional
+    public BookmarkTypeResponseDto createBookmarkType(BookmarkTypeDto bookmarkTypeDto) {
+        // 북마크 타입 생성
+        bookmarkMapper.insertBookmarkType(bookmarkTypeDto);
+
+        // 생성된 북마크 타입 정보 조회
+        Long bookmarkTypeNo = bookmarkMapper.getLastInsertId();
+        return bookmarkMapper.findBookmarkTypeById(bookmarkTypeNo);
+    }
+
 }

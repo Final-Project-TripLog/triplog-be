@@ -12,7 +12,7 @@
             user_no = #{userNo}
         ORDER BY
             no DESC
-            LIMIT #{size} OFFSET #{page}
+            LIMIT #{size} OFFSET #{offset}
     </select>
 
     <!-- 북마크 타입 상세 조회 -->
@@ -61,4 +61,21 @@
         SET attraction_count = attraction_count - 1
         WHERE no = #{bookmarkTypeNo}
     </update>
+
+    <insert id="insertBookmarkType" parameterType="com.ssafy.triplog.attraction.dto.BookmarkTypeDto">
+        INSERT INTO bookmark_types (
+            name, attraction_count, user_no
+        ) VALUES (
+                     #{name}, #{attractionCount}, #{userNo}
+                 )
+    </insert>
+
+    <select id="getLastInsertId" resultType="long">
+        SELECT LAST_INSERT_ID()
+    </select>
+    <select id="getLastOrderByBookmarkTypeNo" resultType="int">
+        SELECT IFNULL(MAX(`order`), 0)
+        FROM bookmark
+        WHERE bookmark_type_no = #{bookmarkTypeNo}
+    </select>
 </mapper>

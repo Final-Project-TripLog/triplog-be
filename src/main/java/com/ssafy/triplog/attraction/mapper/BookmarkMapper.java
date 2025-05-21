@@ -2,6 +2,7 @@
 package com.ssafy.triplog.attraction.mapper;
 
 import com.ssafy.triplog.attraction.dto.BookmarkResponseDto;
+import com.ssafy.triplog.attraction.dto.BookmarkTypeDto;
 import com.ssafy.triplog.attraction.dto.BookmarkTypeResponseDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -9,11 +10,20 @@ import java.util.List;
 
 @Mapper
 public interface BookmarkMapper {
-    List<BookmarkTypeResponseDto> findBookmarkTypesByUser(@Param("userNo") Long userNo, @Param("page") int page, @Param("size") int size);
+    List<BookmarkTypeResponseDto> findBookmarkTypesByUser(
+            @Param("userNo") Long userNo,
+            @Param("size") int size,
+            @Param("offset") int offset  // 'page'를 'offset'으로 변경
+    );
     BookmarkTypeResponseDto findBookmarkTypeById(@Param("bookmarkTypeNo") Long bookmarkTypeNo);
     void insertBookmark(BookmarkResponseDto bookmarkDto);
     void deleteBookmark(@Param("bookmarkTypeNo") Long bookmarkTypeNo, @Param("attractionNo") Long attractionNo);
     int existsBookmark(@Param("bookmarkTypeNo") Long bookmarkTypeNo, @Param("attractionNo") Long attractionNo);
     void increaseAttractionCount(@Param("bookmarkTypeNo") Long bookmarkTypeNo);
     void decreaseAttractionCount(@Param("bookmarkTypeNo") Long bookmarkTypeNo);
+
+    void insertBookmarkType(BookmarkTypeDto bookmarkTypeDto);
+    Long getLastInsertId();
+    // 북마크 타입의 마지막 order 값 조회
+    int getLastOrderByBookmarkTypeNo(@Param("bookmarkTypeNo") Long bookmarkTypeNo);
 }

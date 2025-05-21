@@ -21,8 +21,11 @@ public interface AttractionMapper {
     );
     AttractionResponseDto findById(@Param("attractionNo") Long attractionNo);
     List<AttractionImageResponseDto> findImagesByAttractionId(@Param("attractionNo") Long attractionNo);
-    List<AttractionResponseDto> findAttractionsByBookmarkType(@Param("bookmarkTypeNo") Long bookmarkTypeNo,
-                                                              @Param("page") int page, @Param("size") int size);
+    List<AttractionResponseDto> findAttractionsByBookmarkType(
+            @Param("bookmarkTypeNo") Long bookmarkTypeNo,
+            @Param("size") int size,
+            @Param("offset") int offset  // 'page'를 'offset'으로 변경
+    );
     void increaseRatingSum(@Param("attractionNo") Long attractionNo, @Param("rating") Integer rating);
     void decreaseRatingSum(@Param("attractionNo") Long attractionNo, @Param("rating") Integer rating);
     void increaseReviewCount(@Param("attractionNo") Long attractionNo);

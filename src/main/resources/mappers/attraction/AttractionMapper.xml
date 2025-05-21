@@ -97,7 +97,7 @@
             b.bookmark_type_no = #{bookmarkTypeNo}
         ORDER BY
             b.order ASC
-            LIMIT #{size} OFFSET #{page}
+            LIMIT #{size} OFFSET #{offset}
     </select>
 
     <!-- 평점 관련 업데이트 -->

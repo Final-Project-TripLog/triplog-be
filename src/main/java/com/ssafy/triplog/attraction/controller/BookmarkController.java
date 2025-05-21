@@ -10,16 +10,21 @@ package com.ssafy.triplog.attraction.controller;
 //    - 북마크 삭제
 
 
-import com.ssafy.triplog.attraction.dto.BookmarkDto;
-import com.ssafy.triplog.attraction.dto.BookmarkTypeDto;
+import com.ssafy.triplog.attraction.dto.*;
+import com.ssafy.triplog.attraction.service.AttractionService;
 import com.ssafy.triplog.attraction.service.BookmarkService;
+import com.ssafy.triplog.security.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bookmarks")
@@ -28,13 +33,35 @@ import java.util.List;
 public class BookmarkController {
 
     private final BookmarkService bookmarkService;
+    private final AttractionService attractionService;
     // ----- 북마크 타입 관련 -----
     @Operation(summary = "북마크 타입 생성", description = "사용자가 새로운 북마크 폴더(타입)를 생성합니다.")
     @PostMapping("/types")
-    public ResponseEntity<String> createBookmarkType(@RequestBody BookmarkTypeDto request) {
-        log.debug("createBookmarkType -----> request : {}", request);
-        //200 말고 커스텀에러같은 class 호출해야함
-        return ResponseEntity.status(200).body("북마크 타입 생성이 완료되었습니다.");
+    public ResponseEntity<BookmarkTypeResponseDto> createBookmarkType(@RequestBody Map<String, String> request) {
+        // name만 요청으로 받음
+        String name = request.get("name");
+
+        if (name == null || name.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // JWT 토큰에서 현재 로그인한 사용자 ID 추출
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userNo = userDetails.getUserNo();
+
+        log.debug("createBookmarkType -----> name: {}, userNo: {}", name, userNo);
+
+        // BookmarkTypeDto 객체 생성
+        BookmarkTypeDto bookmarkTypeDto = new BookmarkTypeDto();
+        bookmarkTypeDto.setName(name);
+        bookmarkTypeDto.setUserNo(userNo);
+        bookmarkTypeDto.setAttractionCount(0);  // 초기 관광지 수는 0
+
+        // 북마크 타입 생성 서비스 호출
+        BookmarkTypeResponseDto createdBookmarkType = bookmarkService.createBookmarkType(bookmarkTypeDto);
+
+        return ResponseEntity.ok(createdBookmarkType);
     }
 
     @Operation(summary = "북마크 타입 수정", description = "북마크 폴더의 이름을 수정합니다.")
@@ -54,20 +81,30 @@ public class BookmarkController {
 
     @Operation(summary = "북마크 타입 목록 조회", description = "사용자의 북마크 타입 리스트를 조회합니다.")
     @GetMapping("/types/{userNo}")
-    public ResponseEntity<List<BookmarkTypeDto>> getBookmarkTypeList(@PathVariable Long userNo,
-                                                                     @RequestParam(defaultValue = "0") int page,
-                                                                     @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<List<BookmarkTypeResponseDto>> getBookmarkTypeList(@PathVariable Long userNo,
+                                                                             @RequestParam(defaultValue = "0") int page,
+                                                                             @RequestParam(defaultValue = "10") int size) {
         log.debug("getBookmarkTypeList -----> userNo : {}, page : {} , size : {} ", userNo, page, size);
-        return ResponseEntity.status(200).body(List.of(new BookmarkTypeDto(), new BookmarkTypeDto()));
+        List<BookmarkTypeResponseDto> bookmarkTypes = bookmarkService.getBookmarkTypesByUser(userNo, page, size);
+        return ResponseEntity.ok(bookmarkTypes);
     }
 
     @Operation(summary = "북마크 타입 내 관광지 조회", description = "선택한 북마크 타입에 포함된 관광지 리스트를 조회합니다.")
     @GetMapping("/types/{typeNo}/attractions")
-    public ResponseEntity<?> getAttractionsInBookmarkType(@PathVariable Long typeNo,
-                                                          @RequestParam(defaultValue = "0") int page,
-                                                          @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<List<AttractionResponseDto>> getAttractionsInBookmarkType(
+            @PathVariable Long typeNo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
         log.debug("getAttractionsInBookmarkType -----> typeNo : {}, page : {}, size : {}", typeNo, page, size);
-        return ResponseEntity.ok(List.of(new BookmarkTypeDto(), new BookmarkTypeDto()));
+
+        // 북마크 타입이 존재하는지 확인
+        BookmarkTypeResponseDto bookmarkType = bookmarkService.getBookmarkTypeDetail(typeNo);
+
+        // 북마크 타입에 포함된 관광지 목록 조회
+        List<AttractionResponseDto> attractions = attractionService.getAttractionsByBookmarkType(typeNo, page, size);
+
+        return ResponseEntity.ok(attractions);
     }
 
     // ----- 개별 북마크 항목 관련 -----
@@ -76,7 +113,31 @@ public class BookmarkController {
     @PostMapping
     public ResponseEntity<Long> createBookmark(@RequestBody BookmarkDto request) {
         log.debug("createBookmark -----> request : {}", request);
-        return ResponseEntity.ok(0L);
+
+        // 요청에서 북마크 타입 번호와 관광지 번호 추출
+        Long bookmarkTypeNo = request.getBookmarkTypeNo();
+        Long attractionNo = request.getAttractionNo();
+
+        // JWT 토큰에서 현재 로그인한 사용자 ID 추출
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userNo = userDetails.getUserNo();
+
+        // 북마크 타입의 소유자가 현재 사용자인지 확인
+        BookmarkTypeResponseDto bookmarkType = bookmarkService.getBookmarkTypeDetail(bookmarkTypeNo);
+        if (!bookmarkType.getUserNo().equals(userNo)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // BookmarkResponseDto 객체 생성 (order는 서비스에서 자동 설정)
+        BookmarkResponseDto bookmarkDto = new BookmarkResponseDto();
+        bookmarkDto.setBookmarkTypeNo(bookmarkTypeNo);
+        bookmarkDto.setAttractionNo(attractionNo);
+
+        // 북마크 추가 서비스 호출
+        Long resultBookmarkTypeNo = bookmarkService.addBookmark(bookmarkDto);
+
+        return ResponseEntity.ok(resultBookmarkTypeNo);
     }
 
     @Operation(summary = "북마크 삭제", description = "특정 관광지를 북마크에서 제거합니다. -> 리턴 값 : 북마크 type no")
