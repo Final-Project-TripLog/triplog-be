@@ -22,7 +22,10 @@ public class BookmarkServiceImpl implements BookmarkService {
     public List<BookmarkTypeResponseDto> getBookmarkTypesByUser(Long userNo, int page, int size) {
         log.debug("getBookmarkTypesByUser: userNo={}, page={}, size={}", userNo, page, size);
 
-        return bookmarkMapper.findBookmarkTypesByUser(userNo, page, size);
+        // 페이지 번호를 오프셋으로 변환
+        int offset = page * size;
+
+        return bookmarkMapper.findBookmarkTypesByUser(userNo, size, offset);
     }
 
     @Override

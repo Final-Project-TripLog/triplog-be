@@ -29,7 +29,7 @@
             ar.user_no = #{userNo}
         ORDER BY
             ar.create_at DESC
-            LIMIT #{size} OFFSET #{page} * #{size}
+            LIMIT #{size} OFFSET #{page}
     </select>
 
     <!-- 리뷰 상세 조회 -->

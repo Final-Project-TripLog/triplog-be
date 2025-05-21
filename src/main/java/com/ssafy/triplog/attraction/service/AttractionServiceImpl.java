@@ -65,7 +65,10 @@ public class AttractionServiceImpl implements AttractionService {
         log.debug("getAttractionsByBookmarkType: bookmarkTypeNo={}, page={}, size={}",
                 bookmarkTypeNo, page, size);
 
-        return attractionMapper.findAttractionsByBookmarkType(bookmarkTypeNo, page, size);
+        // 페이지 번호를 오프셋으로 변환
+        int offset = page * size;
+
+        return attractionMapper.findAttractionsByBookmarkType(bookmarkTypeNo, size, offset);
     }
 
     @Override

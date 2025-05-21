@@ -12,7 +12,7 @@
             user_no = #{userNo}
         ORDER BY
             no DESC
-            LIMIT #{size} OFFSET #{page} * #{size}
+            LIMIT #{size} OFFSET #{page}
     </select>
 
     <!-- 북마크 타입 상세 조회 -->

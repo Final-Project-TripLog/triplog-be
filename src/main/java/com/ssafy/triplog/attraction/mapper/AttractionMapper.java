@@ -3,6 +3,8 @@ package com.ssafy.triplog.attraction.mapper;
 
 import com.ssafy.triplog.attraction.dto.AttractionImageResponseDto;
 import com.ssafy.triplog.attraction.dto.AttractionResponseDto;
+import com.ssafy.triplog.planpost.dto.PlanPostResponse;
+import com.ssafy.triplog.planpost.dto.PlanPostTagDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
@@ -29,4 +31,6 @@ public interface AttractionMapper {
             @Param("attractionNo") Long attractionNo,
             @Param("size") int size,
             @Param("offset") int offset);
+    // AttractionMapper.java에 추가
+    List<PlanPostTagDto> findTagsByPlanPostId(@Param("planPostNo") Long planPostNo);
 }

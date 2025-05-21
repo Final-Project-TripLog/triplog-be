@@ -39,8 +39,9 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional(readOnly = true)
     public List<AttractionReviewResponseDto> getReviewsByUser(Long userNo, int page, int size) {
         log.debug("getReviewsByUser: userNo={}, page={}, size={}", userNo, page, size);
-
-        return reviewMapper.findReviewsByUser(userNo, page, size);
+// 페이지 번호를 오프셋으로 변환
+        int offset = page * size;
+        return reviewMapper.findReviewsByUser(userNo, size, offset);
     }
 
     @Override
