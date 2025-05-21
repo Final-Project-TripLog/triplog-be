@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.triplog.attraction.mapper.BookmarkMapper">
+
+    <!-- 사용자별 북마크 타입 조회 -->
+    <select id="findBookmarkTypesByUser" resultType="com.ssafy.triplog.attraction.dto.BookmarkTypeResponseDto">
+        SELECT
+            no, name, attraction_count as attractionCount, user_no as userNo
+        FROM
+            bookmark_types
+        WHERE
+            user_no = #{userNo}
+        ORDER BY
+            no DESC
+            LIMIT #{size} OFFSET #{page} * #{size}
+    </select>
+
+    <!-- 북마크 타입 상세 조회 -->
+    <select id="findBookmarkTypeById" resultType="com.ssafy.triplog.attraction.dto.BookmarkTypeResponseDto">
+        SELECT
+            no, name, attraction_count as attractionCount, user_no as userNo
+        FROM
+            bookmark_types
+        WHERE
+            no = #{bookmarkTypeNo}
+    </select>
+
+    <!-- 북마크 추가 -->
+    <insert id="insertBookmark" parameterType="com.ssafy.triplog.attraction.dto.BookmarkResponseDto">
+        INSERT INTO bookmark (
+            booknark_type_no, attraction_no, `order`
+        ) VALUES (
+                     #{booknarkTypeNo}, #{attractionNo}, #{order}
+                 )
+    </insert>
+
+    <!-- 북마크 삭제 -->
+    <delete id="deleteBookmark">
+        DELETE FROM bookmark
+        WHERE booknark_type_no = #{bookmarkTypeNo}
+          AND attraction_no = #{attractionNo}
+    </delete>
+
+    <!-- 북마크 존재 여부 확인 -->
+    <select id="existsBookmark" resultType="int">
+        SELECT COUNT(*)
+        FROM bookmark
+        WHERE booknark_type_no = #{bookmarkTypeNo}
+          AND attraction_no = #{attractionNo}
+    </select>
+
+    <!-- 북마크 타입의 관광지 수 수정 -->
+    <update id="increaseAttractionCount">
+        UPDATE bookmark_types
+        SET attraction_count = attraction_count + 1
+        WHERE no = #{bookmarkTypeNo}
+    </update>
+
+    <update id="decreaseAttractionCount">
+        UPDATE bookmark_types
+        SET attraction_count = attraction_count - 1
+        WHERE no = #{bookmarkTypeNo}
+    </update>
+</mapper>

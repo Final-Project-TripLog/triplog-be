@@ -7,8 +7,8 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class AttractionDto {
-    private Long no;                      // 관광지 정보 pk
+public class AttractionDetailResponseDto {
+    private Long no;                     // 관광지 정보 pk
     private String title;                // 관광지명
     private String overview;             // 관광지 설명
     private Integer mapLevel;            // 지도 확대 정도
@@ -19,13 +19,10 @@ public class AttractionDto {
     private String addressDetail;        // 상세 주소
     private String homepage;             // 홈페이지 주소
     private String apiId;                // 외부 API 연동 ID
-    private Integer contentId;           // API 고유 콘텐츠 ID
+    private Long contentId;              // API 고유 콘텐츠 ID
     private String thumbnail;            // 대표 이미지
     private Double ratingSum;            // 평점 합계
     private Integer reviewCount;         // 리뷰 개수
-    private String attractionTypeName;   // 관광지 분류명
-    private String attractionTypeNo;     // 관광지 분류 번호 (String으로 변경)
-
-    // rating 필드는 계산이 필요 없으므로 제거
-
+    private String attractionType;       // 관광지 분류명 (프론트에 표시용)
+    // rating 필드는 제거 - 프론트엔드에서 계산
 }

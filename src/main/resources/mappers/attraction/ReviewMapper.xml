@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.triplog.attraction.mapper.ReviewMapper">
+
+    <!-- 관광지별 리뷰 조회 -->
+    <select id="findReviewsByAttraction" resultType="com.ssafy.triplog.attraction.dto.AttractionReviewResponseDto">
+        SELECT
+            ar.no, ar.user_nickname as userNickname, ar.rating,
+            ar.content, ar.create_at as createAt, ar.update_at as updateAt,
+            ar.attraction_no as attractionNo, ar.user_no as userNo
+        FROM
+            attraction_review ar
+        WHERE
+            ar.attraction_no = #{attractionNo}
+        ORDER BY
+            ar.create_at DESC
+            LIMIT #{size} OFFSET #{page} * #{size}
+    </select>
+
+    <!-- 사용자별 리뷰 조회 -->
+    <select id="findReviewsByUser" resultType="com.ssafy.triplog.attraction.dto.AttractionReviewResponseDto">
+        SELECT
+            ar.no, ar.user_nickname as userNickname, ar.rating,
+            ar.content, ar.create_at as createAt, ar.update_at as updateAt,
+            ar.attraction_no as attractionNo, ar.user_no as userNo
+        FROM
+            attraction_review ar
+        WHERE
+            ar.user_no = #{userNo}
+        ORDER BY
+            ar.create_at DESC
+            LIMIT #{size} OFFSET #{page} * #{size}
+    </select>
+
+    <!-- 리뷰 상세 조회 -->
+    <select id="findReviewById" resultType="com.ssafy.triplog.attraction.dto.AttractionReviewResponseDto">
+        SELECT
+            ar.no, ar.user_nickname as userNickname, ar.rating,
+            ar.content, ar.create_at as createAt, ar.update_at as updateAt,
+            ar.attraction_no as attractionNo, ar.user_no as userNo
+        FROM
+            attraction_review ar
+        WHERE
+            ar.no = #{reviewNo}
+    </select>
+
+    <!-- 리뷰 등록 -->
+    <insert id="insertReview" parameterType="com.ssafy.triplog.attraction.dto.AttractionReviewResponseDto">
+        INSERT INTO attraction_review (
+            user_nickname, rating, content, create_at, update_at,
+            attraction_no, user_no
+        ) VALUES (
+                     #{userNickname}, #{rating}, #{content}, #{createAt}, #{updateAt},
+                     #{attractionNo}, #{userNo}
+                 )
+    </insert>
+
+    <!-- 리뷰 수정 -->
+    <update id="updateReview" parameterType="com.ssafy.triplog.attraction.dto.AttractionReviewResponseDto">
+        UPDATE attraction_review
+        SET
+            rating = #{rating},
+            content = #{content},
+            update_at = #{updateAt}
+        WHERE
+            no = #{no}
+    </update>
+
+    <!-- 리뷰 삭제 -->
+    <delete id="deleteReview">
+        DELETE FROM attraction_review
+        WHERE no = #{reviewNo}
+    </delete>
+</mapper>
