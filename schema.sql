@@ -333,3 +333,7 @@ DROP TEMPORARY TABLE temp_my_plan;
 
 -- 외래 키 제약조건 활성화
 SET FOREIGN_KEY_CHECKS = 1;
+
+    -- plan_post 테이블에 totalMember 칼럼 추가
+ALTER TABLE `plan_post`
+    ADD COLUMN `totalMember` BIGINT NULL DEFAULT 0;
