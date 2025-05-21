@@ -8,6 +8,7 @@ package com.ssafy.triplog.attraction.controller;
 //   - 특정 사용자가 작성한 리뷰 list 조회
 
 import com.ssafy.triplog.attraction.dto.AttractionReviewDto;
+import com.ssafy.triplog.attraction.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AttractionReviewController {
+
+    private final ReviewService reviewService;
 
     @Operation(summary = "리뷰 등록", description = "관광지에 대한 리뷰를 등록합니다. 새로 등록된 리뷰의 관광지 no 리턴 -> 다시 관광지 리뷰를 불러오기 위한 관광지 no")
     @PostMapping

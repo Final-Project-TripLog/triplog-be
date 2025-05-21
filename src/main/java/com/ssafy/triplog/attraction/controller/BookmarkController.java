@@ -12,6 +12,7 @@ package com.ssafy.triplog.attraction.controller;
 
 import com.ssafy.triplog.attraction.dto.BookmarkDto;
 import com.ssafy.triplog.attraction.dto.BookmarkTypeDto;
+import com.ssafy.triplog.attraction.service.BookmarkService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import java.util.List;
 @Slf4j
 public class BookmarkController {
 
+    private final BookmarkService bookmarkService;
     // ----- 북마크 타입 관련 -----
     @Operation(summary = "북마크 타입 생성", description = "사용자가 새로운 북마크 폴더(타입)를 생성합니다.")
     @PostMapping("/types")
