@@ -25,4 +25,8 @@ public interface AttractionMapper {
     void decreaseRatingSum(@Param("attractionNo") Long attractionNo, @Param("rating") Integer rating);
     void increaseReviewCount(@Param("attractionNo") Long attractionNo);
     void decreaseReviewCount(@Param("attractionNo") Long attractionNo);
+    List<PlanPostResponse> findPlansByAttractionId(
+            @Param("attractionNo") Long attractionNo,
+            @Param("size") int size,
+            @Param("offset") int offset);
 }

@@ -2,6 +2,7 @@ package com.ssafy.triplog.attraction.service;
 
 import com.ssafy.triplog.attraction.dto.AttractionImageResponseDto;
 import com.ssafy.triplog.attraction.dto.AttractionResponseDto;
+import com.ssafy.triplog.planpost.dto.PlanPostResponse;
 
 import java.util.List;
 
@@ -51,4 +52,15 @@ public interface AttractionService {
      */
     List<AttractionResponseDto> getAttractionsByBookmarkType(
             Long bookmarkTypeNo, int page, int size);
+
+    /**
+     * 특정 관광지를 포함하는 여행 계획 목록을 조회합니다.
+     *
+     * @param attractionNo 관광지 번호
+     * @param page 페이지 번호 (0부터 시작)
+     * @param size 페이지 크기
+     * @return 여행 계획 목록
+     */
+    List<PlanPostResponse> getPlansContainingAttraction(
+            Long attractionNo, int page, int size);
 }

@@ -4,6 +4,7 @@ import com.ssafy.triplog.attraction.dto.*;
 import com.ssafy.triplog.attraction.service.AttractionService;
 import com.ssafy.triplog.attraction.service.BookmarkService;
 import com.ssafy.triplog.attraction.service.ReviewService;
+import com.ssafy.triplog.planpost.dto.PlanPostResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,5 +96,21 @@ public class AttractionController {
         response.setImages(images);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "관광지 포함 여행 계획 조회", description = "특정 관광지를 포함하는 여행 계획 목록을 조회합니다.")
+    @GetMapping("/{attractionNo}/plans")
+    public ResponseEntity<List<PlanPostResponse>> getPlansContainingAttraction(
+            @PathVariable Long attractionNo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        log.debug("getPlansContainingAttraction -----> attractionNo: {}, page: {}, size: {}",
+                attractionNo, page, size);
+
+        List<PlanPostResponse> plans = attractionService.getPlansContainingAttraction(
+                attractionNo, page, size);
+
+        return ResponseEntity.ok(plans);
     }
 }

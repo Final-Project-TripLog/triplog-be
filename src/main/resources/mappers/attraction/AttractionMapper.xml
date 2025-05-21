@@ -56,6 +56,27 @@
             review_image_order ASC
     </select>
 
+    <!-- 관광지를 포함하는 여행 계획 조회 -->
+    <select id="findPlansByAttractionId" resultType="com.ssafy.triplog.planpost.dto.PlanPostResponse">
+        SELECT
+            pp.no, pp.user_nickname as userNickname, pp.title,
+            pp.description, pp.thumbnail, pp.created_at as createdAt,
+            pp.updated_at as updatedAt, pp.user_no as userNo,
+            pp.fork_count as forkCount, pp.liked_count as likedCount,
+            pp.view_count as viewCount
+        FROM
+            plan_post pp
+                JOIN
+            plan_attraction_detail pad ON pp.no = pad.plan_post_no
+        WHERE
+            pad.attraction_no = #{attractionNo}
+        GROUP BY
+            pp.no
+        ORDER BY
+            pp.created_at DESC
+            LIMIT #{size} OFFSET #{offset}
+    </select>
+
     <!-- 북마크 타입에 포함된 관광지 조회 -->
     <select id="findAttractionsByBookmarkType" resultType="com.ssafy.triplog.attraction.dto.AttractionResponseDto">
         SELECT
