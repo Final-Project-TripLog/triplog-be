@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -67,6 +69,10 @@ public class AttractionController {
 
         log.debug("getAttractionReviews -----> attractionNo: {}, page: {}, size: {}",
                 attractionNo, page, size);
+
+        // 인증 정보 로깅
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        log.info("현재 인증 정보: {}", auth);
 
         List<AttractionReviewResponseDto> reviews = reviewService.getReviewsByAttraction(
                 attractionNo, page, size);

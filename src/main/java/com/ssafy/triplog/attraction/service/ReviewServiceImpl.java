@@ -25,12 +25,14 @@ public class ReviewServiceImpl implements ReviewService {
         log.debug("getReviewsByAttraction: attractionNo={}, page={}, size={}",
                 attractionNo, page, size);
 
+        // 페이지 오프셋 계산 (페이지 기반 → 오프셋 기반으로 변환)
+        int offset = page * size;
         // 관광지 존재 여부 확인
         if (attractionMapper.findById(attractionNo) == null) {
             throw new RuntimeException("관광지 정보를 찾을 수 없습니다: " + attractionNo);
         }
 
-        return reviewMapper.findReviewsByAttraction(attractionNo, page, size);
+        return reviewMapper.findReviewsByAttraction(attractionNo, size, offset);
     }
 
     @Override

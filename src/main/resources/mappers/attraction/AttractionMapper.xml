@@ -27,7 +27,7 @@
             <when test="sortBy == 'reviewCount'">reviewCount DESC</when>
             <otherwise>no DESC</otherwise>
         </choose>
-        LIMIT #{size} OFFSET #{page} * #{size}
+        LIMIT #{size} OFFSET #{page}
     </select>
 
     <!-- 관광지 상세 조회 -->

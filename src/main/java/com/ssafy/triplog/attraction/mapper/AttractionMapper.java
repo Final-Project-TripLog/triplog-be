@@ -9,8 +9,14 @@ import java.util.List;
 
 @Mapper
 public interface AttractionMapper {
-    List<AttractionResponseDto> findAttractions(@Param("types") List<String> types, @Param("keyword") String keyword,
-                                                @Param("sortBy") String sortBy, @Param("page") int page, @Param("size") int size);
+    // AttractionMapper.java
+    List<AttractionResponseDto> findAttractions(
+            @Param("types") List<String> types,
+            @Param("keyword") String keyword,
+            @Param("sortBy") String sortBy,
+            @Param("size") int size,
+            @Param("page") int offset // 여기서 파라미터 이름을 offset으로 변경하거나, 아니면 XML에서 직접 #{page}로 접근
+    );
     AttractionResponseDto findById(@Param("attractionNo") Long attractionNo);
     List<AttractionImageResponseDto> findImagesByAttractionId(@Param("attractionNo") Long attractionNo);
     List<AttractionResponseDto> findAttractionsByBookmarkType(@Param("bookmarkTypeNo") Long bookmarkTypeNo,

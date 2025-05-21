@@ -14,7 +14,7 @@
             ar.attraction_no = #{attractionNo}
         ORDER BY
             ar.create_at DESC
-            LIMIT #{size} OFFSET #{page} * #{size}
+            LIMIT #{size} OFFSET #{page}
     </select>
 
     <!-- 사용자별 리뷰 조회 -->

@@ -23,11 +23,13 @@ public class AttractionServiceImpl implements AttractionService {
         log.debug("getAttractions: types={}, keyword={}, sortBy={}, page={}, size={}",
                 types, keyword, sortBy, page, size);
 
+        // 페이지 번호를 오프셋으로 변환
+        int offset = page * size;
         // sortBy 값 검증 및 기본값 설정
         String validSortBy = "ratingSum".equals(sortBy) || "reviewCount".equals(sortBy)
                 ? sortBy : "no";
 
-        return attractionMapper.findAttractions(types, keyword, validSortBy, page, size);
+        return attractionMapper.findAttractions(types, keyword, validSortBy, size, offset);
     }
 
     @Override
