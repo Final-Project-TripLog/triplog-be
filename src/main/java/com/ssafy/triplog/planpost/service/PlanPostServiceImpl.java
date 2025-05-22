@@ -1,5 +1,4 @@
 package com.ssafy.triplog.planpost.service;
-import com.ssafy.triplog.planpost.service.PlanPostService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -223,7 +222,7 @@ public class PlanPostServiceImpl implements PlanPostService {
     @Override
     @Transactional(readOnly = true)
     public PlanPostResponse getPlanPostById(Long postNo) {
-        log.info("게시글 조회 - postNo: {}", postNo);
+        log.info("게시글 기본 정보 조회 - postNo: {}", postNo);
 
         PlanPostDto planPost = planPostMapper.selectPlanPostById(postNo);
         if (planPost == null) {
@@ -231,6 +230,73 @@ public class PlanPostServiceImpl implements PlanPostService {
         }
 
         return convertDtoToResponse(planPost, postNo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PlanPostDetailResponse getPlanPostDetail(Long postNo, Long currentUserNo) {
+        log.info("게시글 상세 조회 - postNo: {}, currentUserNo: {}", postNo, currentUserNo);
+
+        // 1. 게시글 기본 정보 조회
+        PlanPostDto planPost = planPostMapper.selectPlanPostById(postNo);
+        if (planPost == null) {
+            throw new RuntimeException("게시글을 찾을 수 없습니다. postNo: " + postNo);
+        }
+
+        // 2. 관광지 세부 계획 목록 조회
+        List<PlanAttractionDetailDto> attractionDetails = planPostMapper.selectPlanAttractionDetailsByPostNo(postNo);
+
+        // 3. 태그 목록 조회
+        List<PlanPostTagDto> tags = planPostMapper.selectPlanPostTagsByPostNo(postNo);
+
+        // 4. 상세 응답 DTO 생성
+        PlanPostDetailResponse response = convertDtoToDetailResponse(planPost, attractionDetails, tags, currentUserNo);
+
+        log.info("게시글 상세 조회 완료 - 관광지 {} 개, 태그 {} 개",
+                attractionDetails.size(), tags.size());
+
+        return response;
+    }
+
+    /**
+     * PlanPostDto를 PlanPostDetailResponse로 변환
+     */
+    private PlanPostDetailResponse convertDtoToDetailResponse(PlanPostDto dto,
+                                                              List<PlanAttractionDetailDto> attractionDetails,
+                                                              List<PlanPostTagDto> tags,
+                                                              Long currentUserNo) {
+        PlanPostDetailResponse response = new PlanPostDetailResponse();
+
+        // 기본 정보 설정
+        response.setNo(dto.getNo());
+        response.setUserNo(dto.getUserNo());
+        response.setUserNickname(dto.getUserNickname());
+        response.setTitle(dto.getTitle());
+        response.setDescription(dto.getDescription());
+        response.setThumbnail(dto.getThumbnail());
+        response.setCreatedAt(dto.getCreatedAt());
+        response.setUpdatedAt(dto.getUpdatedAt());
+        response.setStartDay(dto.getStartDay());
+        response.setEndDay(dto.getEndDay());
+        response.setTotalMember(dto.getTotalMember());
+        response.setForkCount(dto.getForkCount());
+        response.setLikedCount(dto.getLikedCount());
+        response.setViewCount(dto.getViewCount());
+
+        // 상세 정보 설정
+        response.setTags(tags != null ? tags : Collections.emptyList());
+        response.setAttractionDetails(attractionDetails != null ? attractionDetails : Collections.emptyList());
+
+        // 현재 사용자 관련 정보 설정 (로그인된 경우만)
+        if (currentUserNo != null) {
+            response.setIsLikedByCurrentUser(isLikedByUser(dto.getNo(), currentUserNo));
+            response.setIsOwnedByCurrentUser(dto.getUserNo().equals(currentUserNo));
+        } else {
+            response.setIsLikedByCurrentUser(false);
+            response.setIsOwnedByCurrentUser(false);
+        }
+
+        return response;
     }
 
     private PlanPostResponse convertDtoToResponse(PlanPostDto dto, Long postNo) {

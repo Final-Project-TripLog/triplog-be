@@ -95,6 +95,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
         Long userNo = jwtUtil.getUserNo(token);
+        String nickname = jwtUtil.getNickname(token);
         // 5. jwtUtil에 구현해둔 함수로 토큰에서 UserNo 뽑아내서 userNo로 저장
 
         // 임시 UserDto 객체 생성 (DB 조회 결과가 아니라 토큰에서 추출한 정보만 담음)
@@ -103,7 +104,7 @@ public class JWTFilter extends OncePerRequestFilter {
         userDto.setRole(role);
         // 6. DTO에 Set 해주기
         userDto.setNo(userNo);
-
+        userDto.setNickname(nickname);
 
         // CustomUserDetails에 사용자 정보 삽입
         CustomUserDetails customUserDetails = new CustomUserDetails(userDto);

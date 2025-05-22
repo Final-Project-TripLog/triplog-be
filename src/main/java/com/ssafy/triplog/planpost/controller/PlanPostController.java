@@ -1,6 +1,7 @@
 package com.ssafy.triplog.planpost.controller;
 
 import com.ssafy.triplog.myplan.service.MyPlanService;
+import com.ssafy.triplog.planpost.dto.PlanPostDetailResponse;
 import com.ssafy.triplog.planpost.dto.PlanPostRequest;
 import com.ssafy.triplog.planpost.dto.PlanPostResponse;
 import com.ssafy.triplog.planpost.service.PlanPostService;
@@ -58,7 +59,7 @@ public class PlanPostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(postNo);
     }
 
-    @Operation(summary = "내 개인 계획 목록 조회 (게시글 생성용)",
+    @Operation(summary = "내 개인 계획 목록 조회 (게시글 생성용) - ok ",
             description = "현재 사용자의 개인 여행 계획 목록을 조회합니다. (게시글로 만들기 위한 용도)")
     @GetMapping("/my-plans-for-post")
     public ResponseEntity<?> getMyPlansForPost(
@@ -96,7 +97,7 @@ public class PlanPostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(postNo);
     }
 
-    @Operation(summary = "여행 계획 게시글 단건 조회",
+    @Operation(summary = "여행 계획 게시글 단건 조회 - ok",
             description = "특정 여행 계획 게시글의 상세 정보를 조회합니다.")
     @GetMapping("/{postNo}")
     public ResponseEntity<PlanPostResponse> getPlanPost(@PathVariable Long postNo) {
@@ -162,7 +163,7 @@ public class PlanPostController {
 
     // ===== 게시글 목록 조회 및 검색 =====
 
-    @Operation(summary = "여행 계획 게시글 목록 조회",
+    @Operation(summary = "여행 계획 게시글 목록 조회 - ok",
             description = "게시글을 좋아요 수, 포크 수, 조회 수 기준으로 정렬하여 조회합니다.")
     @GetMapping
     public ResponseEntity<List<PlanPostResponse>> getPlanPostList(
@@ -179,7 +180,7 @@ public class PlanPostController {
         return ResponseEntity.ok(posts);
     }
 
-    @Operation(summary = "게시글 검색 - 장소별",
+    @Operation(summary = "게시글 검색 - 장소별 - ok",
             description = "특정 시도/구군으로 연결된 게시글들을 검색합니다.")
     @GetMapping("/filter")
     public ResponseEntity<List<PlanPostResponse>> searchPlanPostsByLocation(
@@ -199,7 +200,7 @@ public class PlanPostController {
         return ResponseEntity.ok(posts);
     }
 
-    @Operation(summary = "게시글 검색 - 키워드",
+    @Operation(summary = "게시글 검색 - 키워드 - ok",
             description = "제목, 설명, 태그를 기준으로 게시글을 검색합니다.")
     @GetMapping("/search")
     public ResponseEntity<List<PlanPostResponse>> searchPlanPosts(
@@ -222,7 +223,7 @@ public class PlanPostController {
         return ResponseEntity.ok(posts);
     }
 
-    @Operation(summary = "사용자별 게시글 목록 조회",
+    @Operation(summary = "사용자별 게시글 목록 조회 - ok (특정 사용자) ",
             description = "특정 사용자가 작성한 게시글 목록을 조회합니다.")
     @GetMapping("/user/{userNo}")
     public ResponseEntity<List<PlanPostResponse>> getPlanPostsByUser(
@@ -236,7 +237,7 @@ public class PlanPostController {
         return ResponseEntity.ok(posts);
     }
 
-    @Operation(summary = "내가 작성한 게시글 목록 조회",
+    @Operation(summary = "내가 작성한 게시글 목록 조회 - ok",
             description = "현재 로그인한 사용자가 작성한 게시글 목록을 조회합니다.")
     @GetMapping("/my")
     public ResponseEntity<List<PlanPostResponse>> getMyPlanPosts(
@@ -254,7 +255,7 @@ public class PlanPostController {
 
     // ===== 좋아요 기능 =====
 
-    @Operation(summary = "여행 계획 게시글 좋아요 등록",
+    @Operation(summary = "여행 계획 게시글 좋아요 등록 - ok",
             description = "선택한 게시글에 좋아요를 추가합니다.")
     @PostMapping("/{postNo}/like")
     public ResponseEntity<Void> likePlanPost(@PathVariable Long postNo) {
@@ -271,7 +272,7 @@ public class PlanPostController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "여행 계획 게시글 좋아요 삭제",
+    @Operation(summary = "여행 계획 게시글 좋아요 삭제 - ok",
             description = "선택한 게시글의 좋아요를 취소합니다.")
     @DeleteMapping("/{postNo}/like")
     public ResponseEntity<Void> unlikePlanPost(@PathVariable Long postNo) {
@@ -288,7 +289,30 @@ public class PlanPostController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "게시글 좋아요 상태 확인",
+    @Operation(summary = "여행 계획 게시글 상세 조회 - ok",
+            description = "특정 여행 계획 게시글의 상세 정보를 조회합니다. (관광지 세부 계획 포함)")
+    @GetMapping("/{postNo}/detail")
+    public ResponseEntity<PlanPostDetailResponse> getPlanPostDetail(@PathVariable Long postNo) {
+        log.info("게시글 상세 조회 요청 - postNo: {}", postNo);
+
+        // 현재 사용자 정보 추출 (로그인 안된 경우 null)
+        Long currentUserNo = null;
+        try {
+            currentUserNo = authenticationUtil.getCurrentUserNo();
+            log.info("로그인된 사용자 - userNo: {}", currentUserNo);
+        } catch (RuntimeException e) {
+            log.info("비로그인 사용자의 게시글 조회");
+        }
+
+        PlanPostDetailResponse response = planPostService.getPlanPostDetail(postNo, currentUserNo);
+
+        // 조회수 증가
+        planPostService.increaseViewCount(postNo);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "게시글 좋아요 상태 확인 - ok",
             description = "현재 사용자가 해당 게시글에 좋아요를 눌렀는지 확인합니다.")
     @GetMapping("/{postNo}/like/status")
     public ResponseEntity<Boolean> getLikeStatus(@PathVariable Long postNo) {
