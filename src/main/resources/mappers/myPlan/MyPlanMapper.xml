@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.triplog.myplan.mapper.MyPlanMapper">
+
+    <!-- ✅ MyPlanDto ResultMap -->
+    <resultMap id="MyPlanDtoResultMap" type="com.ssafy.triplog.myplan.dto.MyPlanDto">
+        <id property="no" column="no"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="userNo" column="user_no"/>
+        <result property="startTime" column="start_day"/>
+        <result property="endTime" column="end_day"/>
+        <result property="updateTime" column="updated_at"/>
+        <result property="totalMember" column="total_member"/>
+    </resultMap>
+
+    <!-- ✅ MyDailyPlanDto ResultMap -->
+    <resultMap id="MyDailyPlanDtoResultMap" type="com.ssafy.triplog.myplan.dto.MyDailyPlanDto">
+        <id property="no" column="no"/>
+        <result property="visitedDate" column="visited_date"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="moveTime" column="move_time"/>
+        <result property="memo" column="memo"/>
+        <result property="attractionTitle" column="attraction_title"/>
+        <result property="attractionThumbnail" column="attraction_thumbnail"/>
+        <result property="attractionLatitude" column="attraction_latitude"/>
+        <result property="attractionLongitude" column="attraction_longitude"/>
+        <result property="attractionRating" column="attraction_rating"/>
+        <result property="attractionNo" column="attraction_no"/>
+        <result property="myPlanNo" column="my_plan_no"/>
+    </resultMap>
+
+    <!-- ✅ 여행 계획 생성 -->
+    <insert id="insertMyPlan" parameterType="com.ssafy.triplog.myplan.dto.MyPlanDto"
+            useGeneratedKeys="true" keyProperty="no" keyColumn="no">
+        INSERT INTO my_plan (
+            title,
+            description,
+            user_no,
+            start_day,
+            end_day,
+            updated_at,
+            total_member
+        ) VALUES (
+                     #{title},
+                     #{description},
+                     #{userNo},
+                     #{startTime},
+                     #{endTime},
+                     NOW(),
+                     #{totalMember}
+                 )
+    </insert>
+
+    <!-- ✅ 일일 여행 계획 단건 생성 -->
+    <insert id="insertMyDailyPlan" parameterType="com.ssafy.triplog.myplan.dto.MyDailyPlanDto"
+            useGeneratedKeys="true" keyProperty="no" keyColumn="no">
+        INSERT INTO my_daily_plan (
+            visited_date,
+            start_time,
+            end_time,
+            move_time,
+            attraction_title,
+            attraction_thumbnail,
+            attraction_latitude,
+            attraction_longitude,
+            attraction_rating,
+            memo,
+            attraction_no,
+            my_plan_no
+        ) VALUES (
+                     #{visitedDate},
+                     #{startTime},
+                     #{endTime},
+                     #{moveTime},
+                     #{attractionTitle},
+                     #{attractionThumbnail},
+                     #{attractionLatitude},
+                     #{attractionLongitude},
+                     #{attractionRating},
+                     #{memo},
+                     #{attractionNo},
+                     #{myPlanNo}
+                 )
+    </insert>
+
+    <!-- ✅ 일일 여행 계획 여러개 일괄 생성 -->
+    <insert id="insertMyDailyPlans" parameterType="java.util.List">
+        INSERT INTO my_daily_plan (
+        visited_date,
+        start_time,
+        end_time,
+        move_time,
+        attraction_title,
+        attraction_thumbnail,
+        attraction_latitude,
+        attraction_longitude,
+        attraction_rating,
+        memo,
+        attraction_no,
+        my_plan_no
+        ) VALUES
+        <foreach collection="dailyPlans" item="plan" separator=",">
+            (
+            #{plan.visitedDate},
+            #{plan.startTime},
+            #{plan.endTime},
+            #{plan.moveTime},
+            #{plan.attractionTitle},
+            #{plan.attractionThumbnail},
+            #{plan.attractionLatitude},
+            #{plan.attractionLongitude},
+            #{plan.attractionRating},
+            #{plan.memo},
+            #{plan.attractionNo},
+            #{plan.myPlanNo}
+            )
+        </foreach>
+    </insert>
+
+    <!-- ✅ 여행 계획 수정 -->
+    <update id="updateMyPlan" parameterType="com.ssafy.triplog.myplan.dto.MyPlanDto">
+        UPDATE my_plan
+        SET
+            title = #{title},
+            description = #{description},
+            start_day = #{startTime},
+            end_day = #{endTime},
+            updated_at = NOW(),
+            total_member = #{totalMember}
+        WHERE no = #{no}
+          AND user_no = #{userNo}
+    </update>
+
+    <!-- ✅ 여행 계획 삭제 -->
+    <delete id="deleteMyPlan">
+        DELETE FROM my_plan
+        WHERE no = #{planNo}
+          AND user_no = #{userNo}
+    </delete>
+
+    <!-- ✅ 특정 여행 계획의 모든 일일 계획 삭제 -->
+    <delete id="deleteMyDailyPlansByPlanNo">
+        DELETE FROM my_daily_plan
+        WHERE my_plan_no = #{myPlanNo}
+    </delete>
+
+    <!-- ✅ 사용자별 여행 계획 목록 조회 -->
+    <select id="selectMyPlansByUser" resultMap="MyPlanDtoResultMap">
+        SELECT
+            no,
+            title,
+            description,
+            user_no,
+            start_day,
+            end_day,
+            updated_at,
+            total_member
+        FROM my_plan
+        WHERE user_no = #{userNo}
+        ORDER BY updated_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- ✅ 여행 계획 단건 조회 -->
+    <select id="selectMyPlanById" resultMap="MyPlanDtoResultMap">
+        SELECT
+            no,
+            title,
+            description,
+            user_no,
+            start_day,
+            end_day,
+            updated_at,
+            total_member
+        FROM my_plan
+        WHERE no = #{planNo}
+    </select>
+
+    <!-- ✅ 여행 계획의 일일 계획 목록 조회 -->
+    <select id="selectDailyPlansByPlanNo" resultMap="MyDailyPlanDtoResultMap">
+        SELECT
+            no,
+            visited_date,
+            start_time,
+            end_time,
+            move_time,
+            attraction_title,
+            attraction_thumbnail,
+            attraction_latitude,
+            attraction_longitude,
+            attraction_rating,
+            memo,
+            attraction_no,
+            my_plan_no
+        FROM my_daily_plan
+        WHERE my_plan_no = #{planNo}
+        ORDER BY visited_date ASC, start_time ASC
+    </select>
+
+    <!-- ✅ 사용자별 여행 계획 총 개수 조회 -->
+    <select id="countMyPlansByUser" resultType="int">
+        SELECT COUNT(*)
+        FROM my_plan
+        WHERE user_no = #{userNo}
+    </select>
+
+</mapper>

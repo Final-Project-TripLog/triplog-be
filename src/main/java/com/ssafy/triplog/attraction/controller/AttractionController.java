@@ -1,23 +1,16 @@
 package com.ssafy.triplog.attraction.controller;
 
-//2. 관광지 정보 (  AttractionController  )
-//   - 관광지 등록
-//   - 관광지 수정
-//   - 관광지 삭제
-//   - 모든 관광지 list 조회(평점 높은 순, 등록 순, 조회 순)
-//   - 특정 지역에 있는 관광지 list 조회
-//   - 관광지 검색 기능 (list)
-//   - 관광지 상세 조회
-//   - 특정 위도, 경도로 부터 K거리 내에 있는 관광지 list조회
-
-
-import com.ssafy.triplog.attraction.dto.AttractionDto;
-import com.ssafy.triplog.attraction.dto.AttractionPreviewResponse;
+import com.ssafy.triplog.attraction.dto.*;
+import com.ssafy.triplog.attraction.service.AttractionService;
+import com.ssafy.triplog.attraction.service.BookmarkService;
+import com.ssafy.triplog.attraction.service.ReviewService;
+import com.ssafy.triplog.planpost.dto.PlanPostResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,64 +21,96 @@ import java.util.List;
 @Slf4j
 public class AttractionController {
 
-    @Operation(summary = "관광지 등록", description = "새로운 관광지 정보를 등록합니다. 등록 후 등록 된 attraction no 리턴합니다.")
-    @PostMapping
-    public ResponseEntity<Long> createAttraction(@Valid @RequestBody AttractionDto request) {
-        log.debug("createAttraction -----> request : {}", request);
-        return ResponseEntity.ok(0L);
-    }
+    private final AttractionService attractionService;
+    private final ReviewService reviewService;
+    private final BookmarkService bookmarkService;
 
-    @Operation(summary = "관광지 수정", description = "기존 관광지 정보를 수정합니다. 수정 후 attraction no 리턴합니다. ")
-    @PutMapping("/{attractionNo}")
-    public ResponseEntity<Long> updateAttraction(@PathVariable Long attractionNo,
-                                                 @Valid @RequestBody AttractionDto request) {
-        log.debug("updateAttraction -----> attractionNo : {}, request : {}", attractionNo, request);
-        return ResponseEntity.ok(0L);
-    }
-
-    @Operation(summary = "관광지 삭제", description = "관광지 정보를 삭제합니다.")
-    @DeleteMapping("/{attractionNo}")
-    public ResponseEntity<String> deleteAttraction(@PathVariable Long attractionNo) {
-        log.debug("deleteAttraction -----> attractionNo : {}", attractionNo);
-        return ResponseEntity.ok("관광지가 삭제 되었습니다. ");
-    }
-
-    @Operation(summary = "관광지 상세 조회", description = "특정 관광지의 상세 정보를 조회합니다.")
-    @GetMapping("/{attractionNo}")
-    public ResponseEntity<AttractionDto> getAttractionDetail(@PathVariable Long attractionNo) {
-        log.debug("getAttractionDetail -----> attractionNo : {}", attractionNo);
-        return ResponseEntity.ok(new AttractionDto());
-    }
-
-    @Operation(summary = "조건에 맞는 관광지 리스트 조회", description = "타입, 지역, 검색 키워드 정렬 등을 조건으로 관광지를 검색합니다.")
+    @Operation(summary = "관광지 목록 조회 - ok", description = "조건에 맞는 관광지 목록을 조회합니다.")
     @GetMapping("/list")
-    public ResponseEntity<List<AttractionPreviewResponse>> searchAttractions(@RequestParam(required = false) List<Integer> types,
-                                                                             @RequestParam(required = false) Integer sidoNo,
-                                                                             @RequestParam(required = false) Integer gugunNo,
-                                                                             @RequestParam(required = false) String keyword,
-                                                                             @RequestParam(defaultValue = "createdAt") String sortBy,
-                                                                             @RequestParam(defaultValue = "0") int page,
-                                                                             @RequestParam(defaultValue = "10") int size) {
-        log.debug("searchAttractions -----> types : {}, sidoNo : {}, gugunNo : {}, keyword : {}, sortBy : {}, page : {}, size : {}",
-                types, sidoNo, gugunNo, keyword, sortBy, page, size);
+    public ResponseEntity<List<AttractionResponseDto>> getAttractions(
+            @RequestParam(required = false) List<String> types,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        return ResponseEntity.ok(
-                List.of(new AttractionPreviewResponse(), new AttractionPreviewResponse())
-        );
+        log.debug("getAttractions -----> types: {}, keyword: {}, sortBy: {}, page: {}, size: {}",
+                types, keyword, sortBy, page, size);
+
+        List<AttractionResponseDto> attractions = attractionService.getAttractions(
+                types, keyword, sortBy, page, size);
+
+        return ResponseEntity.ok(attractions);
     }
 
-    @Operation(summary = "주변 관광지 조회", description = "위도와 경도를 기준으로 반경 K km 내 관광지를 조회합니다.")
-    @GetMapping("/nearby")
-    public ResponseEntity<List<AttractionPreviewResponse>> getNearbyAttractions(@RequestParam Double latitude,
-                                                                                @RequestParam Double longitude,
-                                                                                @RequestParam Double distanceKm,
-                                                                                @RequestParam(defaultValue = "0") int page,
-                                                                                @RequestParam(defaultValue = "10") int size) {
-        log.debug("getNearbyAttractions -----> lat : {}, lng : {}, distanceKm : {}, page : {}, size : {}",
-                latitude, longitude, distanceKm, page, size);
-        return ResponseEntity.ok(
-                List.of(new AttractionPreviewResponse(), new AttractionPreviewResponse())
-        );
+    @Operation(summary = "관광지 상세 조회 - ok", description = "특정 관광지의 상세 정보를 조회합니다.")
+    @GetMapping("/{attractionNo}")
+    public ResponseEntity<AttractionResponseDto> getAttractionDetail(@PathVariable Long attractionNo) {
+        log.debug("getAttractionDetail -----> attractionNo: {}", attractionNo);
+
+        AttractionResponseDto attraction = attractionService.getAttractionDetail(attractionNo);
+        return ResponseEntity.ok(attraction);
     }
 
+    @Operation(summary = "관광지 이미지 조회 - ok", description = "관광지와 관련된 이미지를 조회합니다.")
+    @GetMapping("/{attractionNo}/images")
+    public ResponseEntity<List<AttractionImageResponseDto>> getAttractionImages(@PathVariable Long attractionNo) {
+        log.debug("getAttractionImages -----> attractionNo: {}", attractionNo);
+
+        List<AttractionImageResponseDto> images = attractionService.getAttractionImages(attractionNo);
+        return ResponseEntity.ok(images);
+    }
+
+    @Operation(summary = "관광지 리뷰 조회 - ok", description = "관광지에 작성된 리뷰를 조회합니다.")
+    @GetMapping("/{attractionNo}/reviews")
+    public ResponseEntity<List<AttractionReviewResponseDto>> getAttractionReviews(
+            @PathVariable Long attractionNo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        log.debug("getAttractionReviews -----> attractionNo: {}, page: {}, size: {}",
+                attractionNo, page, size);
+
+        // 인증 정보 로깅
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        log.info("현재 인증 정보: {}", auth);
+
+        List<AttractionReviewResponseDto> reviews = reviewService.getReviewsByAttraction(
+                attractionNo, page, size);
+
+        return ResponseEntity.ok(reviews);
+    }
+
+    @Operation(summary = "관광지 상세 정보와 이미지 함께 조회 - ok", description = "관광지 상세 정보와 이미지를 함께 조회합니다.")
+    @GetMapping("/{attractionNo}/detail-with-images")
+    public ResponseEntity<AttractionDetailWithImagesResponseDto> getAttractionDetailWithImages(
+            @PathVariable Long attractionNo) {
+
+        log.debug("getAttractionDetailWithImages -----> attractionNo: {}", attractionNo);
+
+        AttractionResponseDto attraction = attractionService.getAttractionDetail(attractionNo);
+        List<AttractionImageResponseDto> images = attractionService.getAttractionImages(attractionNo);
+
+        AttractionDetailWithImagesResponseDto response = new AttractionDetailWithImagesResponseDto();
+        response.setAttraction(attraction);
+        response.setImages(images);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "관광지 포함 여행 계획 조회 - ok", description = "특정 관광지를 포함하는 여행 계획 목록을 조회합니다.")
+    @GetMapping("/{attractionNo}/plans")
+    public ResponseEntity<List<PlanPostResponse>> getPlansContainingAttraction(
+            @PathVariable Long attractionNo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        log.debug("getPlansContainingAttraction -----> attractionNo: {}, page: {}, size: {}",
+                attractionNo, page, size);
+
+        List<PlanPostResponse> plans = attractionService.getPlansContainingAttraction(
+                attractionNo, page, size);
+
+        return ResponseEntity.ok(plans);
+    }
 }
