@@ -181,6 +181,7 @@ public class MyPlanServiceImpl implements MyPlanService {
         }
 
         // 3. 일일 계획 목록 조회
+        log.debug(myPlan.toString() + " Here");
         List<MyDailyPlanDto> dailyPlans = myPlanMapper.selectDailyPlansByPlanNo(planNo);
 
         log.debug("조회된 일일 계획 수: {}", dailyPlans.size());

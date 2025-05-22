@@ -33,7 +33,7 @@ public class PlanPostController {
 
     // ===== MyPlan을 활용한 게시글 생성 =====
 
-    @Operation(summary = "개인 여행 계획으로부터 게시글 생성",
+    @Operation(summary = "개인 여행 계획으로부터 게시글 생성 - NO",
             description = "기존 개인 여행 계획(MyPlan)을 기반으로 공개 게시글을 생성합니다.")
     @PostMapping("/from-myplan/{myPlanNo}")
     public ResponseEntity<Long> createPlanPostFromMyPlan(
@@ -75,7 +75,7 @@ public class PlanPostController {
 
     // ===== 일반 게시글 CRUD =====
 
-    @Operation(summary = "여행 계획 게시글 직접 등록",
+    @Operation(summary = "여행 계획 게시글 직접 등록 - ok",
             description = "새로운 여행 계획 게시글을 직접 등록합니다.")
     @PostMapping
     public ResponseEntity<Long> createPlanPost(
@@ -90,7 +90,7 @@ public class PlanPostController {
         // 요청에 사용자 정보 설정
         request.setUserNo(userNo);
         request.setUserNickname(userNickname);
-
+//        log.debug(userNickname + " ***************************");
         Long postNo = planPostService.createPlanPost(request);
 
         log.info("게시글 직접 등록 완료 - postNo: {}", postNo);
@@ -111,7 +111,7 @@ public class PlanPostController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "여행 계획 게시글 수정",
+    @Operation(summary = "여행 계획 게시글 수정 - ok",
             description = "기존 여행 계획 게시글을 수정합니다.")
     @PutMapping("/{postNo}")
     public ResponseEntity<Long> updatePlanPost(
@@ -138,7 +138,7 @@ public class PlanPostController {
         return ResponseEntity.ok(updatedPostNo);
     }
 
-    @Operation(summary = "여행 계획 게시글 삭제",
+    @Operation(summary = "여행 계획 게시글 삭제 - ok ",
             description = "선택한 여행 계획 게시글을 삭제합니다.")
     @DeleteMapping("/{postNo}")
     public ResponseEntity<Void> deletePlanPost(@PathVariable Long postNo) {
