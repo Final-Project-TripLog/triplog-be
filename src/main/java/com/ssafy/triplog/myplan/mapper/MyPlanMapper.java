@@ -22,6 +22,20 @@ public interface MyPlanMapper {
     int insertMyPlan(MyPlanDto myPlanDto);
 
     /**
+     * 일일 여행 계획 생성
+     * @param myDailyPlanDto 일일 여행 계획 정보
+     * @return 생성된 행 수
+     */
+    int insertMyDailyPlan(MyDailyPlanDto myDailyPlanDto);
+
+    /**
+     * 일일 여행 계획 여러개 일괄 생성
+     * @param dailyPlans 일일 여행 계획 목록
+     * @return 생성된 행 수
+     */
+    int insertMyDailyPlans(@Param("dailyPlans") List<MyDailyPlanDto> dailyPlans);
+
+    /**
      * 여행 계획 수정
      * @param myPlanDto 수정할 여행 계획 정보
      * @return 수정된 행 수
@@ -35,6 +49,13 @@ public interface MyPlanMapper {
      * @return 삭제된 행 수
      */
     int deleteMyPlan(@Param("planNo") Long planNo, @Param("userNo") Long userNo);
+
+    /**
+     * 특정 여행 계획의 모든 일일 계획 삭제
+     * @param myPlanNo 여행 계획 번호
+     * @return 삭제된 행 수
+     */
+    int deleteMyDailyPlansByPlanNo(@Param("myPlanNo") Long myPlanNo);
 
     /**
      * 사용자별 여행 계획 목록 조회

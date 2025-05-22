@@ -1,11 +1,10 @@
-// src/main/java/com/ssafy/triplog/myplan/service/impl/MyPlanServiceImpl.java
+// src/main/java/com/ssafy/triplog/myplan/service/MyPlanServiceImpl.java
 package com.ssafy.triplog.myplan.service;
 
 import com.ssafy.triplog.myplan.dto.MyDailyPlanDto;
 import com.ssafy.triplog.myplan.dto.MyPlanDto;
 import com.ssafy.triplog.myplan.dto.MyPlanRequest;
 import com.ssafy.triplog.myplan.mapper.MyPlanMapper;
-import com.ssafy.triplog.myplan.service.MyPlanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,21 +27,48 @@ public class MyPlanServiceImpl implements MyPlanService {
     public Long createMyPlan(Long userNo, MyPlanRequest request) {
         log.debug("MyPlanServiceImpl.createMyPlan -----> userNo: {}, request: {}", userNo, request);
 
-        // MyPlanDto 생성
-        MyPlanDto myPlanDto = MyPlanDto.builder()
-                .userNo(userNo)
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .totalMember(request.getTotalMember())
-                .build();
+        try {
+            // 1. 기본 여행 계획 생성
+            MyPlanDto myPlanDto = MyPlanDto.builder()
+                    .userNo(userNo)
+                    .title(request.getTitle())
+                    .description(request.getDescription())
+                    .startTime(request.getStartTime())
+                    .endTime(request.getEndTime())
+                    .totalMember(request.getTotalMember())
+                    .build();
 
-        // 여행 계획 저장
-        myPlanMapper.insertMyPlan(myPlanDto);
+            // 2. my_plan 테이블에 저장
+            log.debug("여행 계획 저장 중...");
+            int planResult = myPlanMapper.insertMyPlan(myPlanDto);
 
-        log.debug("여행 계획 생성 완료 -----> planNo: {}", myPlanDto.getNo());
-        return myPlanDto.getNo();
+            if (planResult == 0 || myPlanDto.getNo() == null) {
+                throw new RuntimeException("여행 계획 생성 실패");
+            }
+
+            Long createdPlanNo = myPlanDto.getNo();
+            log.debug("여행 계획 생성 완료 -----> planNo: {}", createdPlanNo);
+
+            // 3. 일일 계획들이 있으면 함께 저장
+            if (request.getDailyPlans() != null && !request.getDailyPlans().isEmpty()) {
+                log.debug("일일 계획 {} 개 저장 중...", request.getDailyPlans().size());
+
+                // 각 일일 계획에 생성된 planNo 설정
+                for (MyDailyPlanDto dailyPlan : request.getDailyPlans()) {
+                    dailyPlan.setMyPlanNo(createdPlanNo);
+                }
+
+                // 일일 계획들 일괄 저장
+                int dailyResult = myPlanMapper.insertMyDailyPlans(request.getDailyPlans());
+                log.debug("일일 계획 저장 완료 -----> 저장된 개수: {}", dailyResult);
+            }
+
+            return createdPlanNo;
+
+        } catch (Exception e) {
+            log.error("여행 계획 생성 중 오류 발생", e);
+            throw new RuntimeException("여행 계획 생성 실패: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -54,25 +80,46 @@ public class MyPlanServiceImpl implements MyPlanService {
             throw new RuntimeException("여행 계획을 수정할 권한이 없습니다.");
         }
 
-        // 업데이트할 데이터 생성
-        MyPlanDto updateDto = MyPlanDto.builder()
-                .no(planNo)
-                .userNo(userNo)
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .totalMember(request.getTotalMember())
-                .build();
+        try {
+            // 1. 기본 여행 계획 수정
+            MyPlanDto updateDto = MyPlanDto.builder()
+                    .no(planNo)
+                    .userNo(userNo)
+                    .title(request.getTitle())
+                    .description(request.getDescription())
+                    .startTime(request.getStartTime())
+                    .endTime(request.getEndTime())
+                    .totalMember(request.getTotalMember())
+                    .build();
 
-        // 여행 계획 수정
-        int updatedRows = myPlanMapper.updateMyPlan(updateDto);
-        if (updatedRows == 0) {
-            throw new RuntimeException("여행 계획을 찾을 수 없습니다.");
+            int planResult = myPlanMapper.updateMyPlan(updateDto);
+            if (planResult == 0) {
+                throw new RuntimeException("여행 계획을 찾을 수 없습니다.");
+            }
+
+            // 2. 일일 계획 수정 (기존 삭제 후 새로 생성)
+            if (request.getDailyPlans() != null && !request.getDailyPlans().isEmpty()) {
+                log.debug("기존 일일 계획 삭제 중...");
+                myPlanMapper.deleteMyDailyPlansByPlanNo(planNo);
+
+                log.debug("새로운 일일 계획 {} 개 저장 중...", request.getDailyPlans().size());
+
+                // 각 일일 계획에 planNo 설정
+                for (MyDailyPlanDto dailyPlan : request.getDailyPlans()) {
+                    dailyPlan.setMyPlanNo(planNo);
+                }
+
+                // 새로운 일일 계획들 저장
+                myPlanMapper.insertMyDailyPlans(request.getDailyPlans());
+            }
+
+            log.debug("여행 계획 수정 완료 -----> planNo: {}", planNo);
+            return planNo;
+
+        } catch (Exception e) {
+            log.error("여행 계획 수정 중 오류 발생", e);
+            throw new RuntimeException("여행 계획 수정 실패: " + e.getMessage(), e);
         }
-
-        log.debug("여행 계획 수정 완료 -----> planNo: {}", planNo);
-        return planNo;
     }
 
     @Override
@@ -84,13 +131,24 @@ public class MyPlanServiceImpl implements MyPlanService {
             throw new RuntimeException("여행 계획을 삭제할 권한이 없습니다.");
         }
 
-        // 여행 계획 삭제
-        int deletedRows = myPlanMapper.deleteMyPlan(planNo, userNo);
-        if (deletedRows == 0) {
-            throw new RuntimeException("여행 계획을 찾을 수 없습니다.");
-        }
+        try {
+            // 1. 관련된 일일 계획들 먼저 삭제
+            log.debug("관련 일일 계획들 삭제 중...");
+            myPlanMapper.deleteMyDailyPlansByPlanNo(planNo);
 
-        log.debug("여행 계획 삭제 완료 -----> planNo: {}", planNo);
+            // 2. 여행 계획 삭제
+            log.debug("여행 계획 삭제 중...");
+            int result = myPlanMapper.deleteMyPlan(planNo, userNo);
+            if (result == 0) {
+                throw new RuntimeException("여행 계획을 찾을 수 없습니다.");
+            }
+
+            log.debug("여행 계획 삭제 완료 -----> planNo: {}", planNo);
+
+        } catch (Exception e) {
+            log.error("여행 계획 삭제 중 오류 발생", e);
+            throw new RuntimeException("여행 계획 삭제 실패: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -98,9 +156,7 @@ public class MyPlanServiceImpl implements MyPlanService {
     public List<MyPlanDto> getMyPlansByUser(Long userNo, int page, int size) {
         log.debug("MyPlanServiceImpl.getMyPlansByUser -----> userNo: {}, page: {}, size: {}", userNo, page, size);
 
-        // 페이징 처리를 위한 offset 계산
         int offset = page * size;
-
         List<MyPlanDto> myPlans = myPlanMapper.selectMyPlansByUser(userNo, offset, size);
 
         log.debug("조회된 여행 계획 수: {}", myPlans.size());
@@ -119,25 +175,15 @@ public class MyPlanServiceImpl implements MyPlanService {
             throw new RuntimeException("여행 계획을 찾을 수 없습니다. planNo: " + planNo);
         }
 
-        // 2. 권한 확인: 본인의 계획인지 체크
+        // 2. 권한 확인
         if (!myPlan.getUserNo().equals(userNo)) {
             throw new RuntimeException("해당 여행 계획에 접근할 권한이 없습니다. planNo: " + planNo);
         }
 
-        // 3. 일일 계획 목록 조회 (visited_date, start_time 순으로 정렬)
+        // 3. 일일 계획 목록 조회
         List<MyDailyPlanDto> dailyPlans = myPlanMapper.selectDailyPlansByPlanNo(planNo);
 
         log.debug("조회된 일일 계획 수: {}", dailyPlans.size());
-
-        // 4. 관광지 정보가 포함된 상세 정보 로그
-        dailyPlans.forEach(plan -> {
-            log.debug("일일계획: {} - {} ~ {} (관광지: {})",
-                    plan.getVisitedDate(),
-                    plan.getStartTime(),
-                    plan.getEndTime(),
-                    plan.getAttractionTitle());
-        });
-
         return dailyPlans;
     }
 

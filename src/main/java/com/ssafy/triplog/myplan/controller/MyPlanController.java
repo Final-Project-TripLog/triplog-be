@@ -37,6 +37,108 @@ public class MyPlanController {
         return ResponseEntity.ok(planNo);
     }
 
+
+    // {
+    //  "title": "제주도 3박 4일 가족 여행",
+    //  "description": "온 가족이 함께하는 제주도 힐링 여행",
+    //  "startTime": "2025-06-15T08:00:00",
+    //  "endTime": "2025-06-18T20:00:00",
+    //  "totalMember": 4,
+    //  "dailyPlans": [
+    //    {
+    //      "visitedDate": "2025-06-15",
+    //      "startTime": "09:00:00",
+    //      "endTime": "12:00:00",
+    //      "moveTime": 30,
+    //      "attractionTitle": "제주공항",
+    //      "attractionThumbnail": "https://example.com/airport.jpg",
+    //      "attractionLatitude": 33.5067,
+    //      "attractionLongitude": 126.4929,
+    //      "attractionRating": 4.0,
+    //      "memo": "제주도 도착, 렌터카 픽업",
+    //      "attractionNo": 1
+    //    },
+    //    {
+    //      "visitedDate": "2025-06-15",
+    //      "startTime": "14:00:00",
+    //      "endTime": "17:00:00",
+    //      "moveTime": 45,
+    //      "attractionTitle": "성산일출봉",
+    //      "attractionThumbnail": "https://example.com/seongsan.jpg",
+    //      "attractionLatitude": 33.4569,
+    //      "attractionLongitude": 126.9419,
+    //      "attractionRating": 4.5,
+    //      "memo": "세계자연유산, 일출 명소",
+    //      "attractionNo": 2
+    //    },
+    //    {
+    //      "visitedDate": "2025-06-16",
+    //      "startTime": "09:30:00",
+    //      "endTime": "12:30:00",
+    //      "moveTime": 60,
+    //      "attractionTitle": "한라산 국립공원",
+    //      "attractionThumbnail": "https://example.com/hallasan.jpg",
+    //      "attractionLatitude": 33.3624,
+    //      "attractionLongitude": 126.5346,
+    //      "attractionRating": 4.7,
+    //      "memo": "등산, 어리목 코스 추천",
+    //      "attractionNo": 3
+    //    },
+    //    {
+    //      "visitedDate": "2025-06-16",
+    //      "startTime": "15:00:00",
+    //      "endTime": "18:00:00",
+    //      "moveTime": 30,
+    //      "attractionTitle": "쇠소깍",
+    //      "attractionThumbnail": "https://example.com/soesokkak.jpg",
+    //      "attractionLatitude": 33.2423,
+    //      "attractionLongitude": 126.4234,
+    //      "attractionRating": 4.3,
+    //      "memo": "카약 체험, 맑은 물",
+    //      "attractionNo": 4
+    //    },
+    //    {
+    //      "visitedDate": "2025-06-17",
+    //      "startTime": "10:00:00",
+    //      "endTime": "13:00:00",
+    //      "moveTime": 40,
+    //      "attractionTitle": "우도",
+    //      "attractionThumbnail": "https://example.com/udo.jpg",
+    //      "attractionLatitude": 33.5012,
+    //      "attractionLongitude": 126.9567,
+    //      "attractionRating": 4.4,
+    //      "memo": "배로 이동, 자전거 대여",
+    //      "attractionNo": 5
+    //    },
+    //    {
+    //      "visitedDate": "2025-06-17",
+    //      "startTime": "16:00:00",
+    //      "endTime": "19:00:00",
+    //      "moveTime": 50,
+    //      "attractionTitle": "정방폭포",
+    //      "attractionThumbnail": "https://example.com/jeongbang.jpg",
+    //      "attractionLatitude": 33.2345,
+    //      "attractionLongitude": 126.5678,
+    //      "attractionRating": 4.2,
+    //      "memo": "바다로 떨어지는 폭포",
+    //      "attractionNo": 6
+    //    },
+    //    {
+    //      "visitedDate": "2025-06-18",
+    //      "startTime": "10:00:00",
+    //      "endTime": "12:00:00",
+    //      "moveTime": 20,
+    //      "attractionTitle": "동문시장",
+    //      "attractionThumbnail": "https://example.com/dongmun.jpg",
+    //      "attractionLatitude": 33.5123,
+    //      "attractionLongitude": 126.5234,
+    //      "attractionRating": 4.1,
+    //      "memo": "기념품 쇼핑, 흑돼지 고기",
+    //      "attractionNo": 7
+    //    }
+    //  ]
+    //}
+
     @Operation(summary = "여행 계획 수정", description = "기존의 개인 여행 계획 정보를 수정합니다.")
     @PutMapping("/{planNo}")
     public ResponseEntity<Long> updateMyPlan(@PathVariable Long planNo,
