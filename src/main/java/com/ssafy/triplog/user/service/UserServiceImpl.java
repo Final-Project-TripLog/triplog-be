@@ -282,13 +282,19 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("자기 자신을 팔로우할 수 없습니다.");
         }
 
+        // ⭐ 이미 팔로우 중인지 확인
+        if (userMapper.existsFollow(followingId, followerId) > 0) {
+            throw new RuntimeException("이미 팔로우 중인 사용자입니다.");
+        }
+
         try {
             userMapper.addFollow(followingId, followerId);
             userMapper.increaseFollowCount(followerId);
             userMapper.increaseFollowerCount(followingId);
             return true;
         } catch (Exception e) {
-            return false;
+//            log.error("팔로우 처리 중 오류 발생", e);
+            throw new RuntimeException("팔로우 처리 중 오류가 발생했습니다.");
         }
     }
 
@@ -304,13 +310,19 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("사용자를 찾을 수 없습니다.");
         }
 
+        // ⭐ 팔로우 관계가 존재하는지 확인
+        if (userMapper.existsFollow(followingId, followerId) == 0) {
+            throw new RuntimeException("팔로우 관계가 존재하지 않습니다.");
+        }
+
         try {
             userMapper.removeFollow(followingId, followerId);
             userMapper.decreaseFollowCount(followerId);
             userMapper.decreaseFollowerCount(followingId);
             return true;
         } catch (Exception e) {
-            return false;
+//            log.error("언팔로우 처리 중 오류 발생", e);
+            throw new RuntimeException("언팔로우 처리 중 오류가 발생했습니다.");
         }
     }
 
