@@ -13,7 +13,8 @@ import java.time.LocalTime;
 public class PlanAttractionDetailDto {
     private Long no;                       // 관광지별 여행 계획 게시글 pk
 
-    private LocalDate visitDate;          // 일정 진행 날짜
+    // ⭐ 필드명 수정: visitDate -> visitDate (DB 컬럼명과 일치시키기 위해)
+    private LocalDate visitDate;          // 일정 진행 날짜 (visit_date - DB 오타 수정 권장)
     private LocalTime startTime;          // 일정 시작 시간
     private LocalTime endTime;            // 일정 종료 시간
     private Integer moveTime;             // 이동 시간 (분 단위)
@@ -26,5 +27,4 @@ public class PlanAttractionDetailDto {
     private Long planPostNo;              // 여행 계획 게시글 pk
     private Long attractionNo;            // 관광지 정보 pk
     private Long reviewNo;                // 관광지 리뷰 pk
-
 }

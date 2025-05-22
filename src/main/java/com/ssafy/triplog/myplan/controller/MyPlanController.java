@@ -25,7 +25,7 @@ public class MyPlanController {
     private final MyPlanService myPlanService;
     private final AuthenticationUtil authenticationUtil;
 
-    @Operation(summary = "여행 계획 등록", description = "사용자가 새로운 개인 여행 계획을 등록합니다.")
+    @Operation(summary = "여행 계획 등록 - ok", description = "사용자가 새로운 개인 여행 계획을 등록합니다.")
     @PostMapping
     public ResponseEntity<Long> createMyPlan(@RequestBody MyPlanRequest request) {
         // JWT에서 현재 사용자 번호 추출
@@ -139,7 +139,7 @@ public class MyPlanController {
     //  ]
     //}
 
-    @Operation(summary = "여행 계획 수정", description = "기존의 개인 여행 계획 정보를 수정합니다.")
+    @Operation(summary = "여행 계획 수정 - ok", description = "기존의 개인 여행 계획 정보를 수정합니다.")
     @PutMapping("/{planNo}")
     public ResponseEntity<Long> updateMyPlan(@PathVariable Long planNo,
                                              @RequestBody MyPlanRequest request) {
@@ -152,7 +152,7 @@ public class MyPlanController {
         return ResponseEntity.ok(updatedPlanNo);
     }
 
-    @Operation(summary = "여행 계획 삭제", description = "사용자의 특정 여행 계획을 삭제합니다.")
+    @Operation(summary = "여행 계획 삭제 - ok", description = "사용자의 특정 여행 계획을 삭제합니다.")
     @DeleteMapping("/{planNo}")
     public ResponseEntity<String> deleteMyPlan(@PathVariable Long planNo) {
         // JWT에서 현재 사용자 번호 추출
@@ -164,7 +164,7 @@ public class MyPlanController {
         return ResponseEntity.ok("여행 계획이 삭제되었습니다.");
     }
 
-    @Operation(summary = "사용자별 여행 계획 목록 조회", description = "현재 로그인한 사용자의 개인 여행 계획 목록을 조회합니다.")
+    @Operation(summary = "사용자별 여행 계획 목록 조회 - ok", description = "현재 로그인한 사용자의 개인 여행 계획 목록을 조회합니다.")
     @GetMapping("/user")
     public ResponseEntity<List<MyPlanDto>> getMyPlansByUser(@RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "10") int size) {
@@ -177,7 +177,7 @@ public class MyPlanController {
         return ResponseEntity.ok(myPlans);
     }
 
-    @Operation(summary = "여행 계획 상세 조회", description = "선택한 개인 여행 계획의 상세 정보를 조회합니다.")
+    @Operation(summary = "여행 계획 상세 조회 - ok", description = "선택한 개인 여행 계획의 상세 정보를 조회합니다.")
     @GetMapping("/{planNo}")
     public ResponseEntity<List<MyDailyPlanDto>> getMyPlanDetail(@PathVariable Long planNo) {
         // JWT에서 현재 사용자 번호 추출

@@ -26,7 +26,7 @@ public class AttractionReviewController {
 
     private final ReviewService reviewService;
 
-    @Operation(summary = "리뷰 등록", description = "관광지에 대한 리뷰를 등록합니다. 새로 등록된 리뷰의 관광지 no 리턴 -> 다시 관광지 리뷰를 불러오기 위한 관광지 no")
+    @Operation(summary = "리뷰 등록 - ok", description = "관광지에 대한 리뷰를 등록합니다. 새로 등록된 리뷰의 관광지 no 리턴 -> 다시 관광지 리뷰를 불러오기 위한 관광지 no")
     @PostMapping
     public ResponseEntity<Long> createReview(@RequestBody AttractionReviewDto request) {
         log.debug("createReview -----> request : {}", request);
@@ -51,7 +51,7 @@ public class AttractionReviewController {
         }
     }
 
-    @Operation(summary = "리뷰 수정", description = "기존 리뷰의 내용을 수정합니다. 수정 된 리뷰의 관광지 no 리턴 -> 다시 관광지 리뷰를 불러오기 위한 관광지 no")
+    @Operation(summary = "리뷰 수정 - ok", description = "기존 리뷰의 내용을 수정합니다. 수정 된 리뷰의 관광지 no 리턴 -> 다시 관광지 리뷰를 불러오기 위한 관광지 no")
     @PutMapping("/{reviewNo}")
     public ResponseEntity<Long> updateReview(
             @PathVariable Long reviewNo,
@@ -91,7 +91,7 @@ public class AttractionReviewController {
         }
     }
 
-    @Operation(summary = "리뷰 삭제", description = "관광지에 작성한 리뷰를 삭제합니다.")
+    @Operation(summary = "리뷰 삭제 - ok", description = "관광지에 작성한 리뷰를 삭제합니다.")
     @DeleteMapping("/{reviewNo}")
     public ResponseEntity<String> deleteReview(@PathVariable Long reviewNo) {
         log.debug("deleteReview -----> reviewNo : {}", reviewNo);
@@ -127,7 +127,7 @@ public class AttractionReviewController {
         }
     }
 
-    @Operation(summary = "관광지별 리뷰 목록 조회", description = "특정 관광지에 대한 리뷰 목록을 조회합니다.")
+    @Operation(summary = "관광지별 리뷰 목록 조회 - ok", description = "특정 관광지에 대한 리뷰 목록을 조회합니다.")
     @GetMapping("/attraction/{attractionNo}")
     public ResponseEntity<List<AttractionReviewDto>> getReviewsByAttraction(
             @PathVariable Long attractionNo,
@@ -154,7 +154,7 @@ public class AttractionReviewController {
         }
     }
 
-    @Operation(summary = "사용자별 리뷰 목록 조회", description = "특정 사용자가 작성한 리뷰 목록을 조회합니다.")
+    @Operation(summary = "사용자별 리뷰 목록 조회 - ok", description = "특정 사용자가 작성한 리뷰 목록을 조회합니다.")
     @GetMapping("/user/{userNo}")
     public ResponseEntity<List<AttractionReviewDto>> getReviewsByUser(
             @PathVariable Long userNo,

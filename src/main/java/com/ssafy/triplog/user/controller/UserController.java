@@ -22,14 +22,14 @@ public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "회원가입", description = "사용자 이메일과 비밀번호 등 기본 정보를 이용하여 회원가입을 처리합니다.")
+    @Operation(summary = "회원가입 - ok", description = "사용자 이메일과 비밀번호 등 기본 정보를 이용하여 회원가입을 처리합니다. - ok")
     @PostMapping("/signup")
     public ResponseEntity<UserResponse> signup(@Valid @RequestBody UserServiceDto request) {
         log.debug("signup -----> request : {} ", request);
         UserResponse response = userService.registerUser(request);
         return ResponseEntity.ok(response);
     }
-    @Operation(summary = "이메일 중복 확인", description = "입력된 이메일의 사용 가능 여부를 확인합니다.")
+    @Operation(summary = "이메일 중복 확인 - ok", description = "입력된 이메일의 사용 가능 여부를 확인합니다. - ok")
     @GetMapping("/check-email")
     public ResponseEntity<Boolean> checkEmailDuplicate(@RequestParam String email) {
         log.debug("checkEmailDuplicate -----> email: {}", email);
@@ -37,14 +37,14 @@ public class UserController {
         return ResponseEntity.ok(isDuplicate);
     }
 
-    @Operation(summary = "닉네임 중복 확인", description = "입력된 닉네임의 사용 가능 여부를 확인합니다.")
+    @Operation(summary = "닉네임 중복 확인 - ok", description = "입력된 닉네임의 사용 가능 여부를 확인합니다. - ok")
     @GetMapping("/check-nickname")
     public ResponseEntity<Boolean> checkNicknameDuplicate(@RequestParam String nickname) {
         log.debug("checkNicknameDuplicate -----> nickname: {}", nickname);
         boolean isDuplicate = userService.checkNicknameDuplicate(nickname);
         return ResponseEntity.ok(isDuplicate);
     }
-    @Operation(summary = "회원탈퇴", description = "인증된 사용자가 자신의 계정을 탈퇴합니다.")
+    @Operation(summary = "회원탈퇴 - ok", description = "인증된 사용자가 자신의 계정을 탈퇴합니다. - ok ")
     @DeleteMapping("/{userNo}")
     public ResponseEntity<String> withdrawUser(@PathVariable Long userNo, @RequestBody String password) {
         log.debug("withdrawUser -----> userNo : {}", userNo);
@@ -64,7 +64,7 @@ public class UserController {
     }
 
     // 로그인 API는 LoginFilter에서 처리되므로 컨트롤러에서는 기본 응답만 제공
-    @Operation(summary = "로컬 로그인", description = "로컬 디비를 바탕으로 로그인 처리를 합니다.")
+    @Operation(summary = "로컬 로그인 - ok", description = "로컬 디비를 바탕으로 로그인 처리를 합니다. - ok")
     @PostMapping("/login")
     public ResponseEntity<UserResponse> login(@Valid @RequestBody UserLoginRequest request) {
         log.debug("login -----> request : {} ", request);
@@ -83,7 +83,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "회원정보 수정", description = "로그인한 사용자가 자신의 회원 정보를 수정합니다.")
+    @Operation(summary = "회원정보 수정 - ok 조금더 확인필요", description = "로그인한 사용자가 자신의 회원 정보를 수정합니다. - ok 어느정도는 되는데 몇개안됨 수정필요")
     @PutMapping("/{userNo}")
     public ResponseEntity<UserResponse> updateUser(
             @PathVariable Long userNo,
@@ -115,7 +115,7 @@ public class UserController {
         return ResponseEntity.ok("임시 비밀번호가 발급되었습니다: " + temporaryPassword);
     }
 
-    @Operation(summary = "회원 정보 조회", description = "지정한 회원 번호에 해당하는 회원의 상세 정보를 조회합니다.")
+    @Operation(summary = "회원 정보 조회", description = "지정한 회원 번호에 해당하는 회원의 상세 정보를 조회합니다. - ok 근데 자기꺼만 됨 권한 풀어줘야함")
     @GetMapping("/{userNo}")
     public ResponseEntity<UserServiceDto> getUserById(@PathVariable Long userNo) {
         log.debug("getUserById -----> userNo : {} ", userNo);

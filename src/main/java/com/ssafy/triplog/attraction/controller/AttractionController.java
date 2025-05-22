@@ -25,7 +25,7 @@ public class AttractionController {
     private final ReviewService reviewService;
     private final BookmarkService bookmarkService;
 
-    @Operation(summary = "관광지 목록 조회", description = "조건에 맞는 관광지 목록을 조회합니다.")
+    @Operation(summary = "관광지 목록 조회 - ok", description = "조건에 맞는 관광지 목록을 조회합니다.")
     @GetMapping("/list")
     public ResponseEntity<List<AttractionResponseDto>> getAttractions(
             @RequestParam(required = false) List<String> types,
@@ -43,7 +43,7 @@ public class AttractionController {
         return ResponseEntity.ok(attractions);
     }
 
-    @Operation(summary = "관광지 상세 조회", description = "특정 관광지의 상세 정보를 조회합니다.")
+    @Operation(summary = "관광지 상세 조회 - ok", description = "특정 관광지의 상세 정보를 조회합니다.")
     @GetMapping("/{attractionNo}")
     public ResponseEntity<AttractionResponseDto> getAttractionDetail(@PathVariable Long attractionNo) {
         log.debug("getAttractionDetail -----> attractionNo: {}", attractionNo);
@@ -52,7 +52,7 @@ public class AttractionController {
         return ResponseEntity.ok(attraction);
     }
 
-    @Operation(summary = "관광지 이미지 조회", description = "관광지와 관련된 이미지를 조회합니다.")
+    @Operation(summary = "관광지 이미지 조회 - ok", description = "관광지와 관련된 이미지를 조회합니다.")
     @GetMapping("/{attractionNo}/images")
     public ResponseEntity<List<AttractionImageResponseDto>> getAttractionImages(@PathVariable Long attractionNo) {
         log.debug("getAttractionImages -----> attractionNo: {}", attractionNo);
@@ -61,7 +61,7 @@ public class AttractionController {
         return ResponseEntity.ok(images);
     }
 
-    @Operation(summary = "관광지 리뷰 조회", description = "관광지에 작성된 리뷰를 조회합니다.")
+    @Operation(summary = "관광지 리뷰 조회 - ok", description = "관광지에 작성된 리뷰를 조회합니다.")
     @GetMapping("/{attractionNo}/reviews")
     public ResponseEntity<List<AttractionReviewResponseDto>> getAttractionReviews(
             @PathVariable Long attractionNo,
@@ -81,7 +81,7 @@ public class AttractionController {
         return ResponseEntity.ok(reviews);
     }
 
-    @Operation(summary = "관광지 상세 정보와 이미지 함께 조회", description = "관광지 상세 정보와 이미지를 함께 조회합니다.")
+    @Operation(summary = "관광지 상세 정보와 이미지 함께 조회 - ok", description = "관광지 상세 정보와 이미지를 함께 조회합니다.")
     @GetMapping("/{attractionNo}/detail-with-images")
     public ResponseEntity<AttractionDetailWithImagesResponseDto> getAttractionDetailWithImages(
             @PathVariable Long attractionNo) {
@@ -98,7 +98,7 @@ public class AttractionController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "관광지 포함 여행 계획 조회", description = "특정 관광지를 포함하는 여행 계획 목록을 조회합니다.")
+    @Operation(summary = "관광지 포함 여행 계획 조회 - ok", description = "특정 관광지를 포함하는 여행 계획 목록을 조회합니다.")
     @GetMapping("/{attractionNo}/plans")
     public ResponseEntity<List<PlanPostResponse>> getPlansContainingAttraction(
             @PathVariable Long attractionNo,

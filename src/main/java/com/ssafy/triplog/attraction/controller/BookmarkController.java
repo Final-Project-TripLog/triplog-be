@@ -27,7 +27,7 @@ public class BookmarkController {
     private final BookmarkService bookmarkService;
     private final AttractionService attractionService;
 
-    @Operation(summary = "북마크 타입 생성", description = "사용자가 새로운 북마크 폴더(타입)를 생성합니다.")
+    @Operation(summary = "북마크 타입 생성 - ok", description = "사용자가 새로운 북마크 폴더(타입)를 생성합니다.")
     @PostMapping("/types")
     public ResponseEntity<BookmarkTypeResponseDto> createBookmarkType(@RequestBody BookmarkTypeCreateRequest request) {
         // name 유효성 검사
@@ -54,7 +54,7 @@ public class BookmarkController {
         return ResponseEntity.ok(createdBookmarkType);
     }
 
-    @Operation(summary = "북마크 타입 수정", description = "북마크 폴더의 이름을 수정합니다.")
+    @Operation(summary = "북마크 타입 수정 - ok", description = "북마크 폴더의 이름을 수정합니다.")
     @PutMapping("/types/{typeNo}")
     public ResponseEntity<BookmarkTypeResponseDto> updateBookmarkType(
             @PathVariable Long typeNo,
@@ -91,7 +91,7 @@ public class BookmarkController {
         return ResponseEntity.ok(updatedType);
     }
 
-    @Operation(summary = "북마크 타입 삭제", description = "사용자의 북마크 타입(폴더)를 삭제합니다.")
+    @Operation(summary = "북마크 타입 삭제 - ok", description = "사용자의 북마크 타입(폴더)를 삭제합니다.")
     @DeleteMapping("/types/{typeNo}")
     public ResponseEntity<String> deleteBookmarkType(@PathVariable Long typeNo) {
         // JWT 토큰에서 현재 로그인한 사용자 ID 추출
@@ -119,7 +119,7 @@ public class BookmarkController {
         }
     }
 
-    @Operation(summary = "북마크 타입 목록 조회", description = "사용자의 북마크 타입 리스트를 조회합니다.")
+    @Operation(summary = "북마크 타입 목록 조회 - ok", description = "사용자의 북마크 타입 리스트를 조회합니다.")
     @GetMapping("/types/{userNo}")
     public ResponseEntity<List<BookmarkTypeResponseDto>> getBookmarkTypeList(
             @PathVariable Long userNo,
@@ -134,7 +134,7 @@ public class BookmarkController {
         return ResponseEntity.ok(bookmarkTypes);
     }
 
-    @Operation(summary = "북마크 타입 내 관광지 조회", description = "선택한 북마크 타입에 포함된 관광지 리스트를 조회합니다.")
+    @Operation(summary = "북마크 타입 내 관광지 조회 - ok", description = "선택한 북마크 타입에 포함된 관광지 리스트를 조회합니다.")
     @GetMapping("/types/{typeNo}/attractions")
     public ResponseEntity<List<AttractionResponseDto>> getAttractionsInBookmarkType(
             @PathVariable Long typeNo,
@@ -158,7 +158,7 @@ public class BookmarkController {
     }
 
     // ----- 개별 북마크 항목 관련 -----
-    @Operation(summary = "북마크 생성", description = "특정 관광지를 지정된 북마크 타입에 추가합니다. -> 리턴 값 : 북마크 type no")
+    @Operation(summary = "북마크 생성 - ok", description = "특정 관광지를 지정된 북마크 타입에 추가합니다. -> 리턴 값 : 북마크 type no")
     @PostMapping
     public ResponseEntity<Long> createBookmark(@RequestBody BookmarkDto request) {
         // 요청에서 북마크 타입 번호와 관광지 번호 추출
@@ -194,7 +194,7 @@ public class BookmarkController {
         }
     }
 
-    @Operation(summary = "북마크 삭제", description = "특정 관광지를 북마크에서 제거합니다. -> 리턴 값 : 북마크 type no")
+    @Operation(summary = "북마크 삭제 - ok", description = "특정 관광지를 북마크에서 제거합니다. -> 리턴 값 : 북마크 type no")
     @DeleteMapping
     public ResponseEntity<Long> deleteBookmark(
             @RequestParam Long typeNo,
