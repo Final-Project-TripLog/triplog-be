@@ -11,10 +11,14 @@ package com.ssafy.triplog.myplan.controller;
 import com.ssafy.triplog.myplan.dto.MyDailyPlanDto;
 import com.ssafy.triplog.myplan.dto.MyPlanDto;
 import com.ssafy.triplog.myplan.dto.MyPlanRequest;
+import com.ssafy.triplog.myplan.service.MyPlanService;
+import com.ssafy.triplog.security.jwt.JWTUtil;
+import com.ssafy.triplog.security.util.AuthenticationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +28,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class MyPlanController {
+
+    private final JWTUtil jwtUtil;
+    private final AuthenticationUtil authenticationUtil;
+    private final MyPlanService myPlanService;
 
     @Operation(summary = "여행 계획 등록", description = "사용자가 새로운 개인 여행 계획을 등록합니다. --> 리턴값 : myPlanDto no")
     @PostMapping
@@ -47,13 +55,18 @@ public class MyPlanController {
         return ResponseEntity.ok("여행 계획이 삭제되었습니다. ");
     }
 
-    @Operation(summary = "사용자별 여행 계획 목록 조회", description = "특정 사용자가 등록한 개인 여행 계획 목록을 조회합니다. -> userNo는 토큰 들어오면 삭제 예정")
-    @GetMapping("/user/{userNo}")
-    public ResponseEntity<List<MyPlanDto>> getMyPlansByUser(@PathVariable Long userNo,
-                                                            @RequestParam(defaultValue = "0") int page,
+    @Operation(summary = "사용자별 여행 계획 목록 조회", description = "현재 로그인한 사용자의 개인 여행 계획 목록을 조회합니다.")
+    @GetMapping("/user")
+    public ResponseEntity<List<MyPlanDto>> getMyPlansByUser(@RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "10") int size) {
+        // JWT 토큰에서 현재 로그인한 사용자 ID 추출
+        Long userNo = authenticationUtil.getCurrentUserNo();
+
         log.debug("getMyPlansByUser -----> userNo : {}, page : {}, size : {}", userNo, page, size);
-        return ResponseEntity.ok(List.of(new MyPlanDto(), new MyPlanDto()));
+
+        List<MyPlanDto> myPlans = myPlanService.getMyPlansByUser(userNo, page, size);
+
+        return ResponseEntity.ok(myPlans);
     }
 
     @Operation(summary = "여행 계획 상세 조회", description = "선택한 개인 여행 계획의 상세 정보를 조회합니다.")

@@ -337,3 +337,18 @@ SET FOREIGN_KEY_CHECKS = 1;
     -- plan_post 테이블에 totalMember 칼럼 추가
 ALTER TABLE `plan_post`
     ADD COLUMN `totalMember` BIGINT NULL DEFAULT 0;
+
+-- 1. my_plan 테이블 컬럼명 변경
+ALTER TABLE `my_plan`
+    CHANGE COLUMN `startDay` `start_day` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+    CHANGE COLUMN `endDay` `end_day` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+    CHANGE COLUMN `totalMember` `total_member` BIGINT NULL DEFAULT 0;
+
+-- 2. plan_post 테이블 컬럼명도 변경
+ALTER TABLE `plan_post`
+    CHANGE COLUMN `totalMember` `total_member` BIGINT NULL DEFAULT 0;
+
+-- 1. plan_post 테이블 camelCase 컬럼들을 snake_case로 변경
+ALTER TABLE `plan_post`
+    CHANGE COLUMN `startDay` `start_day` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+    CHANGE COLUMN `endDay` `end_day` DATETIME NULL DEFAULT CURRENT_TIMESTAMP;
