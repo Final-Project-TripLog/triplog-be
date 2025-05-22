@@ -10,6 +10,7 @@ import java.time.LocalTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class MyDailyPlanDto {
     private Long no;                        // 관광지별 개인 여행 계획 pk
     private LocalDate visitedDate;         // 일정 진행 날짜

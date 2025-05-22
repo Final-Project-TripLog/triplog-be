@@ -11,6 +11,7 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class MyPlanRequest {
     // MyPlanDto
     private Long no;               // 개인 여행 계획 pk

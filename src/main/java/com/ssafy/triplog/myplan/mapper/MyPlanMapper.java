@@ -1,4 +1,4 @@
-// src/main/java/com/ssafy/triplog/myplan/mapper/MyPlanMapper.xml.java
+// src/main/java/com/ssafy/triplog/myplan/mapper/MyPlanMapper.java
 package com.ssafy.triplog.myplan.mapper;
 
 import com.ssafy.triplog.myplan.dto.MyDailyPlanDto;
@@ -29,7 +29,7 @@ public interface MyPlanMapper {
     int updateMyPlan(MyPlanDto myPlanDto);
 
     /**
-     * 여행 계획 삭제 (논리적 삭제)
+     * 여행 계획 삭제
      * @param planNo 여행 계획 번호
      * @param userNo 사용자 번호
      * @return 삭제된 행 수
@@ -48,7 +48,7 @@ public interface MyPlanMapper {
                                         @Param("limit") int limit);
 
     /**
-     * 여행 계획 단건 조회
+     * 여행 계획 단건 조회 (권한 확인용)
      * @param planNo 여행 계획 번호
      * @return 여행 계획 정보
      */
@@ -57,7 +57,7 @@ public interface MyPlanMapper {
     /**
      * 여행 계획의 일일 계획 목록 조회
      * @param planNo 여행 계획 번호
-     * @return 일일 계획 목록
+     * @return 일일 계획 목록 (visited_date, start_time 순으로 정렬)
      */
     List<MyDailyPlanDto> selectDailyPlansByPlanNo(@Param("planNo") Long planNo);
 

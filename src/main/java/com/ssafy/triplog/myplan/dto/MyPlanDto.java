@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class MyPlanDto {
     private Long no;               // 개인 여행 계획 pk
     private String title;          // 제목
