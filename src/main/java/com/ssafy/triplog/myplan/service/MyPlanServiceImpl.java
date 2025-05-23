@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -156,6 +157,7 @@ public class MyPlanServiceImpl implements MyPlanService {
     public List<MyPlanDto> getMyPlansByUser(Long userNo, int page, int size) {
         log.debug("MyPlanServiceImpl.getMyPlansByUser -----> userNo: {}, page: {}, size: {}", userNo, page, size);
 
+//        log.debug(startDate.toString(), endDate.toString());
         int offset = page * size;
         List<MyPlanDto> myPlans = myPlanMapper.selectMyPlansByUser(userNo, offset, size);
 

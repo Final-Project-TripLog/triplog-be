@@ -26,7 +26,6 @@ public class AttractionController {
     private final BookmarkService bookmarkService;
 
 
-
     @Operation(summary = "관광지 카테고리 조회", description = "관광지 카테고리 보여주기.")
     @GetMapping("/category")
     public ResponseEntity<List<String>> getCategory() {
