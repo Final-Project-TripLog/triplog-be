@@ -17,7 +17,7 @@ public class AttractionReviewResponseDto {
     private LocalDateTime updateAt;
     private Long attractionNo;
     private Long userNo;
-
+    private String profileUrl;
     // 스키마에 없는 필드는 제외
     // private String profileImage; // 스키마에 없음
 }

@@ -20,4 +20,5 @@ public class AttractionReviewDto {
 
     private Long attractionNo;        // 관광지 ID
     private Long userNo;              // 작성자 ID
+    private String profileUrl;
 }

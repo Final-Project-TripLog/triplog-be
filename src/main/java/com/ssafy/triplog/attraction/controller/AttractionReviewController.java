@@ -192,6 +192,8 @@ public class AttractionReviewController {
         responseDto.setUpdateAt(dto.getUpdateAt());
         responseDto.setAttractionNo(dto.getAttractionNo());
         responseDto.setUserNo(dto.getUserNo());
+        responseDto.setProfileUrl(dto.getProfileUrl());
+
         return responseDto;
     }
 
@@ -206,6 +208,7 @@ public class AttractionReviewController {
         dto.setUpdateAt(responseDto.getUpdateAt());
         dto.setAttractionNo(responseDto.getAttractionNo());
         dto.setUserNo(responseDto.getUserNo());
+        dto.setProfileUrl(responseDto.getProfileUrl());
         return dto;
     }
 }

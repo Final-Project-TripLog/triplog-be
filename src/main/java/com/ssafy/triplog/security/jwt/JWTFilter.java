@@ -32,7 +32,8 @@ public class JWTFilter extends OncePerRequestFilter {
             "/api-docs",
             "/api/users/check-email",
             "/api/users/check-nickname",
-            "/api/attraction"
+            "/api/attraction",
+            "/api/review"
     );
 
     public JWTFilter(JWTUtil jwtUtil) {
