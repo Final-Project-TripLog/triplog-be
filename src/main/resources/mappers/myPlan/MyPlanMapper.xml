@@ -30,6 +30,7 @@
         <result property="attractionRating" column="attraction_rating"/>
         <result property="attractionNo" column="attraction_no"/>
         <result property="myPlanNo" column="my_plan_no"/>
+        <result property="reviewCount" column="review_count"/>
     </resultMap>
 
     <!-- ✅ 여행 계획 생성 -->
@@ -182,22 +183,24 @@
     <!-- ✅ 여행 계획의 일일 계획 목록 조회 -->
     <select id="selectDailyPlansByPlanNo" resultMap="MyDailyPlanDtoResultMap">
         SELECT
-            no,
-            visited_date,
-            start_time,
-            end_time,
-            move_time,
-            attraction_title,
-            attraction_thumbnail,
-            attraction_latitude,
-            attraction_longitude,
-            attraction_rating,
-            memo,
-            attraction_no,
-            my_plan_no
-        FROM my_daily_plan
-        WHERE my_plan_no = #{planNo}
-        ORDER BY visited_date ASC, start_time ASC
+        mdp.no,
+        mdp.visited_date,
+        mdp.start_time,
+        mdp.end_time,
+        mdp.move_time,
+        mdp.attraction_title,
+        mdp.attraction_thumbnail,
+        mdp.attraction_latitude,
+        mdp.attraction_longitude,
+        mdp.attraction_rating,
+        mdp.memo,
+        mdp.attraction_no,
+        mdp.my_plan_no,
+        a.reviewCount AS review_count  <!-- ✅ attractions 테이블에서 가져온 reviewCount -->
+        FROM my_daily_plan mdp
+        LEFT JOIN attractions a ON mdp.attraction_no = a.no
+        WHERE mdp.my_plan_no = #{planNo}
+        ORDER BY mdp.visited_date ASC, mdp.start_time ASC
     </select>
 
     <!-- ✅ 사용자별 여행 계획 총 개수 조회 -->

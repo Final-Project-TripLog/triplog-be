@@ -29,4 +29,5 @@ public class MyDailyPlanDto {
     private Long attractionNo;             // 관광지 ID
     private Long myPlanNo;                 // 개인 여행 계획 ID
 
+    private Integer reviewCount;
 }
