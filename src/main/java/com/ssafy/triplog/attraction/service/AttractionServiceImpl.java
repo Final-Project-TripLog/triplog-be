@@ -20,6 +20,13 @@ public class AttractionServiceImpl implements AttractionService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<String> getAttractionCategories() {
+        log.debug("getAttractionCategories");
+        return attractionMapper.findAttractionCategories();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<AttractionResponseDto> getAttractions(List<String> types, String keyword, String sortBy, int page, int size) {
         log.debug("getAttractions: types={}, keyword={}, sortBy={}, page={}, size={}",
                 types, keyword, sortBy, page, size);

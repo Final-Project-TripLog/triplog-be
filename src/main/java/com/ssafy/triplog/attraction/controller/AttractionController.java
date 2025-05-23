@@ -25,6 +25,15 @@ public class AttractionController {
     private final ReviewService reviewService;
     private final BookmarkService bookmarkService;
 
+
+
+    @Operation(summary = "관광지 카테고리 조회", description = "관광지 카테고리 보여주기.")
+    @GetMapping("/category")
+    public ResponseEntity<List<String>> getCategory() {
+        List<String> categories = attractionService.getAttractionCategories();
+        return ResponseEntity.ok(categories);
+    }
+
     @Operation(summary = "관광지 목록 조회 - ok", description = "조건에 맞는 관광지 목록을 조회합니다.")
     @GetMapping("/list")
     public ResponseEntity<List<AttractionResponseDto>> getAttractions(

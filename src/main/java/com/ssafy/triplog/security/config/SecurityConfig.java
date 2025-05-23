@@ -75,7 +75,8 @@ public class SecurityConfig {
                         AntPathRequestMatcher.antMatcher("/**/api/users/find-email"),
                         AntPathRequestMatcher.antMatcher("/**/api/users/find-password"),
                         AntPathRequestMatcher.antMatcher("/**/api/users/check-email"),
-                        AntPathRequestMatcher.antMatcher("/**/api/users/check-nickname")
+                        AntPathRequestMatcher.antMatcher("/**/api/users/check-nickname"),
+                        AntPathRequestMatcher.antMatcher("/**/api/attraction/**")
 //                        AntPathRequestMatcher.antMatcher("/**") // 테스트를 위해 일시적으로 모든 경로 허용 (실제 운영에서는 제거 필요)
                 ).permitAll()
                 // 관리자 기능 - ADMIN 역할을 가진 사용자만 접근 가능
@@ -85,7 +86,6 @@ public class SecurityConfig {
                 // 인증된 사용자만 접근 가능한 경로들
                 .requestMatchers(
                         AntPathRequestMatcher.antMatcher("/**/api/users/{userNo}/**"),
-                        AntPathRequestMatcher.antMatcher("/**/api/attraction/**"),
                         AntPathRequestMatcher.antMatcher("/**/api/review/**"),
                         AntPathRequestMatcher.antMatcher("/**/api/bookmarks/**"),
                         AntPathRequestMatcher.antMatcher("/**/api/myplans/**"),
