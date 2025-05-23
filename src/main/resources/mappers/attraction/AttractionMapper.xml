@@ -36,7 +36,7 @@
             no, title, overview, map_level as mapLevel, latitude, longitude,
             tel, address, address_detail as addressDetail, homepage,
             api_id as apiId, thumbnail, ratingSum, reviewCount,
-            attraction_type_name as attractionTypeName
+            attraction_type_name as attractionTypeName, overview
         FROM
             attractions
         WHERE
