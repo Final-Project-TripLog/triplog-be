@@ -3,15 +3,25 @@ package com.ssafy.triplog.user.service;
 
 import com.ssafy.triplog.user.dto.*;
 import com.ssafy.triplog.user.mapper.UserMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
@@ -344,6 +354,64 @@ public class UserServiceImpl implements UserService {
 
         return processSocialLogin(provider.toUpperCase(), socialId, socialUserInfo);
     }
+
+    // UserServiceImpl.java에 추가할 메서드
+    @Override
+    public String uploadProfileImage(Long userNo, MultipartFile image, String position) throws IOException {
+        // 파일 검증
+        if (image.isEmpty()) {
+            throw new RuntimeException("파일이 비어있습니다.");
+        }
+
+        // 허용된 파일 형식 확인
+        String contentType = image.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new RuntimeException("이미지 파일만 업로드 가능합니다.");
+        }
+
+        // 파일 크기 확인 (5MB 제한)
+        if (image.getSize() > 5 * 1024 * 1024) {
+            throw new RuntimeException("파일 크기가 5MB를 초과할 수 없습니다.");
+        }
+
+        // 사용자 존재 확인
+        UserDto user = userMapper.findById(userNo);
+        if (user == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+
+        // 업로드 디렉토리 생성
+        String uploadDir = System.getProperty("user.home") + "/triplog/uploads/profiles/";
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        // 파일명 생성 (중복 방지)
+        String originalFileName = image.getOriginalFilename();
+        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        String newFileName = "profile_" + userNo + "_" + System.currentTimeMillis() + fileExtension;
+
+        // 파일 저장
+        Path filePath = Paths.get(uploadDir + newFileName);
+        Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // DB에 프로필 URL 업데이트
+        String profileUrl = "/triplog/uploads/profiles/" + newFileName;
+        UserDto updateUser = new UserDto();
+        updateUser.setNo(userNo);
+        updateUser.setProfileUrl(profileUrl);
+        updateUser.setNickname(user.getNickname()); // 기존 닉네임 유지
+        updateUser.setName(user.getName()); // 기존 이름 유지
+        updateUser.setPhone(user.getPhone()); // 기존 전화번호 유지
+        updateUser.setAddress(user.getAddress()); // 기존 주소 유지
+        updateUser.setAddressDetail(user.getAddressDetail()); // 기존 상세주소 유지
+
+        userMapper.updateUser(updateUser);
+
+        return profileUrl;
+    }
+
 
     // 소셜 로그인 처리 (내부 메서드)
     private UserResponse processSocialLogin(String socialType, String socialId, UserServiceDto socialUserInfo) {

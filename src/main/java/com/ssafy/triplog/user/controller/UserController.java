@@ -7,10 +7,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -170,4 +175,31 @@ public class UserController {
             return ResponseEntity.badRequest().body("언팔로우 처리 중 오류가 발생했습니다.");
         }
     }
+
+    // UserController.java에 추가할 메서드들
+
+    @Operation(summary = "프로필 이미지 업로드", description = "사용자의 프로필 이미지를 업로드합니다.")
+    @PostMapping("/{userNo}/profile-image")
+    public ResponseEntity<Map<String, String>> uploadProfileImage(
+            @PathVariable Long userNo,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "position", required = false) String position) {
+
+        log.debug("uploadProfileImage -----> userNo: {}, fileName: {}", userNo, image.getOriginalFilename());
+
+        try {
+            String imageUrl = userService.uploadProfileImage(userNo, image, position);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("imageUrl", imageUrl);
+            response.put("profileUrl", imageUrl);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("프로필 이미지 업로드 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "이미지 업로드 중 오류가 발생했습니다."));
+        }
+    }
+
 }

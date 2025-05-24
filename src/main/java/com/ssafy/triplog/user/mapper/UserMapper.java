@@ -41,4 +41,6 @@ public interface UserMapper {
     int existsFollow(@Param("followId") Long followId, @Param("followerId") Long followerId);
     // 소셜 로그인
     UserDto findBySocialIdAndType(@Param("socialId") String socialId, @Param("socialType") String socialType);
+
+    void updateProfileImage(Long userNo, String profileUrl);
 }

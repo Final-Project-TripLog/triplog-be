@@ -87,6 +87,10 @@ public class UserResourceOwnershipFilter extends OncePerRequestFilter {
                     // URL에서 사용자 ID 추출 (첫 번째 캡처 그룹)
                     Long resourceOwnerId = Long.parseLong(matcher.group(1));
 
+                    System.out.println("[DEBUG] 요청 URL: " + requestPath);
+                    System.out.println("[DEBUG] JWT 토큰에서 추출한 userNo: " + authenticatedUserNo);
+                    System.out.println("[DEBUG] URL에서 추출한 userNo: " + resourceOwnerId);
+
                     // 관리자 권한을 가진 경우 모든 리소스에 접근 허용 (예외 처리)
                     if (userDetails.getAuthorities().stream()
                             .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {

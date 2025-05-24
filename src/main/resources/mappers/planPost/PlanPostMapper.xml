@@ -168,6 +168,7 @@
         pp.title LIKE CONCAT('%', #{keyword}, '%')
         OR pp.description LIKE CONCAT('%', #{keyword}, '%')
         OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
+        OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')
         )
         <if test="sidoNo != null">
             AND a.address LIKE CONCAT('%', (SELECT name FROM sido WHERE no = #{sidoNo}), '%')

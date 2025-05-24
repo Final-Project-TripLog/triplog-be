@@ -80,6 +80,7 @@
             pp.created_at DESC
             LIMIT #{size} OFFSET #{offset}
     </select>
+
     <select id="findTagsByPlanPostId" resultType="com.ssafy.triplog.planpost.dto.PlanPostTagDto">
         SELECT
             no, plan_post_no as planPostNo, name
