@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.triplog.planpost.mapper.PlanCommentMapper">
+
+    <!-- 댓글 등록 -->
+    <insert id="insertComment" parameterType="com.ssafy.triplog.planpost.dto.PlanCommentDto" useGeneratedKeys="true" keyProperty="no">
+        INSERT INTO plan_comment (
+            content,
+            user_nickname,
+            created_at,
+            updated_at,
+            level,
+            path,
+            child_count,
+            plan_post_no,
+            user_no,
+            parent_no
+        ) VALUES (
+                     #{content},
+                     #{userNickname},
+                     #{createdAt},
+                     #{updatedAt},
+                     #{level},
+                     #{path},
+                     #{childCount},
+                     #{planPostNo},
+                     #{userNo},
+                     #{parentNo}
+                 )
+    </insert>
+
+    <!-- 댓글 수정 -->
+    <update id="updateComment" parameterType="com.ssafy.triplog.planpost.dto.PlanCommentDto">
+        UPDATE plan_comment
+        SET
+            content = #{content},
+            updated_at = #{updatedAt},
+            path = #{path}
+        WHERE no = #{no}
+    </update>
+
+    <!-- 댓글 삭제 -->
+    <delete id="deleteComment">
+        DELETE FROM plan_comment
+        WHERE no = #{commentNo}
+    </delete>
+
+    <!-- 댓글 단건 조회 -->
+    <select id="selectCommentById" resultType="com.ssafy.triplog.planpost.dto.PlanCommentDto">
+        SELECT
+            no,
+            content,
+            user_nickname AS userNickname,
+            created_at AS createdAt,
+            updated_at AS updatedAt,
+            level,
+            path,
+            child_count AS childCount,
+            plan_post_no AS planPostNo,
+            user_no AS userNo,
+            parent_no AS parentNo
+        FROM plan_comment
+        WHERE no = #{commentNo}
+    </select>
+
+    <!-- 게시글에 달린 댓글 목록 조회 -->
+    <select id="selectCommentsByPostNo" resultType="com.ssafy.triplog.planpost.dto.PlanCommentDto">
+        SELECT
+            no,
+            content,
+            user_nickname AS userNickname,
+            created_at AS createdAt,
+            updated_at AS updatedAt,
+            level,
+            path,
+            child_count AS childCount,
+            plan_post_no AS planPostNo,
+            user_no AS userNo,
+            parent_no AS parentNo
+        FROM plan_comment
+        WHERE plan_post_no = #{postNo}
+        ORDER BY path
+            LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 부모 댓글의 자식 댓글 수 증가 -->
+    <update id="increaseChildCount">
+        UPDATE plan_comment
+        SET child_count = child_count + 1
+        WHERE no = #{parentNo}
+    </update>
+
+    <!-- 부모 댓글의 자식 댓글 수 감소 -->
+    <update id="decreaseChildCount">
+        UPDATE plan_comment
+        SET child_count = GREATEST(child_count - 1, 0)
+        WHERE no = #{parentNo}
+    </update>
+
+</mapper>
