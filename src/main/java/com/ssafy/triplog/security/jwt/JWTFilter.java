@@ -33,7 +33,14 @@ public class JWTFilter extends OncePerRequestFilter {
             "/api/users/check-email",
             "/api/users/check-nickname",
             "/api/attraction",
-            "/api/review"
+            "/api/review",
+            // ⭐ 정적 파일 경로 추가
+            "/uploads",
+            "/triplog/uploads",
+            "/static",
+            "/css",
+            "/js",
+            "/images"
     );
 
     public JWTFilter(JWTUtil jwtUtil) {
@@ -58,11 +65,29 @@ public class JWTFilter extends OncePerRequestFilter {
             }
         }
 
+        // ⭐ 정적 파일 확장자 체크 추가
+        if (isStaticResource(path)) {
+            return true;
+        }
+
         // 홈 경로는 필터링하지 않음
         if (path.equals("/") || path.isEmpty()) {
             return true;
         }
 
+        return false;
+    }
+
+    // ⭐ 정적 파일 확장자 체크 메서드 추가
+    private boolean isStaticResource(String path) {
+        String[] staticExtensions = {".png", ".jpg", ".jpeg", ".gif", ".css", ".js", ".ico", ".svg", ".webp"};
+        String lowerPath = path.toLowerCase();
+
+        for (String extension : staticExtensions) {
+            if (lowerPath.endsWith(extension)) {
+                return true;
+            }
+        }
         return false;
     }
 

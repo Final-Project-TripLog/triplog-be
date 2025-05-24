@@ -355,7 +355,6 @@ public class UserServiceImpl implements UserService {
         return processSocialLogin(provider.toUpperCase(), socialId, socialUserInfo);
     }
 
-    // UserServiceImpl.java에 추가할 메서드
     @Override
     public String uploadProfileImage(Long userNo, MultipartFile image, String position) throws IOException {
         // 파일 검증
@@ -380,34 +379,47 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("사용자를 찾을 수 없습니다.");
         }
 
-        // 업로드 디렉토리 생성
-        String uploadDir = System.getProperty("user.home") + "/triplog/uploads/profiles/";
+        // 업로드 디렉토리 생성 (profiles 하위 디렉토리 제거)
+        String uploadDir = System.getProperty("user.home") + "/triplog/uploads/";
+
+
         File directory = new File(uploadDir);
         if (!directory.exists()) {
             directory.mkdirs();
         }
 
-        // 파일명 생성 (중복 방지)
+        // 파일명 생성 (중복 방지) - 확장자 처리 개선
         String originalFileName = image.getOriginalFilename();
-        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        String fileExtension = "";
+        if (originalFileName != null && originalFileName.contains(".")) {
+            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        } else {
+            // 확장자가 없는 경우 Content-Type에서 추출
+            if (contentType.equals("image/jpeg")) {
+                fileExtension = ".jpg";
+            } else if (contentType.equals("image/png")) {
+                fileExtension = ".png";
+            } else if (contentType.equals("image/gif")) {
+                fileExtension = ".gif";
+            } else {
+                fileExtension = ".jpg"; // 기본값
+            }
+        }
+
         String newFileName = "profile_" + userNo + "_" + System.currentTimeMillis() + fileExtension;
 
         // 파일 저장
         Path filePath = Paths.get(uploadDir + newFileName);
         Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        // DB에 프로필 URL 업데이트
-        String profileUrl = "/triplog/uploads/profiles/" + newFileName;
-        UserDto updateUser = new UserDto();
-        updateUser.setNo(userNo);
-        updateUser.setProfileUrl(profileUrl);
-        updateUser.setNickname(user.getNickname()); // 기존 닉네임 유지
-        updateUser.setName(user.getName()); // 기존 이름 유지
-        updateUser.setPhone(user.getPhone()); // 기존 전화번호 유지
-        updateUser.setAddress(user.getAddress()); // 기존 주소 유지
-        updateUser.setAddressDetail(user.getAddressDetail()); // 기존 상세주소 유지
+        // DB에 프로필 URL 업데이트 (경로 수정)
+        String profileUrl = "/triplog/uploads/" + newFileName;
 
-        userMapper.updateUser(updateUser);
+        // 프로필 URL만 업데이트하는 새로운 메서드 사용
+        userMapper.updateProfileImage(userNo, profileUrl);
+
+        log.info("프로필 이미지 업로드 완료: userNo={}, fileName={}, profileUrl={}",
+                userNo, newFileName, profileUrl);
 
         return profileUrl;
     }

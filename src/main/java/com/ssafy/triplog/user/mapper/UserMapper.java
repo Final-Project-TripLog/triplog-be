@@ -42,5 +42,5 @@ public interface UserMapper {
     // 소셜 로그인
     UserDto findBySocialIdAndType(@Param("socialId") String socialId, @Param("socialType") String socialType);
 
-    void updateProfileImage(Long userNo, String profileUrl);
+    void updateProfileImage(@Param("userNo") Long userNo, @Param("profileUrl") String profileUrl);
 }

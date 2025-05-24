@@ -178,14 +178,14 @@ public class UserController {
 
     // UserController.java에 추가할 메서드들
 
-    @Operation(summary = "프로필 이미지 업로드", description = "사용자의 프로필 이미지를 업로드합니다.")
     @PostMapping("/{userNo}/profile-image")
     public ResponseEntity<Map<String, String>> uploadProfileImage(
             @PathVariable Long userNo,
             @RequestParam("image") MultipartFile image,
             @RequestParam(value = "position", required = false) String position) {
 
-        log.debug("uploadProfileImage -----> userNo: {}, fileName: {}", userNo, image.getOriginalFilename());
+        log.info("프로필 이미지 업로드 요청: userNo={}, fileName={}, fileSize={}",
+                userNo, image.getOriginalFilename(), image.getSize());
 
         try {
             String imageUrl = userService.uploadProfileImage(userNo, image, position);
@@ -194,11 +194,12 @@ public class UserController {
             response.put("imageUrl", imageUrl);
             response.put("profileUrl", imageUrl);
 
+            log.info("프로필 이미지 업로드 성공: userNo={}, imageUrl={}", userNo, imageUrl);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("프로필 이미지 업로드 실패", e);
+            log.error("프로필 이미지 업로드 실패: userNo={}, error={}", userNo, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "이미지 업로드 중 오류가 발생했습니다."));
+                    .body(Map.of("error", "이미지 업로드 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
 

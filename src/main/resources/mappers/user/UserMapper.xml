@@ -13,11 +13,13 @@
         WHERE
             email = #{email}
     </select>
+    <!-- 프로필 이미지만 업데이트 -->
     <update id="updateProfileImage">
         UPDATE users
         SET profile_url = #{profileUrl}
         WHERE no = #{userNo}
     </update>
+
     <select id="existsByEmail" resultType="int">
         SELECT COUNT(*) FROM users WHERE email = #{email}
     </select>
