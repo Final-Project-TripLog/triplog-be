@@ -1,76 +1,1349 @@
--- users
-INSERT INTO users (email, password, social_type, social_id, nickname, profile_url, role, phone, address, address_detail, follow_count, follower_count, name)
-VALUES
-    ('user1@example.com', 'encrypted_pw1', 'local', 'local_id_1', 'user1nick', NULL, 'ROLE_USER', '010-1234-5678', '서울시 강남구', '역삼동 123', 2, 3, '홍길동'),
-    ('user2@example.com', 'encrypted_pw2', 'local', 'local_id_2', 'user2nick', NULL, 'ROLE_USER', '010-8765-4321', '부산시 해운대구', '좌동 456', 1, 0, '김영희');
+-- 더미 데이터 생성 스크립트 (30개 관광지)
 
--- attraction_types
-INSERT INTO attraction_types (name) VALUES
-                                        ('역사'), ('테마파크'), ('자연');
+-- 1. 관광지 타입 데이터 삽입
+INSERT INTO
+    `attraction_types` (`name`)
+VALUES ('관광지'),
+       ('문화시설'),
+       ('축제공연행사'),
+       ('여행코스'),
+       ('레포츠'),
+       ('숙박'),
+       ('쇼핑'),
+       ('음식점');
 
--- attractions
-INSERT INTO attractions (title, overview, latitude, longitude, tel, address, address_detail, homepage, api_id, thumbnail, ratingSum, reviewCount, attraction_type_name)
-VALUES
-    ('경복궁', '조선시대 궁궐', 37.579617, 126.977041, '02-3700-3900', '서울 종로구 사직로 161', '광화문 앞', 'http://gogung.go.kr', 101, NULL, 4.5, 2, '역사'),
-    ('롯데월드', '서울 잠실에 위치한 대형 테마파크', 37.5110, 127.0980, '02-411-2000', '서울 송파구 올림픽로 240', '잠실동', 'http://lotteworld.com', 102, NULL, 4.2, 3, '테마파크');
+-- 2. 사용자 데이터 삽입
+INSERT INTO
+    `users` (
+    `email`,
+    `password`,
+    `nickname`,
+    `role`,
+    `phone`,
+    `address`,
+    `name`,
+    `follow_count`,
+    `follower_count`
+)
+VALUES (
+           'user1@example.com',
+           'password123',
+           '여행러버',
+           'USER',
+           '010-1234-5678',
+           '서울시 강남구',
+           '김여행',
+           5,
+           12
+       ),
+       (
+           'user2@example.com',
+           'password456',
+           '탐험가',
+           'USER',
+           '010-9876-5432',
+           '부산시 해운대구',
+           '박탐험',
+           3,
+           8
+       );
 
--- attraction_review
-INSERT INTO attraction_review (user_nickname, rating, content, attraction_no, user_no)
-VALUES
-    ('user1nick', 5, '정말 멋진 곳이었어요!', 1, 1),
-    ('user2nick', 4, '역사 공부에 도움이 되었어요.', 1, 2);
+-- 3. 관광지 데이터 삽입 (30개)
+INSERT INTO
+    `attractions` (
+    `title`,
+    `overview`,
+    `latitude`,
+    `longitude`,
+    `address`,
+    `tel`,
+    `thumbnail`,
+    `attraction_type_name`,
+    `ratingSum`,
+    `reviewCount`
+)
+VALUES (
+           '경복궁',
+           '조선 왕조의 대표 궁궐',
+           37.5796,
+           126.9770,
+           '서울시 종로구 사직로 161',
+           '02-3700-3900',
+           'https://example.com/gyeongbok.jpg',
+           '관광지',
+           18.0,
+           4
+       ),
+       (
+           'N서울타워',
+           '서울의 랜드마크 타워',
+           37.5512,
+           126.9882,
+           '서울시 용산구 남산공원길 105',
+           '02-3455-9277',
+           'https://example.com/tower.jpg',
+           '관광지',
+           21.5,
+           5
+       ),
+       (
+           '부산 해운대해수욕장',
+           '부산의 대표 해수욕장',
+           35.1587,
+           129.1603,
+           '부산시 해운대구 우동',
+           '051-749-4000',
+           'https://example.com/haeundae.jpg',
+           '관광지',
+           16.8,
+           4
+       ),
+       (
+           '제주 성산일출봉',
+           '제주도의 일출 명소',
+           33.4584,
+           126.9427,
+           '제주도 서귀포시 성산읍',
+           '064-783-0959',
+           'https://example.com/seongsan.jpg',
+           '관광지',
+           23.5,
+           5
+       ),
+       (
+           '국립중앙박물관',
+           '국내 최대 규모의 박물관',
+           37.5240,
+           126.9803,
+           '서울시 용산구 서빙고로 137',
+           '02-2077-9000',
+           'https://example.com/museum.jpg',
+           '문화시설',
+           22.0,
+           5
+       ),
+       (
+           '롯데월드',
+           '서울의 대표 테마파크',
+           37.5112,
+           127.0982,
+           '서울시 송파구 올림픽로 240',
+           '02-411-2000',
+           'https://example.com/lotte.jpg',
+           '레포츠',
+           20.5,
+           5
+       ),
+       (
+           '명동거리',
+           '서울의 대표 쇼핑거리',
+           37.5636,
+           126.9830,
+           '서울시 중구 명동',
+           '02-3396-0114',
+           'https://example.com/myeongdong.jpg',
+           '쇼핑',
+           16.0,
+           4
+       ),
+       (
+           '광장시장',
+           '서울의 전통 시장',
+           37.5704,
+           126.9995,
+           '서울시 종로구 창경궁로 88',
+           '02-2267-4077',
+           'https://example.com/gwangjang.jpg',
+           '음식점',
+           17.2,
+           4
+       ),
+       (
+           '한라산',
+           '제주도 최고봉',
+           33.3617,
+           126.5292,
+           '제주도 제주시 해안동',
+           '064-713-9950',
+           'https://example.com/hallasan.jpg',
+           '관광지',
+           24.0,
+           5
+       ),
+       (
+           '부산 감천문화마을',
+           '부산의 산토리니',
+           35.0979,
+           129.0106,
+           '부산시 사하구 감내2로 203',
+           '051-204-1444',
+           'https://example.com/gamcheon.jpg',
+           '문화시설',
+           22.0,
+           5
+       ),
+       (
+           '경주 불국사',
+           '신라 시대의 대표 사찰',
+           35.7898,
+           129.3320,
+           '경북 경주시 진현동 15-1',
+           '054-746-9913',
+           'https://example.com/bulguksa.jpg',
+           '문화시설',
+           23.0,
+           5
+       ),
+       (
+           '여의도 한강공원',
+           '서울의 대표 공원',
+           37.5285,
+           126.9336,
+           '서울시 영등포구 여의동로 330',
+           '02-3780-0561',
+           'https://example.com/hangang.jpg',
+           '관광지',
+           16.8,
+           4
+       ),
+       (
+           '인사동 거리',
+           '전통 문화 거리',
+           37.5719,
+           126.9856,
+           '서울시 종로구 인사동길',
+           '02-732-6050',
+           'https://example.com/insadong.jpg',
+           '문화시설',
+           17.2,
+           4
+       ),
+       (
+           '제주 우도',
+           '제주의 아름다운 섬',
+           33.5009,
+           126.9505,
+           '제주도 제주시 우도면',
+           '064-782-2810',
+           'https://example.com/udo.jpg',
+           '관광지',
+           23.5,
+           5
+       ),
+       (
+           '부산 자갈치시장',
+           '부산의 대표 수산시장',
+           35.0968,
+           129.0305,
+           '부산시 중구 자갈치해안로 52',
+           '051-245-2594',
+           'https://example.com/jagalchi.jpg',
+           '음식점',
+           16.4,
+           4
+       ),
+       (
+           '덕수궁',
+           '서울 시내의 고궁',
+           37.5658,
+           126.9751,
+           '서울시 중구 세종대로 99',
+           '02-771-9951',
+           'https://example.com/deoksu.jpg',
+           '관광지',
+           18.0,
+           4
+       ),
+       (
+           '동대문 디자인 플라자',
+           '서울의 현대적 건축물',
+           37.5665,
+           127.0095,
+           '서울시 중구 을지로 281',
+           '02-2153-0000',
+           'https://example.com/ddp.jpg',
+           '문화시설',
+           19.5,
+           5
+       ),
+       (
+           '제주 중문관광단지',
+           '제주의 관광 명소',
+           33.2441,
+           126.4144,
+           '제주도 서귀포시 중문동',
+           '064-739-1330',
+           'https://example.com/jungmun.jpg',
+           '관광지',
+           20.0,
+           4
+       ),
+       (
+           '전주 한옥마을',
+           '전통 한옥의 멋',
+           35.8154,
+           127.1530,
+           '전북 전주시 완산구 기린대로 99',
+           '063-282-1330',
+           'https://example.com/jeonju.jpg',
+           '관광지',
+           22.5,
+           5
+       ),
+       (
+           '강릉 경포대',
+           '강원도의 바다 명소',
+           37.7954,
+           128.8962,
+           '강원도 강릉시 경포로 365',
+           '033-640-5420',
+           'https://example.com/gyeongpo.jpg',
+           '관광지',
+           18.8,
+           4
+       ),
+       (
+           '안동 하회마을',
+           '전통 마을의 보존',
+           36.5391,
+           128.5188,
+           '경북 안동시 풍천면 하회종가길 69',
+           '054-852-3588',
+           'https://example.com/hahoe.jpg',
+           '관광지',
+           21.0,
+           5
+       ),
+       (
+           '여수 밤바다',
+           '여수의 야경 명소',
+           34.7361,
+           127.6647,
+           '전남 여수시 돌산읍',
+           '061-659-3819',
+           'https://example.com/yeosu.jpg',
+           '관광지',
+           23.0,
+           5
+       ),
+       (
+           '부산 해동용궁사',
+           '바다 위의 사찰',
+           35.1881,
+           129.2230,
+           '부산시 기장군 기장읍 용궁길 86',
+           '051-722-7744',
+           'https://example.com/yonggung.jpg',
+           '문화시설',
+           22.4,
+           5
+       ),
+       (
+           '제주 섭지코지',
+           '제주의 해안 절경',
+           33.4242,
+           126.9307,
+           '제주도 서귀포시 성산읍',
+           '064-760-4000',
+           'https://example.com/seopji.jpg',
+           '관광지',
+           21.6,
+           5
+       ),
+       (
+           '속초 설악산',
+           '강원도의 산악 명소',
+           38.1560,
+           128.4651,
+           '강원도 속초시 설악산로 1091',
+           '033-636-7700',
+           'https://example.com/seorak.jpg',
+           '관광지',
+           24.5,
+           5
+       ),
+       (
+           '대구 김광석거리',
+           '대구의 문화 거리',
+           35.8514,
+           128.5906,
+           '대구시 중구 달구벌대로 2238',
+           '053-661-2000',
+           'https://example.com/kimgwangseok.jpg',
+           '문화시설',
+           17.6,
+           4
+       ),
+       (
+           '춘천 남이섬',
+           '낭만적인 섬',
+           37.7913,
+           127.5267,
+           '강원도 춘천시 남산면 남이섬길 1',
+           '031-580-8114',
+           'https://example.com/nami.jpg',
+           '관광지',
+           20.8,
+           5
+       ),
+       (
+           '광주 무등산',
+           '광주의 대표 산',
+           35.1348,
+           126.9889,
+           '광주시 북구 무등로 1550',
+           '062-227-1187',
+           'https://example.com/mudeung.jpg',
+           '관광지',
+           19.2,
+           4
+       ),
+       (
+           '통영 동피랑벽화마을',
+           '통영의 예술 마을',
+           34.8565,
+           128.4333,
+           '경남 통영시 동피랑길 6-5',
+           '055-650-0580',
+           'https://example.com/dongpirang.jpg',
+           '문화시설',
+           18.4,
+           4
+       ),
+       (
+           '포항 호미곶',
+           '한반도 최동단',
+           36.0766,
+           129.5654,
+           '경북 포항시 남구 호미곶면',
+           '054-270-5882',
+           'https://example.com/homigot.jpg',
+           '관광지',
+           20.4,
+           5
+       );
 
--- plan_post
-INSERT INTO plan_post (user_nickname, title, description, user_no, fork_count, view_count, liked_count, thumbnail)
-VALUES
-    ('user1nick', '서울 역사 여행', '경복궁 중심의 역사 여행 루트', 1, 0, 100, 20, NULL);
+-- 4. 북마크 타입 데이터 삽입
+INSERT INTO
+    `bookmark_types` (
+    `name`,
+    `user_no`,
+    `attraction_count`
+)
+VALUES ('가고싶은 곳', 1, 5),
+       ('다녀온 곳', 1, 8),
+       ('즐겨찾기', 2, 3),
+       ('맛집 리스트', 2, 2);
 
--- plan_post_tag
-INSERT INTO plan_post_tag (plan_post_no, name)
-VALUES
-    (1, '서울'), (1, '역사'), (1, '여행');
+-- 5. 개인 계획 데이터 삽입 (1번 사용자의 2개 계획)
+INSERT INTO
+    `my_plan` (
+    `title`,
+    `description`,
+    `user_no`,
+    `start_day`,
+    `end_day`,
+    `total_member`
+)
+VALUES (
+           '서울 핵심 2일 여행',
+           '서울의 주요 관광지를 둘러보는 2일 일정',
+           1,
+           '2025-06-01 09:00:00',
+           '2025-06-02 18:00:00',
+           2
+       ),
+       (
+           '전국 명소 3일 투어',
+           '전국의 유명 관광지를 만끽하는 3일 일정',
+           1,
+           '2025-07-01 08:00:00',
+           '2025-07-03 19:00:00',
+           3
+       );
 
--- bookmark_types
-INSERT INTO bookmark_types (name, user_no)
+-- 6. 일별 상세 계획 데이터 삽입
+-- 첫 번째 계획 (2일): 1일차 1,2,3,4번 관광지, 2일차 5,6,7,8번 관광지
+INSERT INTO
+    `my_daily_plan` (
+    `visited_date`,
+    `start_time`,
+    `end_time`,
+    `move_time`,
+    `attraction_title`,
+    `attraction_thumbnail`,
+    `attraction_latitude`,
+    `attraction_longitude`,
+    `attraction_rating`,
+    `memo`,
+    `attraction_no`,
+    `my_plan_no`
+)
 VALUES
-    ('가고 싶은 곳', 1);
+    -- 1일차 (2025-06-01)
+    (
+        '2025-06-01',
+        '09:00:00',
+        '11:00:00',
+        30,
+        '경복궁',
+        'https://example.com/gyeongbok.jpg',
+        37.5796,
+        126.9770,
+        4.5,
+        '궁궐 투어 및 수문장 교대식 관람',
+        1,
+        1
+    ),
+    (
+        '2025-06-01',
+        '11:30:00',
+        '13:30:00',
+        20,
+        'N서울타워',
+        'https://example.com/tower.jpg',
+        37.5512,
+        126.9882,
+        4.3,
+        '전망대에서 서울 시내 조망',
+        2,
+        1
+    ),
+    (
+        '2025-06-01',
+        '14:00:00',
+        '16:00:00',
+        15,
+        '부산 해운대해수욕장',
+        'https://example.com/haeundae.jpg',
+        35.1587,
+        129.1603,
+        4.2,
+        '해변 산책 및 휴식',
+        3,
+        1
+    ),
+    (
+        '2025-06-01',
+        '16:30:00',
+        '18:00:00',
+        25,
+        '제주 성산일출봉',
+        'https://example.com/seongsan.jpg',
+        33.4584,
+        126.9427,
+        4.7,
+        '일몰 감상 및 사진 촬영',
+        4,
+        1
+    ),
+    (
+        '2025-06-02',
+        '10:00:00',
+        '12:00:00',
+        20,
+        '국립중앙박물관',
+        'https://example.com/museum.jpg',
+        37.5240,
+        126.9803,
+        4.4,
+        '한국 역사 전시 관람',
+        5,
+        1
+    ),
+    (
+        '2025-06-02',
+        '12:30:00',
+        '15:30:00',
+        30,
+        '롯데월드',
+        'https://example.com/lotte.jpg',
+        37.5112,
+        127.0982,
+        4.1,
+        '놀이기구 탑승 및 퍼레이드 관람',
+        6,
+        1
+    ),
+    (
+        '2025-06-02',
+        '16:00:00',
+        '17:30:00',
+        10,
+        '명동거리',
+        'https://example.com/myeongdong.jpg',
+        37.5636,
+        126.9830,
+        4.0,
+        '쇼핑 및 거리 음식',
+        7,
+        1
+    ),
+    (
+        '2025-06-02',
+        '17:45:00',
+        '19:00:00',
+        5,
+        '광장시장',
+        'https://example.com/gwangjang.jpg',
+        37.5704,
+        126.9995,
+        4.3,
+        '전통 음식 체험',
+        8,
+        1
+    );
 
--- bookmark
-INSERT INTO bookmark (bookmark_type_no, attraction_no, `order`)
+-- 두 번째 계획 (3일): 1일차 9,10,11,12번, 2일차 13,14,15,16번, 3일차 17,18,19,20번
+INSERT INTO
+    `my_daily_plan` (
+    `visited_date`,
+    `start_time`,
+    `end_time`,
+    `move_time`,
+    `attraction_title`,
+    `attraction_thumbnail`,
+    `attraction_latitude`,
+    `attraction_longitude`,
+    `attraction_rating`,
+    `memo`,
+    `attraction_no`,
+    `my_plan_no`
+)
 VALUES
-    (1, 2, 1);
+    -- 1일차 (2025-07-01)
+    (
+        '2025-07-01',
+        '08:00:00',
+        '11:00:00',
+        45,
+        '한라산',
+        'https://example.com/hallasan.jpg',
+        33.3617,
+        126.5292,
+        4.8,
+        '등산 및 자연 경관 감상',
+        9,
+        2
+    ),
+    (
+        '2025-07-01',
+        '12:00:00',
+        '14:00:00',
+        30,
+        '부산 감천문화마을',
+        'https://example.com/gamcheon.jpg',
+        35.0979,
+        129.0106,
+        4.4,
+        '벽화 마을 투어',
+        10,
+        2
+    ),
+    (
+        '2025-07-01',
+        '14:45:00',
+        '16:45:00',
+        25,
+        '경주 불국사',
+        'https://example.com/bulguksa.jpg',
+        35.7898,
+        129.3320,
+        4.6,
+        '불교 문화재 관람',
+        11,
+        2
+    ),
+    (
+        '2025-07-01',
+        '17:15:00',
+        '19:00:00',
+        20,
+        '여의도 한강공원',
+        'https://example.com/hangang.jpg',
+        37.5285,
+        126.9336,
+        4.2,
+        '한강에서 피크닉',
+        12,
+        2
+    ),
+    (
+        '2025-07-02',
+        '09:00:00',
+        '11:00:00',
+        15,
+        '인사동 거리',
+        'https://example.com/insadong.jpg',
+        37.5719,
+        126.9856,
+        4.3,
+        '전통 문화 체험 및 쇼핑',
+        13,
+        2
+    ),
+    (
+        '2025-07-02',
+        '11:30:00',
+        '14:30:00',
+        60,
+        '제주 우도',
+        'https://example.com/udo.jpg',
+        33.5009,
+        126.9505,
+        4.7,
+        '섬 여행 및 자전거 투어',
+        14,
+        2
+    ),
+    (
+        '2025-07-02',
+        '15:45:00',
+        '17:15:00',
+        25,
+        '부산 자갈치시장',
+        'https://example.com/jagalchi.jpg',
+        35.0968,
+        129.0305,
+        4.1,
+        '신선한 해산물 구경',
+        15,
+        2
+    ),
+    (
+        '2025-07-02',
+        '17:45:00',
+        '19:30:00',
+        15,
+        '덕수궁',
+        'https://example.com/deoksu.jpg',
+        37.5658,
+        126.9751,
+        4.5,
+        '야간 궁궐 투어',
+        16,
+        2
+    ),
+    (
+        '2025-07-03',
+        '09:30:00',
+        '11:30:00',
+        20,
+        '동대문 디자인 플라자',
+        'https://example.com/ddp.jpg',
+        37.5665,
+        127.0095,
+        3.9,
+        '현대 건축 및 디자인 전시',
+        17,
+        2
+    ),
+    (
+        '2025-07-03',
+        '12:00:00',
+        '14:00:00',
+        30,
+        '제주 중문관광단지',
+        'https://example.com/jungmun.jpg',
+        33.2441,
+        126.4144,
+        4.0,
+        '해변 리조트 지역 탐방',
+        18,
+        2
+    ),
+    (
+        '2025-07-03',
+        '14:45:00',
+        '16:45:00',
+        25,
+        '전주 한옥마을',
+        'https://example.com/jeonju.jpg',
+        35.8154,
+        127.1530,
+        4.5,
+        '전통 한옥 체험',
+        19,
+        2
+    ),
+    (
+        '2025-07-03',
+        '17:15:00',
+        '19:00:00',
+        20,
+        '강릉 경포대',
+        'https://example.com/gyeongpo.jpg',
+        37.7954,
+        128.8962,
+        4.7,
+        '해안 절경 감상',
+        20,
+        2
+    );
 
--- like_post
-INSERT INTO like_post (user_no, plan_post_no)
-VALUES
-    (2, 1);
+-- 7. 관광지 리뷰 데이터 삽입
+INSERT INTO
+    `attraction_review` (
+    `user_nickname`,
+    `rating`,
+    `content`,
+    `attraction_no`,
+    `user_no`
+)
+VALUES (
+           '여행러버',
+           5,
+           '정말 멋진 궁궐이었습니다. 수문장 교대식도 볼 수 있어서 좋았어요.',
+           1,
+           1
+       ),
+       (
+           '여행러버',
+           4,
+           '서울 전체가 한눈에 보이는 멋진 전망이었습니다.',
+           2,
+           1
+       ),
+       (
+           '탐험가',
+           4,
+           '해변이 정말 깨끗하고 아름다웠습니다.',
+           3,
+           2
+       ),
+       (
+           '탐험가',
+           5,
+           '일출이 정말 장관이었습니다. 꼭 다시 가고 싶어요.',
+           4,
+           2
+       ),
+       (
+           '여행러버',
+           4,
+           '역사를 배울 수 있는 좋은 곳이었습니다.',
+           5,
+           1
+       ),
+       (
+           '탐험가',
+           3,
+           '놀이기구는 재미있었지만 사람이 너무 많았어요.',
+           6,
+           2
+       ),
+       (
+           '여행러버',
+           4,
+           '쇼핑하기 좋고 먹을 거리도 많았습니다.',
+           7,
+           1
+       ),
+       (
+           '탐험가',
+           4,
+           '전통 음식이 정말 맛있었습니다.',
+           8,
+           2
+       );
 
--- follow_info
-INSERT INTO follow_info (follow, follower)
-VALUES
-    (2, 1);
+-- 8. 관광지 이미지 데이터 삽입
+INSERT INTO
+    `attraction_image` (
+    `image_url`,
+    `attraction_no`,
+    `attraction_review_no`
+)
+VALUES (
+           'https://example.com/gyeongbok_1.jpg',
+           1,
+           1
+       ),
+       (
+           'https://example.com/gyeongbok_2.jpg',
+           1,
+           NULL
+       ),
+       (
+           'https://example.com/tower_1.jpg',
+           2,
+           2
+       ),
+       (
+           'https://example.com/haeundae_1.jpg',
+           3,
+           3
+       ),
+       (
+           'https://example.com/seongsan_1.jpg',
+           4,
+           4
+       ),
+       (
+           'https://example.com/museum_1.jpg',
+           5,
+           5
+       ),
+       (
+           'https://example.com/lotte_1.jpg',
+           6,
+           6
+       ),
+       (
+           'https://example.com/myeongdong_1.jpg',
+           7,
+           7
+       ),
+       (
+           'https://example.com/gwangjang_1.jpg',
+           8,
+           8
+       );
 
--- my_plan
-INSERT INTO my_plan (title, description, user_no)
-VALUES
-    ('서울 여행 플랜', '서울 시내 주요 관광지 방문', 1);
+-- 9. 북마크 데이터 삽입
+INSERT INTO
+    `bookmark` (
+    `bookmark_type_no`,
+    `attraction_no`,
+    `order`
+)
+VALUES (1, 1, 1),
+       (1, 2, 2),
+       (1, 9, 3),
+       (1, 14, 4),
+       (1, 19, 5),
+       (2, 3, 1),
+       (2, 4, 2),
+       (2, 5, 3),
+       (2, 6, 4),
+       (2, 7, 5),
+       (2, 8, 6),
+       (2, 10, 7),
+       (2, 11, 8),
+       (3, 15, 1),
+       (3, 20, 2),
+       (3, 25, 3),
+       (4, 8, 1),
+       (4, 15, 2);
 
--- my_daily_plan
-INSERT INTO my_daily_plan (visited_date, start_time, end_time, move_time, attraction_title, attraction_thumbnail, attraction_latitude, attraction_longitude, attraction_rating, memo, attraction_no, my_plan_no)
-VALUES
-    ('2025-05-21', '09:00:00', '11:00:00', 30, '경복궁', NULL, 37.579617, 126.977041, 4.5, '날씨 좋음', 1, 1);
+-- 10. 팔로우 관계 데이터 삽입
+INSERT INTO
+    `follow_info` (
+    `follow`,
+    `follower`,
+    `create_at`
+)
+VALUES (1, 2, '2025-01-15 10:30:00'),
+       (2, 1, '2025-01-20 14:20:00');
 
--- plan_attraction_detail
-INSERT INTO plan_attraction_detail (visite_date, start_time, end_time, move_time, attraction_title, attraction_thumbnail, attraction_rating, writer_rating, plan_post_no, attraction_no, review_no)
-VALUES
-    ('2025-05-21', '09:00:00', '11:00:00', 30, '경복궁', NULL, 4.5, 5, 1, 1, 1);
+-- 11. 계획 게시물 데이터 삽입 (1번 사용자의 2개 공개 계획)
+INSERT INTO
+    `plan_post` (
+    `user_nickname`,
+    `title`,
+    `description`,
+    `user_no`,
+    `fork_count`,
+    `view_count`,
+    `liked_count`,
+    `thumbnail`,
+    `start_day`,
+    `end_day`,
+    `total_member`
+)
+VALUES (
+           '여행러버',
+           '서울 핵심 명소 2일 코스',
+           '서울의 대표 관광지들을 효율적으로 둘러보는 2일 코스입니다. 궁궐과 타워, 쇼핑까지!',
+           1,
+           3,
+           127,
+           15,
+           'https://example.com/seoul_plan.jpg',
+           '2025-06-01 09:00:00',
+           '2025-06-02 18:00:00',
+           2
+       ),
+       (
+           '여행러버',
+           '전국 투어 3일 완벽 코스',
+           '한국의 아름다운 명소들을 3일간 알차게 여행하는 코스입니다. 자연과 문화를 모두 만끽!',
+           1,
+           8,
+           243,
+           32,
+           'https://example.com/korea_tour.jpg',
+           '2025-07-01 08:00:00',
+           '2025-07-03 19:00:00',
+           3
+       );
 
--- plan_comment
-INSERT INTO plan_comment (content, user_nickname, level, path, child_count, plan_post_no, user_no)
+-- 12. 계획 게시물 상세 일정 데이터 삽입
+-- 첫 번째 게시물 (2일): 1일차 1,2,3,4번 관광지, 2일차 5,6,7,8번 관광지
+INSERT INTO
+    `plan_attraction_detail` (
+    `visite_date`,
+    `start_time`,
+    `end_time`,
+    `move_time`,
+    `attraction_title`,
+    `attraction_thumbnail`,
+    `attraction_rating`,
+    `writer_rating`,
+    `plan_post_no`,
+    `attraction_no`
+)
 VALUES
-    ('좋은 계획이네요!', 'user2nick', 0, '00001', 0, 1, 2);
+    -- 1일차 (2025-06-01)
+    (
+        '2025-06-01',
+        '09:00:00',
+        '11:00:00',
+        30,
+        '경복궁',
+        'https://example.com/gyeongbok.jpg',
+        4.5,
+        5,
+        1,
+        1
+    ),
+    (
+        '2025-06-01',
+        '11:30:00',
+        '13:30:00',
+        20,
+        'N서울타워',
+        'https://example.com/tower.jpg',
+        4.3,
+        4,
+        1,
+        2
+    ),
+    (
+        '2025-06-01',
+        '14:00:00',
+        '16:00:00',
+        15,
+        '부산 해운대해수욕장',
+        'https://example.com/haeundae.jpg',
+        4.2,
+        4,
+        1,
+        3
+    ),
+    (
+        '2025-06-01',
+        '16:30:00',
+        '18:00:00',
+        25,
+        '제주 성산일출봉',
+        'https://example.com/seongsan.jpg',
+        4.7,
+        5,
+        1,
+        4
+    ),
+    (
+        '2025-06-02',
+        '10:00:00',
+        '12:00:00',
+        20,
+        '국립중앙박물관',
+        'https://example.com/museum.jpg',
+        4.4,
+        4,
+        1,
+        5
+    ),
+    (
+        '2025-06-02',
+        '12:30:00',
+        '15:30:00',
+        30,
+        '롯데월드',
+        'https://example.com/lotte.jpg',
+        4.1,
+        4,
+        1,
+        6
+    ),
+    (
+        '2025-06-02',
+        '16:00:00',
+        '17:30:00',
+        10,
+        '명동거리',
+        'https://example.com/myeongdong.jpg',
+        4.0,
+        4,
+        1,
+        7
+    ),
+    (
+        '2025-06-02',
+        '17:45:00',
+        '19:00:00',
+        5,
+        '광장시장',
+        'https://example.com/gwangjang.jpg',
+        4.3,
+        5,
+        1,
+        8
+    );
 
--- attraction_image
-INSERT INTO attraction_image (image_url, review_image_order, attraction_no, attraction_review_no)
+-- 두 번째 게시물 (3일): 1일차 9,10,11,12번, 2일차 13,14,15,16번, 3일차 17,18,19,20번
+INSERT INTO
+    `plan_attraction_detail` (
+    `visite_date`,
+    `start_time`,
+    `end_time`,
+    `move_time`,
+    `attraction_title`,
+    `attraction_thumbnail`,
+    `attraction_rating`,
+    `writer_rating`,
+    `plan_post_no`,
+    `attraction_no`
+)
 VALUES
-    ('http://image.com/gyeongbokgung1.jpg', 1, 1, 1);
+    -- 1일차 (2025-07-01)
+    (
+        '2025-07-01',
+        '08:00:00',
+        '11:00:00',
+        45,
+        '한라산',
+        'https://example.com/hallasan.jpg',
+        4.8,
+        5,
+        2,
+        9
+    ),
+    (
+        '2025-07-01',
+        '12:00:00',
+        '14:00:00',
+        30,
+        '부산 감천문화마을',
+        'https://example.com/gamcheon.jpg',
+        4.4,
+        4,
+        2,
+        10
+    ),
+    (
+        '2025-07-01',
+        '14:45:00',
+        '16:45:00',
+        25,
+        '경주 불국사',
+        'https://example.com/bulguksa.jpg',
+        4.6,
+        5,
+        2,
+        11
+    ),
+    (
+        '2025-07-01',
+        '17:15:00',
+        '19:00:00',
+        20,
+        '여의도 한강공원',
+        'https://example.com/hangang.jpg',
+        4.2,
+        4,
+        2,
+        12
+    ),
+    (
+        '2025-07-02',
+        '09:00:00',
+        '11:00:00',
+        15,
+        '인사동 거리',
+        'https://example.com/insadong.jpg',
+        4.3,
+        4,
+        2,
+        13
+    ),
+    (
+        '2025-07-02',
+        '11:30:00',
+        '14:30:00',
+        60,
+        '제주 우도',
+        'https://example.com/udo.jpg',
+        4.7,
+        5,
+        2,
+        14
+    ),
+    (
+        '2025-07-02',
+        '15:45:00',
+        '17:15:00',
+        25,
+        '부산 자갈치시장',
+        'https://example.com/jagalchi.jpg',
+        4.1,
+        4,
+        2,
+        15
+    ),
+    (
+        '2025-07-02',
+        '17:45:00',
+        '19:30:00',
+        15,
+        '덕수궁',
+        'https://example.com/deoksu.jpg',
+        4.5,
+        4,
+        2,
+        16
+    ),
+    (
+        '2025-07-03',
+        '09:30:00',
+        '11:30:00',
+        20,
+        '동대문 디자인 플라자',
+        'https://example.com/ddp.jpg',
+        3.9,
+        3,
+        2,
+        17
+    ),
+    (
+        '2025-07-03',
+        '12:00:00',
+        '14:00:00',
+        30,
+        '제주 중문관광단지',
+        'https://example.com/jungmun.jpg',
+        4.0,
+        4,
+        2,
+        18
+    ),
+    (
+        '2025-07-03',
+        '14:45:00',
+        '16:45:00',
+        25,
+        '전주 한옥마을',
+        'https://example.com/jeonju.jpg',
+        4.5,
+        5,
+        2,
+        19
+    ),
+    (
+        '2025-07-03',
+        '17:15:00',
+        '19:00:00',
+        20,
+        '강릉 경포대',
+        'https://example.com/gyeongpo.jpg',
+        4.7,
+        5,
+        2,
+        20
+    );
+
+-- 13. 계획 게시물 태그 데이터 삽입
+INSERT INTO
+    `plan_post_tag` (`plan_post_no`, `name`)
+VALUES (1, '서울여행'),
+       (1, '2일코스'),
+       (1, '궁궐투어'),
+       (1, '쇼핑'),
+       (2, '전국투어'),
+       (2, '3일코스'),
+       (2, '자연경관'),
+       (2, '문화체험'),
+       (2, '한국여행');
+
+-- 14. 계획 게시물 좋아요 데이터 삽입
+INSERT INTO
+    `like_post` (
+    `user_no`,
+    `plan_post_no`,
+    `liked_at`
+)
+VALUES (2, 1, '2025-05-15 14:30:00'),
+       (2, 2, '2025-05-16 10:20:00');
+
+-- 15. 계획 게시물 댓글 데이터 삽입
+INSERT INTO
+    `plan_comment` (
+    `content`,
+    `user_nickname`,
+    `level`,
+    `path`,
+    `child_count`,
+    `plan_post_no`,
+    `user_no`
+)
+VALUES (
+           '정말 알찬 서울 코스네요! 시간 배분도 적절한 것 같아요.',
+           '탐험가',
+           0,
+           '1',
+           1,
+           1,
+           2
+       ),
+       (
+           '감사합니다! 실제로 다녀본 코스라 추천드려요.',
+           '여행러버',
+           1,
+           '1.1',
+           0,
+           1,
+           1
+       ),
+       (
+           '전국 투어 코스가 정말 멋지네요. 특히 한라산 일정이 좋아요!',
+           '탐험가',
+           0,
+           '2',
+           0,
+           2,
+           2
+       ),
+       (
+           '3일 일정치고는 꽤 타이트한데 괜찮을까요?',
+           '탐험가',
+           0,
+           '3',
+           1,
+           2,
+           2
+       ),
+       (
+           '조금 빡빡하긴 하지만 충분히 즐길 수 있는 일정이에요!',
+           '여행러버',
+           1,
+           '3.1',
+           0,
+           2,
+           1
+       );
+
+-- 업데이트: 사용자 팔로우/팔로워 수 업데이트
+UPDATE `users`
+SET
+    `follow_count` = 1,
+    `follower_count` = 1
+WHERE
+    `no` = 1;
+
+UPDATE `users`
+SET
+    `follow_count` = 1,
+    `follower_count` = 1
+WHERE
+    `no` = 2;
