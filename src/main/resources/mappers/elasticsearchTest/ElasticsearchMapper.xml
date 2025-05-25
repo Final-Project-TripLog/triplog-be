@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.triplog.elasticsearchTest.mapper.ElasticsearchTestMapper">
+
+    <!-- PlanPostDto ResultMap -->
+    <resultMap id="searchFourJoinNPlus1ResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto">
+        <id property="no" column="no"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="userNo" column="user_no"/>
+        <result property="forkCount" column="fork_count"/>
+        <result property="likedCount" column="liked_count"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="startDay" column="start_day"/>
+        <result property="endDay" column="end_day"/>
+        <result property="totalMember" column="total_member"/>
+    </resultMap>
+
+    <resultMap id="ElasticsearchTestResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostResponseDto">
+        <id property="no" column="pp_no"/>
+        <result property="userNickname" column="userNickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="updatedAt" column="updatedAt"/>
+        <result property="userNo" column="userNo"/>
+        <result property="forkCount" column="forkCount"/>
+        <result property="viewCount" column="viewCount"/>
+        <result property="likedCount" column="likedCount"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="startDay" column="startDay"/>
+        <result property="endDay" column="endDay"/>
+        <result property="totalMember" column="totalMember"/>
+
+        <collection property="tags" ofType="com.ssafy.triplog.planpost.dto.PlanPostTagDto">
+            <id property="no" column="tag_no"/>
+            <result property="planPostNo" column="tag_plan_post_no"/>
+            <result property="name" column="tag_name"/>
+        </collection>
+    </resultMap>
+
+    <!-- 키워드 기반 게시글 검색 -->
+    <select id="searchByFourJoin" resultMap="ElasticsearchTestResultMap">
+        SELECT DISTINCT
+        pp.no AS pp_no,
+        pp.user_nickname AS userNickname,
+        pp.title,
+        pp.description,
+        pp.created_at AS createdAt,
+        pp.updated_at AS updatedAt,
+        pp.user_no AS userNo,
+        pp.fork_count AS forkCount,
+        pp.view_count AS viewCount,
+        pp.liked_count AS likedCount,
+        pp.thumbnail,
+        pp.start_day AS startDay,
+        pp.end_day AS endDay,
+        pp.total_member AS totalMember,
+
+        ppt.no AS tag_no,
+        ppt.plan_post_no AS tag_plan_post_no,
+        ppt.name AS tag_name
+
+        FROM plan_post pp
+        LEFT JOIN plan_post_tag ppt ON pp.no = ppt.plan_post_no
+        LEFT JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
+        LEFT JOIN attractions a ON pad.attraction_no = a.no
+
+        WHERE (
+        pp.title LIKE CONCAT('%', #{keyword}, '%')
+        OR pp.user_nickname LIKE CONCAT('%', #{keyword}, '%')
+        OR pp.description LIKE CONCAT('%', #{keyword}, '%')
+        OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
+        OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')
+        OR a.address LIKE CONCAT('%', #{keyword}, '%')
+        )
+
+        ORDER BY pp.created_at DESC
+    </select>
+
+</mapper>

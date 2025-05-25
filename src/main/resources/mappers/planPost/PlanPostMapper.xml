@@ -22,6 +22,29 @@
         <result property="totalMember" column="total_member"/>
     </resultMap>
 
+    <resultMap id="PlanPostWithTagsResultMap" type="com.ssafy.triplog.planpost.dto.PlanPostResponse">
+        <id property="no" column="pp_no"/>
+        <result property="userNickname" column="userNickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="updatedAt" column="updatedAt"/>
+        <result property="userNo" column="userNo"/>
+        <result property="forkCount" column="forkCount"/>
+        <result property="viewCount" column="viewCount"/>
+        <result property="likedCount" column="likedCount"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="startDay" column="startDay"/>
+        <result property="endDay" column="endDay"/>
+        <result property="totalMember" column="totalMember"/>
+
+        <collection property="tags" ofType="com.ssafy.triplog.planpost.dto.PlanPostTagDto">
+            <id property="no" column="tag_no"/>
+            <result property="planPostNo" column="tag_plan_post_no"/>
+            <result property="name" column="tag_name"/>
+        </collection>
+    </resultMap>
+
     <!-- PlanAttractionDetailDto ResultMap -->
     <resultMap id="PlanAttractionDetailDtoResultMap" type="com.ssafy.triplog.planpost.dto.PlanAttractionDetailDto">
         <id property="no" column="no"/>
@@ -155,26 +178,45 @@
     </select>
 
     <!-- 키워드 기반 게시글 검색 -->
-    <select id="searchPlanPostsByKeyword" resultMap="PlanPostDtoResultMap">
+    <select id="searchPlanPostsByKeyword" resultMap="PlanPostWithTagsResultMap">
         SELECT DISTINCT
-        pp.no, pp.user_nickname, pp.title, pp.description, pp.created_at, pp.updated_at,
-        pp.user_no, pp.fork_count, pp.view_count, pp.liked_count, pp.thumbnail,
-        pp.start_day, pp.end_day, pp.total_member
+        pp.no AS pp_no,
+        pp.user_nickname AS userNickname,
+        pp.title,
+        pp.description,
+        pp.created_at AS createdAt,
+        pp.updated_at AS updatedAt,
+        pp.user_no AS userNo,
+        pp.fork_count AS forkCount,
+        pp.view_count AS viewCount,
+        pp.liked_count AS likedCount,
+        pp.thumbnail,
+        pp.start_day AS startDay,
+        pp.end_day AS endDay,
+        pp.total_member AS totalMember,
+
+        ppt.no AS tag_no,
+        ppt.plan_post_no AS tag_plan_post_no,
+        ppt.name AS tag_name
+
         FROM plan_post pp
         LEFT JOIN plan_post_tag ppt ON pp.no = ppt.plan_post_no
         LEFT JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
         LEFT JOIN attractions a ON pad.attraction_no = a.no
+
         WHERE (
         pp.title LIKE CONCAT('%', #{keyword}, '%')
         OR pp.user_nickname LIKE CONCAT('%', #{keyword}, '%')
         OR pp.description LIKE CONCAT('%', #{keyword}, '%')
         OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
         OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')
-        OR a.address LIKE CONCAT('%',#{keyword},'%')
+        OR a.address LIKE CONCAT('%', #{keyword}, '%')
         )
+
         ORDER BY pp.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
+
 <!--        <if test="sidoNo != null">-->
 <!--            AND a.address LIKE CONCAT('%', (SELECT name FROM sido WHERE no = #{sidoNo}), '%')-->
 <!--        </if>-->

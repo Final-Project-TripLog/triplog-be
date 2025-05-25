@@ -421,11 +421,9 @@ public class PlanPostServiceImpl implements PlanPostService {
         log.info("키워드 게시글 검색 - keyword: {}, page: {}, size: {}", keyword, page, size);
 
         int offset = page * size;
-        List<PlanPostDto> posts = planPostMapper.searchPlanPostsByKeyword(keyword, sidoNo, gugunNo, offset, size);
+        List<PlanPostResponse> posts = planPostMapper.searchPlanPostsByKeyword(keyword, sidoNo, gugunNo, offset, size);
 
-        return posts.stream()
-                .map(dto -> convertDtoToResponse(dto, dto.getNo()))
-                .collect(Collectors.toList());
+        return posts;
     }
 
     @Override

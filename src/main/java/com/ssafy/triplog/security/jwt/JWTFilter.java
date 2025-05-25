@@ -44,7 +44,8 @@ public class JWTFilter extends OncePerRequestFilter {
             "/images",
 
             // 엘라스틱 서치 - context path 고려하여 수정
-            "/api/elastic"
+            "/api/elastic",
+            "/api/elastic/test"
     );
 
     public JWTFilter(JWTUtil jwtUtil) {
