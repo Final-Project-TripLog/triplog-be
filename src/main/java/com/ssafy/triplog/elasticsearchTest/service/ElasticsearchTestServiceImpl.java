@@ -4,12 +4,12 @@ import com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto;
 import com.ssafy.triplog.elasticsearchTest.dto.PlanPostResponseDto;
 import com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto;
 import com.ssafy.triplog.elasticsearchTest.mapper.ElasticsearchTestMapper;
-import com.ssafy.triplog.planpost.dto.PlanPostResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,17 +24,19 @@ public class ElasticsearchTestServiceImpl implements ElasticsearchTestService {
     @Override
     @Transactional(readOnly = true)
     public List<PlanPostResponseDto> searchFourJoinNPlus1(String keyword) {
-        log.info("키워드 게시글 검색 - keyword: {}", keyword);
+        log.info("N+1 방식 키워드 게시글 검색 - keyword: {}", keyword);
 
-        List<PlanPostDto> posts = elasticsearchTestMapper.searchFourJoinNPlus1(keyword);
+        // 1. 먼저 게시글 목록만 조회 (N+1 문제 발생 지점)
+        List<PlanPostDto> posts = elasticsearchTestMapper.searchPlanPostsByKeyword(keyword);
 
+        // 2. 각 게시글마다 별도로 태그 조회 (N+1 문제!)
         return posts.stream()
-                .map(dto -> convertDtoToResponse(dto, dto.getNo()))
+                .map(dto -> convertDtoToResponseDto(dto))
                 .collect(Collectors.toList());
     }
 
-    private PlanPostResponse convertDtoToResponse(PlanPostDto dto, Long postNo) {
-        PlanPostResponse response = new PlanPostResponse();
+    private PlanPostResponseDto convertDtoToResponseDto(PlanPostDto dto) {
+        PlanPostResponseDto response = new PlanPostResponseDto();
         response.setNo(dto.getNo());
         response.setUserNo(dto.getUserNo());
         response.setUserNickname(dto.getUserNickname());
@@ -50,8 +52,8 @@ public class ElasticsearchTestServiceImpl implements ElasticsearchTestService {
         response.setLikedCount(dto.getLikedCount());
         response.setViewCount(dto.getViewCount());
 
-        // 태그 목록 조회
-        List<PlanPostTagDto> tags = elasticsearchTestMapper.searchFourJoinNPlus1(postNo);
+        // 각 게시글마다 별도 쿼리 실행 - N+1 문제 발생!
+        List<PlanPostTagDto> tags = elasticsearchTestMapper.selectPlanPostTagsByPostNo(dto.getNo());
         response.setTags(tags != null ? tags : Collections.emptyList());
 
         return response;
@@ -60,8 +62,9 @@ public class ElasticsearchTestServiceImpl implements ElasticsearchTestService {
     @Override
     @Transactional(readOnly = true)
     public List<PlanPostResponseDto> searchByFourJoin(String keyword) {
-        log.info("키워드 게시글 검색 - keyword: {}", keyword);
+        log.info("4중 JOIN 방식 키워드 게시글 검색 - keyword: {}", keyword);
 
+        // 한 번의 쿼리로 모든 데이터 조회 (N+1 문제 해결)
         List<PlanPostResponseDto> posts = elasticsearchTestMapper.searchByFourJoin(keyword);
 
         return posts;

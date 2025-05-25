@@ -1,6 +1,5 @@
 package com.ssafy.triplog.elasticsearchTest.dto;
 
-import com.ssafy.triplog.planpost.dto.PlanPostTagDto;
 import lombok.*;
 
 import java.time.LocalDateTime;

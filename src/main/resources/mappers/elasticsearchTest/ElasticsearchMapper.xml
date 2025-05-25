@@ -3,7 +3,7 @@
 <mapper namespace="com.ssafy.triplog.elasticsearchTest.mapper.ElasticsearchTestMapper">
 
     <!-- PlanPostDto ResultMap -->
-    <resultMap id="searchFourJoinNPlus1ResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto">
+    <resultMap id="PlanPostDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto">
         <id property="no" column="no"/>
         <result property="userNickname" column="user_nickname"/>
         <result property="title" column="title"/>
@@ -18,6 +18,13 @@
         <result property="startDay" column="start_day"/>
         <result property="endDay" column="end_day"/>
         <result property="totalMember" column="total_member"/>
+    </resultMap>
+
+    <!-- PlanPostTagDto ResultMap -->
+    <resultMap id="PlanPostTagDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto">
+        <id property="no" column="no"/>
+        <result property="planPostNo" column="plan_post_no"/>
+        <result property="name" column="name"/>
     </resultMap>
 
     <resultMap id="ElasticsearchTestResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostResponseDto">
@@ -36,48 +43,90 @@
         <result property="endDay" column="endDay"/>
         <result property="totalMember" column="totalMember"/>
 
-        <collection property="tags" ofType="com.ssafy.triplog.planpost.dto.PlanPostTagDto">
+        <collection property="tags" ofType="com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto">
             <id property="no" column="tag_no"/>
             <result property="planPostNo" column="tag_plan_post_no"/>
             <result property="name" column="tag_name"/>
         </collection>
     </resultMap>
 
-    <!-- 키워드 기반 게시글 검색 -->
+    <!-- N+1 문제를 위한 게시글만 조회 (태그 제외) -->
+    <select id="searchPlanPostsByKeyword" resultMap="PlanPostDtoResultMap">
+        SELECT DISTINCT
+            pp.no,
+            pp.user_nickname,
+            pp.title,
+            pp.description,
+            pp.created_at,
+            pp.updated_at,
+            pp.thumbnail,
+            pp.user_no,
+            pp.fork_count,
+            pp.liked_count,
+            pp.view_count,
+            pp.start_day,
+            pp.end_day,
+            pp.total_member
+        FROM plan_post pp
+                 LEFT JOIN plan_post_tag ppt ON pp.no = ppt.plan_post_no
+                 LEFT JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
+                 LEFT JOIN attractions a ON pad.attraction_no = a.no
+        WHERE (
+                  pp.title LIKE CONCAT('%', #{keyword}, '%')
+                      OR pp.user_nickname LIKE CONCAT('%', #{keyword}, '%')
+                      OR pp.description LIKE CONCAT('%', #{keyword}, '%')
+                      OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
+                      OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')
+                      OR a.address LIKE CONCAT('%', #{keyword}, '%')
+                  )
+        ORDER BY pp.created_at DESC
+    </select>
+
+    <!-- N+1 문제를 위한 태그 개별 조회 -->
+    <select id="selectPlanPostTagsByPostNo" resultMap="PlanPostTagDtoResultMap">
+        SELECT
+            no,
+            plan_post_no,
+            name
+        FROM plan_post_tag
+        WHERE plan_post_no = #{postNo}
+    </select>
+
+    <!-- 4중 JOIN으로 한번에 조회 (N+1 문제 해결) -->
     <select id="searchByFourJoin" resultMap="ElasticsearchTestResultMap">
         SELECT DISTINCT
-        pp.no AS pp_no,
-        pp.user_nickname AS userNickname,
-        pp.title,
-        pp.description,
-        pp.created_at AS createdAt,
-        pp.updated_at AS updatedAt,
-        pp.user_no AS userNo,
-        pp.fork_count AS forkCount,
-        pp.view_count AS viewCount,
-        pp.liked_count AS likedCount,
-        pp.thumbnail,
-        pp.start_day AS startDay,
-        pp.end_day AS endDay,
-        pp.total_member AS totalMember,
+            pp.no AS pp_no,
+            pp.user_nickname AS userNickname,
+            pp.title,
+            pp.description,
+            pp.created_at AS createdAt,
+            pp.updated_at AS updatedAt,
+            pp.user_no AS userNo,
+            pp.fork_count AS forkCount,
+            pp.view_count AS viewCount,
+            pp.liked_count AS likedCount,
+            pp.thumbnail,
+            pp.start_day AS startDay,
+            pp.end_day AS endDay,
+            pp.total_member AS totalMember,
 
-        ppt.no AS tag_no,
-        ppt.plan_post_no AS tag_plan_post_no,
-        ppt.name AS tag_name
+            ppt.no AS tag_no,
+            ppt.plan_post_no AS tag_plan_post_no,
+            ppt.name AS tag_name
 
         FROM plan_post pp
-        LEFT JOIN plan_post_tag ppt ON pp.no = ppt.plan_post_no
-        LEFT JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
-        LEFT JOIN attractions a ON pad.attraction_no = a.no
+                 LEFT JOIN plan_post_tag ppt ON pp.no = ppt.plan_post_no
+                 LEFT JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
+                 LEFT JOIN attractions a ON pad.attraction_no = a.no
 
         WHERE (
-        pp.title LIKE CONCAT('%', #{keyword}, '%')
-        OR pp.user_nickname LIKE CONCAT('%', #{keyword}, '%')
-        OR pp.description LIKE CONCAT('%', #{keyword}, '%')
-        OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
-        OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')
-        OR a.address LIKE CONCAT('%', #{keyword}, '%')
-        )
+                  pp.title LIKE CONCAT('%', #{keyword}, '%')
+                      OR pp.user_nickname LIKE CONCAT('%', #{keyword}, '%')
+                      OR pp.description LIKE CONCAT('%', #{keyword}, '%')
+                      OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
+                      OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')
+                      OR a.address LIKE CONCAT('%', #{keyword}, '%')
+                  )
 
         ORDER BY pp.created_at DESC
     </select>
