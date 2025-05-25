@@ -50,7 +50,7 @@
         </collection>
     </resultMap>
 
-    <!-- N+1 문제를 위한 게시글만 조회 (태그 제외) -->
+    <!-- 👎 N+1 문제를 위한 게시글만 조회 (키워드 매칭되는 게시글 ID 먼저 수집) -->
     <select id="searchPlanPostsByKeyword" resultMap="PlanPostDtoResultMap">
         SELECT DISTINCT
             pp.no,
@@ -68,21 +68,26 @@
             pp.end_day,
             pp.total_member
         FROM plan_post pp
-                 LEFT JOIN plan_post_tag ppt ON pp.no = ppt.plan_post_no
-                 LEFT JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
-                 LEFT JOIN attractions a ON pad.attraction_no = a.no
-        WHERE (
-                  pp.title LIKE CONCAT('%', #{keyword}, '%')
-                      OR pp.user_nickname LIKE CONCAT('%', #{keyword}, '%')
-                      OR pp.description LIKE CONCAT('%', #{keyword}, '%')
-                      OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
-                      OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')
-                      OR a.address LIKE CONCAT('%', #{keyword}, '%')
-                  )
+        WHERE pp.no IN (
+            -- 키워드와 매치되는 게시글 ID들을 서브쿼리로 조회
+            SELECT DISTINCT pp2.no
+            FROM plan_post pp2
+                     LEFT JOIN plan_post_tag ppt2 ON pp2.no = ppt2.plan_post_no
+                     LEFT JOIN plan_attraction_detail pad2 ON pp2.no = pad2.plan_post_no
+                     LEFT JOIN attractions a2 ON pad2.attraction_no = a2.no
+            WHERE (
+                      pp2.title LIKE CONCAT('%', #{keyword}, '%')
+                          OR pp2.user_nickname LIKE CONCAT('%', #{keyword}, '%')
+                          OR pp2.description LIKE CONCAT('%', #{keyword}, '%')
+                          OR ppt2.name LIKE CONCAT('%', #{keyword}, '%')
+                          OR pad2.attraction_title LIKE CONCAT('%', #{keyword}, '%')
+                          OR a2.address LIKE CONCAT('%', #{keyword}, '%')
+                      )
+        )
         ORDER BY pp.created_at DESC
     </select>
 
-    <!-- N+1 문제를 위한 태그 개별 조회 -->
+    <!-- 👎 N+1 문제를 위한 태그 개별 조회 -->
     <select id="selectPlanPostTagsByPostNo" resultMap="PlanPostTagDtoResultMap">
         SELECT
             no,
@@ -92,7 +97,7 @@
         WHERE plan_post_no = #{postNo}
     </select>
 
-    <!-- 4중 JOIN으로 한번에 조회 (N+1 문제 해결) -->
+    <!-- 👍 4중 JOIN으로 한번에 조회 (N+1 문제 해결) -->
     <select id="searchByFourJoin" resultMap="ElasticsearchTestResultMap">
         SELECT DISTINCT
             pp.no AS pp_no,
