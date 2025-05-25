@@ -2,31 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.triplog.elasticsearchTest.mapper.ElasticsearchTestMapper">
 
-    <!-- PlanPostDto ResultMap -->
-    <resultMap id="PlanPostDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto">
-        <id property="no" column="no"/>
-        <result property="userNickname" column="user_nickname"/>
-        <result property="title" column="title"/>
-        <result property="description" column="description"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
-        <result property="thumbnail" column="thumbnail"/>
-        <result property="userNo" column="user_no"/>
-        <result property="forkCount" column="fork_count"/>
-        <result property="likedCount" column="liked_count"/>
-        <result property="viewCount" column="view_count"/>
-        <result property="startDay" column="start_day"/>
-        <result property="endDay" column="end_day"/>
-        <result property="totalMember" column="total_member"/>
-    </resultMap>
-
-    <!-- PlanPostTagDto ResultMap -->
+    <!-- PlanPostTagDto ResultMap (태그 개별 조회용) -->
     <resultMap id="PlanPostTagDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto">
         <id property="no" column="no"/>
         <result property="planPostNo" column="plan_post_no"/>
         <result property="name" column="name"/>
     </resultMap>
 
+    <!--  4중 JOIN 해결 케이스용 ResultMap (Collection 사용) -->
     <resultMap id="ElasticsearchTestResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostResponseDto">
         <id property="no" column="pp_no"/>
         <result property="userNickname" column="userNickname"/>
@@ -43,6 +26,7 @@
         <result property="endDay" column="endDay"/>
         <result property="totalMember" column="totalMember"/>
 
+        <!-- Collection으로 태그들을 한번에 매핑 -->
         <collection property="tags" ofType="com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto">
             <id property="no" column="tag_no"/>
             <result property="planPostNo" column="tag_plan_post_no"/>
@@ -50,23 +34,23 @@
         </collection>
     </resultMap>
 
-    <!-- 👎 N+1 문제를 위한 게시글만 조회 (키워드 매칭되는 게시글 ID 먼저 수집) -->
-    <select id="searchPlanPostsByKeyword" resultMap="PlanPostDtoResultMap">
+    <!--  N+1 문제 발생 케이스: resultType으로 게시글만 단순 조회 -->
+    <select id="searchPlanPostsByKeyword" resultType="com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto">
         SELECT DISTINCT
             pp.no,
-            pp.user_nickname,
+            pp.user_nickname AS userNickname,
             pp.title,
             pp.description,
-            pp.created_at,
-            pp.updated_at,
+            pp.created_at AS createdAt,
+            pp.updated_at AS updatedAt,
             pp.thumbnail,
-            pp.user_no,
-            pp.fork_count,
-            pp.liked_count,
-            pp.view_count,
-            pp.start_day,
-            pp.end_day,
-            pp.total_member
+            pp.user_no AS userNo,
+            pp.fork_count AS forkCount,
+            pp.liked_count AS likedCount,
+            pp.view_count AS viewCount,
+            pp.start_day AS startDay,
+            pp.end_day AS endDay,
+            pp.total_member AS totalMember
         FROM plan_post pp
         WHERE pp.no IN (
             -- 키워드와 매치되는 게시글 ID들을 서브쿼리로 조회
@@ -87,7 +71,7 @@
         ORDER BY pp.created_at DESC
     </select>
 
-    <!-- 👎 N+1 문제를 위한 태그 개별 조회 -->
+    <!--  N+1 문제 발생: 태그 개별 조회 (resultMap 사용) -->
     <select id="selectPlanPostTagsByPostNo" resultMap="PlanPostTagDtoResultMap">
         SELECT
             no,
@@ -97,7 +81,7 @@
         WHERE plan_post_no = #{postNo}
     </select>
 
-    <!-- 👍 4중 JOIN으로 한번에 조회 (N+1 문제 해결) -->
+    <!--  N+1 문제 해결: 4중 JOIN으로 한번에 조회 (resultMap + Collection 사용) -->
     <select id="searchByFourJoin" resultMap="ElasticsearchTestResultMap">
         SELECT DISTINCT
             pp.no AS pp_no,
