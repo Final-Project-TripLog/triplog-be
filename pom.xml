@@ -132,7 +132,26 @@
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>3.0.4</version>
         </dependency>
+        <!-- Elasticsearch RestHighLevelClient -->
+        <!-- ES High-Level Client -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.17.13</version> <!-- 또는 7.17.18 -->
+        </dependency>
 
+        <!-- XContentType 관련 클래스 포함 -->
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch-x-content</artifactId>
+            <version>7.17.13</version> <!-- 반드시 위 버전과 동일해야 함 -->
+        </dependency>
+
+        <!-- JSON 변환용 Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

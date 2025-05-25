@@ -78,7 +78,8 @@ public class SecurityConfig {
                         AntPathRequestMatcher.antMatcher("/**/swagger-ui/**"),
                         AntPathRequestMatcher.antMatcher("/**/swagger-ui.html"),
                         AntPathRequestMatcher.antMatcher("/**/v3/api-docs/**"),
-                        AntPathRequestMatcher.antMatcher("/**/api-docs/**")
+                        AntPathRequestMatcher.antMatcher("/**/api-docs/**"),
+                        AntPathRequestMatcher.antMatcher("/**/api/elastic/**")
                 ).permitAll()
 
                 // 인증이 필요 없는 API 경로들

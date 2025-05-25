@@ -169,16 +169,17 @@
         OR pp.description LIKE CONCAT('%', #{keyword}, '%')
         OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
         OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')
+        OR a.address LIKE CONCAT('%',#{keyword},'%')
         )
-        <if test="sidoNo != null">
-            AND a.address LIKE CONCAT('%', (SELECT name FROM sido WHERE no = #{sidoNo}), '%')
-        </if>
-        <if test="gugunNo != null">
-            AND a.address LIKE CONCAT('%', (SELECT name FROM gugun WHERE no = #{gugunNo}), '%')
-        </if>
         ORDER BY pp.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
+<!--        <if test="sidoNo != null">-->
+<!--            AND a.address LIKE CONCAT('%', (SELECT name FROM sido WHERE no = #{sidoNo}), '%')-->
+<!--        </if>-->
+<!--        <if test="gugunNo != null">-->
+<!--            AND a.address LIKE CONCAT('%', (SELECT name FROM gugun WHERE no = #{gugunNo}), '%')-->
+<!--        </if>-->
 
     <!-- 키워드 기반 게시글 총 개수 -->
     <select id="countPlanPostsByKeyword" resultType="int">

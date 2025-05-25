@@ -34,13 +34,17 @@ public class JWTFilter extends OncePerRequestFilter {
             "/api/users/check-nickname",
             "/api/attraction",
             "/api/review",
+
             // ⭐ 정적 파일 경로 추가
             "/uploads",
             "/triplog/uploads",
             "/static",
             "/css",
             "/js",
-            "/images"
+            "/images",
+            // 엘라스틱 서치
+            "/api/elastic/**",
+            "/triplog/api/elastic"
     );
 
     public JWTFilter(JWTUtil jwtUtil) {
