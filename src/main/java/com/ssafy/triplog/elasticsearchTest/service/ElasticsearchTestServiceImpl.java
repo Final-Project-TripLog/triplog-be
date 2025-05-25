@@ -2,6 +2,7 @@ package com.ssafy.triplog.elasticsearchTest.service;
 
 import com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto;
 import com.ssafy.triplog.elasticsearchTest.dto.PlanPostResponseDto;
+import com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto;
 import com.ssafy.triplog.elasticsearchTest.mapper.ElasticsearchTestMapper;
 import com.ssafy.triplog.planpost.dto.PlanPostResponse;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +51,7 @@ public class ElasticsearchTestServiceImpl implements ElasticsearchTestService {
         response.setViewCount(dto.getViewCount());
 
         // 태그 목록 조회
-        List<PlanPostTagDto> tags = searchFourJoinNPlus1.selectPlanPostTagsByPostNo(postNo);
+        List<PlanPostTagDto> tags = elasticsearchTestMapper.searchFourJoinNPlus1(postNo);
         response.setTags(tags != null ? tags : Collections.emptyList());
 
         return response;
