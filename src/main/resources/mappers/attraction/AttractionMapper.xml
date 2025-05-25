@@ -2,6 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.triplog.attraction.mapper.AttractionMapper">
 
+    <resultMap id="PlanPostWithTagsResultMap" type="com.ssafy.triplog.planpost.dto.PlanPostResponse">
+        <id property="no" column="pp_no"/>
+        <result property="userNickname" column="userNickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="updatedAt" column="updatedAt"/>
+        <result property="userNo" column="userNo"/>
+        <result property="forkCount" column="forkCount"/>
+        <result property="likedCount" column="likedCount"/>
+        <result property="viewCount" column="viewCount"/>
+        <result property="startDay" column="startDay"/>
+        <result property="endDay" column="endDay"/>
+        <result property="totalMember" column="totalMember"/>
+
+        <collection property="tags" ofType="com.ssafy.triplog.planpost.dto.PlanPostTagDto">
+            <id property="no" column="tag_no"/>
+            <result property="planPostNo" column="tag_plan_post_no"/>
+            <result property="name" column="tag_name"/>
+        </collection>
+    </resultMap>
+
+
     <select id="findAttractionCategories" resultType="String">
         SELECT name FROM attraction_types
     </select>
@@ -61,25 +85,42 @@
     </select>
 
     <!-- 관광지를 포함하는 여행 계획 조회 -->
-    <select id="findPlansByAttractionId" resultType="com.ssafy.triplog.planpost.dto.PlanPostResponse">
+    <select id="findPlansByAttractionId" resultMap="PlanPostWithTagsResultMap">
         SELECT
-            pp.no, pp.user_nickname as userNickname, pp.title,
-            pp.description, pp.thumbnail, pp.created_at as createdAt,
-            pp.updated_at as updatedAt, pp.user_no as userNo,
-            pp.fork_count as forkCount, pp.liked_count as likedCount,
-            pp.view_count as viewCount
+            pp.no AS pp_no,
+            pp.user_nickname AS userNickname,
+            pp.title,
+            pp.description,
+            pp.thumbnail,
+            pp.created_at AS createdAt,
+            pp.updated_at AS updatedAt,
+            pp.user_no AS userNo,
+            pp.fork_count AS forkCount,
+            pp.liked_count AS likedCount,
+            pp.view_count AS viewCount,
+            pp.start_day AS startDay,
+            pp.end_day AS endDay,
+            pp.total_member AS totalMember,
+
+            pt.no AS tag_no,
+            pt.plan_post_no AS tag_plan_post_no,
+            pt.name AS tag_name
+
         FROM
             plan_post pp
                 JOIN
             plan_attraction_detail pad ON pp.no = pad.plan_post_no
+            LEFT JOIN
+            plan_post_tag pt ON pp.no = pt.plan_post_no
+
         WHERE
             pad.attraction_no = #{attractionNo}
-        GROUP BY
-            pp.no
+
         ORDER BY
             pp.created_at DESC
             LIMIT #{size} OFFSET #{offset}
     </select>
+
 
     <select id="findTagsByPlanPostId" resultType="com.ssafy.triplog.planpost.dto.PlanPostTagDto">
         SELECT

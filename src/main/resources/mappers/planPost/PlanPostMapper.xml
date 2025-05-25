@@ -166,6 +166,7 @@
         LEFT JOIN attractions a ON pad.attraction_no = a.no
         WHERE (
         pp.title LIKE CONCAT('%', #{keyword}, '%')
+        OR pp.user_nickname LIKE CONCAT('%', #{keyword}, '%')
         OR pp.description LIKE CONCAT('%', #{keyword}, '%')
         OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
         OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')

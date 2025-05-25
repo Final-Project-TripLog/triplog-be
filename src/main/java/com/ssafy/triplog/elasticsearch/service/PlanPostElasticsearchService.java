@@ -177,7 +177,7 @@ public class PlanPostElasticsearchService {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.query(
                 QueryBuilders.multiMatchQuery(keyword,
-                        "title", "description", "tags", "attractionTitles", "address"
+                        "title", "userNickname", "description", "tags", "attractionTitles", "address"
                 ).type(MultiMatchQueryBuilder.Type.BEST_FIELDS)
         );
 
