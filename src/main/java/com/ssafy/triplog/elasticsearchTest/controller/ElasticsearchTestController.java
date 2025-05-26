@@ -384,4 +384,152 @@ public class ElasticsearchTestController {
     }
 
 
+// 🆕 Elasticsearch 검색 엔드포인트들
+
+    @Operation(summary = "Elasticsearch 쿼리 스트링 검색")
+    @GetMapping("/search/elasticsearch")
+    public ResponseEntity<List<PlanPostResponseDto>> searchElasticsearch(
+            @Parameter(description = "검색 키워드", required = true)
+            @RequestParam String keyword) {
+
+        log.info("🔍 Elasticsearch 검색 - keyword: {}", keyword);
+
+        List<PlanPostResponseDto> posts = elasticsearchTestService.searchByElasticsearch(keyword);
+        return ResponseEntity.ok(posts);
+    }
+
+    @Operation(summary = "Elasticsearch Match 검색")
+    @GetMapping("/search/elasticsearch-match")
+    public ResponseEntity<List<PlanPostResponseDto>> searchElasticsearchMatch(
+            @Parameter(description = "검색 키워드", required = true)
+            @RequestParam String keyword) {
+
+        log.info("🔍 Elasticsearch Match 검색 - keyword: {}", keyword);
+
+        List<PlanPostResponseDto> posts = elasticsearchTestService.searchByElasticsearchMatch(keyword);
+        return ResponseEntity.ok(posts);
+    }
+
+    @Operation(summary = "Elasticsearch Multi-Match 검색")
+    @GetMapping("/search/elasticsearch-multi")
+    public ResponseEntity<List<PlanPostResponseDto>> searchElasticsearchMultiMatch(
+            @Parameter(description = "검색 키워드", required = true)
+            @RequestParam String keyword) {
+
+        log.info("🔍 Elasticsearch Multi-Match 검색 - keyword: {}", keyword);
+
+        List<PlanPostResponseDto> posts = elasticsearchTestService.searchByElasticsearchMultiMatch(keyword);
+        return ResponseEntity.ok(posts);
+    }
+
+    // 🏆 궁극의 성능 비교 테스트 (MySQL vs Elasticsearch)
+    @Operation(summary = "🏆 궁극의 성능 비교 테스트 (MySQL vs Elasticsearch)")
+    @GetMapping("/search/ultimate-performance-test")
+    public ResponseEntity<Map<String, Object>> ultimatePerformanceTest(
+            @Parameter(description = "검색 키워드", required = true)
+            @RequestParam String keyword) throws InterruptedException {
+
+        Map<String, Object> result = new HashMap<>();
+
+        log.warn("🏆🏆🏆 궁극의 성능 비교 테스트 시작 🏆🏆🏆");
+        log.warn("키워드: {}", keyword);
+
+        // 1. MySQL LIKE 검색 (최적화됨)
+        log.info("🗃️ MySQL 인덱스 캐시 최적화 검색 시작");
+        long mysqlOptimizedStart = System.currentTimeMillis();
+        List<PlanPostResponseDto> mysqlOptimizedResult = elasticsearchTestService.searchByCacheIndexedOptimized(keyword);
+        long mysqlOptimizedDuration = System.currentTimeMillis() - mysqlOptimizedStart;
+        log.info("🗃️ MySQL 최적화 완료: {}ms ({}개)", mysqlOptimizedDuration, mysqlOptimizedResult.size());
+
+        Thread.sleep(100);
+
+        // 2. MySQL FULLTEXT 검색
+        log.info("🔍 MySQL FULLTEXT 자연어 검색 시작");
+        long mysqlFulltextStart = System.currentTimeMillis();
+        List<PlanPostResponseDto> mysqlFulltextResult = elasticsearchTestService.searchByCacheFulltext(keyword);
+        long mysqlFulltextDuration = System.currentTimeMillis() - mysqlFulltextStart;
+        log.info("🔍 MySQL FULLTEXT 완료: {}ms ({}개)", mysqlFulltextDuration, mysqlFulltextResult.size());
+
+        Thread.sleep(100);
+
+        // 3. MySQL 4중 JOIN 검색
+        log.info("⚡ MySQL 4중 JOIN 검색 시작");
+        long mysql4JoinStart = System.currentTimeMillis();
+        List<PlanPostResponseDto> mysql4JoinResult = elasticsearchTestService.searchByFourJoin(keyword);
+        long mysql4JoinDuration = System.currentTimeMillis() - mysql4JoinStart;
+        log.info("⚡ MySQL 4중 JOIN 완료: {}ms ({}개)", mysql4JoinDuration, mysql4JoinResult.size());
+
+        Thread.sleep(100);
+
+        // 4. Elasticsearch Query String 검색
+        log.info("🚀 Elasticsearch 쿼리 스트링 검색 시작");
+        long esQueryStart = System.currentTimeMillis();
+        List<PlanPostResponseDto> esQueryResult = elasticsearchTestService.searchByElasticsearch(keyword);
+        long esQueryDuration = System.currentTimeMillis() - esQueryStart;
+        log.info("🚀 Elasticsearch 쿼리 스트링 완료: {}ms ({}개)", esQueryDuration, esQueryResult.size());
+
+        Thread.sleep(100);
+
+        // 5. Elasticsearch Match 검색
+        log.info("🎯 Elasticsearch Match 검색 시작");
+        long esMatchStart = System.currentTimeMillis();
+        List<PlanPostResponseDto> esMatchResult = elasticsearchTestService.searchByElasticsearchMatch(keyword);
+        long esMatchDuration = System.currentTimeMillis() - esMatchStart;
+        log.info("🎯 Elasticsearch Match 완료: {}ms ({}개)", esMatchDuration, esMatchResult.size());
+
+        Thread.sleep(100);
+
+        // 6. Elasticsearch Multi-Match 검색
+        log.info("⭐ Elasticsearch Multi-Match 검색 시작");
+        long esMultiStart = System.currentTimeMillis();
+        List<PlanPostResponseDto> esMultiResult = elasticsearchTestService.searchByElasticsearchMultiMatch(keyword);
+        long esMultiDuration = System.currentTimeMillis() - esMultiStart;
+        log.info("⭐ Elasticsearch Multi-Match 완료: {}ms ({}개)", esMultiDuration, esMultiResult.size());
+
+        // 성능 비교 결과 로깅
+        log.warn("📊📊📊 궁극의 성능 비교 결과 📊📊📊");
+        log.warn("1️⃣ MySQL 인덱스 최적화:        {}ms ({}개 결과)", mysqlOptimizedDuration, mysqlOptimizedResult.size());
+        log.warn("2️⃣ MySQL FULLTEXT:            {}ms ({}개 결과)", mysqlFulltextDuration, mysqlFulltextResult.size());
+        log.warn("3️⃣ MySQL 4중 JOIN:            {}ms ({}개 결과)", mysql4JoinDuration, mysql4JoinResult.size());
+        log.warn("4️⃣ Elasticsearch 쿼리:        {}ms ({}개 결과)", esQueryDuration, esQueryResult.size());
+        log.warn("5️⃣ Elasticsearch Match:       {}ms ({}개 결과)", esMatchDuration, esMatchResult.size());
+        log.warn("6️⃣ Elasticsearch Multi-Match: {}ms ({}개 결과)", esMultiDuration, esMultiResult.size());
+
+        // 가장 빠른 방식 찾기
+        long[] times = {mysqlOptimizedDuration, mysqlFulltextDuration, mysql4JoinDuration,
+                esQueryDuration, esMatchDuration, esMultiDuration};
+        String[] methods = {"MySQL 인덱스 최적화", "MySQL FULLTEXT", "MySQL 4중 JOIN",
+                "ES 쿼리", "ES Match", "ES Multi-Match"};
+
+        long fastestTime = Arrays.stream(times).min().orElse(0);
+        String fastestMethod = "";
+        for (int i = 0; i < times.length; i++) {
+            if (times[i] == fastestTime) {
+                fastestMethod = methods[i];
+                break;
+            }
+        }
+
+        log.warn("🏆 가장 빠른 방식: {} ({}ms)", fastestMethod, fastestTime);
+
+        // 결과 정리
+        result.put("keyword", keyword);
+        result.put("mysql_optimized_time_ms", mysqlOptimizedDuration);
+        result.put("mysql_optimized_result_count", mysqlOptimizedResult.size());
+        result.put("mysql_fulltext_time_ms", mysqlFulltextDuration);
+        result.put("mysql_fulltext_result_count", mysqlFulltextResult.size());
+        result.put("mysql_4join_time_ms", mysql4JoinDuration);
+        result.put("mysql_4join_result_count", mysql4JoinResult.size());
+        result.put("elasticsearch_query_time_ms", esQueryDuration);
+        result.put("elasticsearch_query_result_count", esQueryResult.size());
+        result.put("elasticsearch_match_time_ms", esMatchDuration);
+        result.put("elasticsearch_match_result_count", esMatchResult.size());
+        result.put("elasticsearch_multi_time_ms", esMultiDuration);
+        result.put("elasticsearch_multi_result_count", esMultiResult.size());
+        result.put("fastest_method", fastestMethod);
+        result.put("fastest_time_ms", fastestTime);
+
+        return ResponseEntity.ok(result);
+    }
+
 }
