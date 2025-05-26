@@ -15,5 +15,8 @@ public interface ElasticsearchTestService {
     List<PlanPostResponseDto> searchByCacheFulltext(String keyword);
     List<PlanPostResponseDto> searchByCacheFulltextBoolean(String keyword);
     List<PlanPostResponseDto> searchByCacheFulltextRelevance(String keyword);
-
+    // 🆕 Elasticsearch 검색 메소드들
+    List<PlanPostResponseDto> searchByElasticsearch(String keyword);
+    List<PlanPostResponseDto> searchByElasticsearchMatch(String keyword);
+    List<PlanPostResponseDto> searchByElasticsearchMultiMatch(String keyword);
 }
