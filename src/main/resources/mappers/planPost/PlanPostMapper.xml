@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.triplog.planpost.mapper.PlanPostMapper">
+
+    <!-- ===== ResultMap 정의 ===== -->
+
+    <!-- PlanPostDto ResultMap -->
+    <resultMap id="PlanPostDtoResultMap" type="com.ssafy.triplog.planpost.dto.PlanPostDto">
+        <id property="no" column="no"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="userNo" column="user_no"/>
+        <result property="forkCount" column="fork_count"/>
+        <result property="likedCount" column="liked_count"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="startDay" column="start_day"/>
+        <result property="endDay" column="end_day"/>
+        <result property="totalMember" column="total_member"/>
+    </resultMap>
+
+    <resultMap id="PlanPostWithTagsResultMap" type="com.ssafy.triplog.planpost.dto.PlanPostResponse">
+        <id property="no" column="pp_no"/>
+        <result property="userNickname" column="userNickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="updatedAt" column="updatedAt"/>
+        <result property="userNo" column="userNo"/>
+        <result property="forkCount" column="forkCount"/>
+        <result property="viewCount" column="viewCount"/>
+        <result property="likedCount" column="likedCount"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="startDay" column="startDay"/>
+        <result property="endDay" column="endDay"/>
+        <result property="totalMember" column="totalMember"/>
+
+        <collection property="tags" ofType="com.ssafy.triplog.planpost.dto.PlanPostTagDto">
+            <id property="no" column="tag_no"/>
+            <result property="planPostNo" column="tag_plan_post_no"/>
+            <result property="name" column="tag_name"/>
+        </collection>
+    </resultMap>
+
+    <!-- PlanAttractionDetailDto ResultMap -->
+    <resultMap id="PlanAttractionDetailDtoResultMap" type="com.ssafy.triplog.planpost.dto.PlanAttractionDetailDto">
+        <id property="no" column="no"/>
+        <result property="visitDate" column="visite_date"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="moveTime" column="move_time"/>
+        <result property="attractionTitle" column="attraction_title"/>
+        <result property="attractionThumbnail" column="attraction_thumbnail"/>
+        <result property="attractionRating" column="attraction_rating"/>
+        <result property="writerRating" column="writer_rating"/>
+        <result property="planPostNo" column="plan_post_no"/>
+        <result property="attractionNo" column="attraction_no"/>
+        <result property="reviewNo" column="review_no"/>
+    </resultMap>
+
+    <!-- PlanPostTagDto ResultMap -->
+    <resultMap id="PlanPostTagDtoResultMap" type="com.ssafy.triplog.planpost.dto.PlanPostTagDto">
+        <id property="no" column="no"/>
+        <result property="planPostNo" column="plan_post_no"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <!-- LikePostDto ResultMap -->
+    <resultMap id="LikePostDtoResultMap" type="com.ssafy.triplog.planpost.dto.LikePostDto">
+        <result property="userNo" column="user_no"/>
+        <result property="planPostNo" column="plan_post_no"/>
+        <result property="likedAt" column="liked_at"/>
+    </resultMap>
+
+    <!-- ===== plan_post 테이블 관련 쿼리 ===== -->
+
+    <!-- 게시글 등록 -->
+    <insert id="insertPlanPost" parameterType="com.ssafy.triplog.planpost.dto.PlanPostDto"
+            useGeneratedKeys="true" keyProperty="no" keyColumn="no">
+        INSERT INTO plan_post (
+            user_nickname, title, description, created_at, updated_at,
+            user_no, fork_count, view_count, liked_count, thumbnail,
+            start_day, end_day, total_member
+        ) VALUES (
+                     #{userNickname}, #{title}, #{description}, NOW(), NOW(),
+                     #{userNo}, #{forkCount}, #{viewCount}, #{likedCount}, #{thumbnail},
+                     #{startDay}, #{endDay}, #{totalMember}
+                 )
+    </insert>
+
+    <!-- 게시글 단건 조회 -->
+    <select id="selectPlanPostById" resultMap="PlanPostDtoResultMap">
+        SELECT
+            no, user_nickname, title, description, created_at, updated_at,
+            user_no, fork_count, view_count, liked_count, thumbnail,
+            start_day, end_day, total_member
+        FROM plan_post
+        WHERE no = #{postNo}
+    </select>
+
+    <!-- 게시글 수정 -->
+    <update id="updatePlanPost" parameterType="com.ssafy.triplog.planpost.dto.PlanPostDto">
+        UPDATE plan_post
+        SET
+            title = #{title},
+            description = #{description},
+            updated_at = NOW(),
+            thumbnail = #{thumbnail},
+            start_day = #{startDay},
+            end_day = #{endDay},
+            total_member = #{totalMember}
+        WHERE no = #{no}
+    </update>
+
+    <!-- 게시글 삭제 -->
+    <delete id="deletePlanPost">
+        DELETE FROM plan_post WHERE no = #{postNo}
+    </delete>
+
+    <!-- 게시글 목록 조회 (정렬 기준별) -->
+    <select id="selectPlanPostList" resultMap="PlanPostDtoResultMap">
+        SELECT
+        no, user_nickname, title, description, created_at, updated_at,
+        user_no, fork_count, view_count, liked_count, thumbnail,
+        start_day, end_day, total_member
+        FROM plan_post
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'liked_count'">liked_count DESC, created_at DESC</when>
+            <when test="sortBy == 'fork_count'">fork_count DESC, created_at DESC</when>
+            <when test="sortBy == 'view_count'">view_count DESC, created_at DESC</when>
+            <otherwise>created_at DESC</otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 게시글 총 개수 조회 -->
+    <select id="countPlanPosts" resultType="int">
+        SELECT COUNT(*) FROM plan_post
+    </select>
+
+    <!-- 장소별 게시글 검색 -->
+    <select id="searchPlanPostsByLocation" resultMap="PlanPostDtoResultMap">
+        SELECT DISTINCT
+        pp.no, pp.user_nickname, pp.title, pp.description, pp.created_at, pp.updated_at,
+        pp.user_no, pp.fork_count, pp.view_count, pp.liked_count, pp.thumbnail,
+        pp.start_day, pp.end_day, pp.total_member
+        FROM plan_post pp
+        INNER JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
+        INNER JOIN attractions a ON pad.attraction_no = a.no
+        WHERE 1=1
+        <if test="sidoNo != null">
+            AND a.address LIKE CONCAT('%', (SELECT name FROM sido WHERE no = #{sidoNo}), '%')
+        </if>
+        <if test="gugunNo != null">
+            AND a.address LIKE CONCAT('%', (SELECT name FROM gugun WHERE no = #{gugunNo}), '%')
+        </if>
+        ORDER BY pp.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 장소별 게시글 총 개수 -->
+    <select id="countPlanPostsByLocation" resultType="int">
+        SELECT COUNT(DISTINCT pp.no)
+        FROM plan_post pp
+        INNER JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
+        INNER JOIN attractions a ON pad.attraction_no = a.no
+        WHERE 1=1
+        <if test="sidoNo != null">
+            AND a.address LIKE CONCAT('%', (SELECT name FROM sido WHERE no = #{sidoNo}), '%')
+        </if>
+        <if test="gugunNo != null">
+            AND a.address LIKE CONCAT('%', (SELECT name FROM gugun WHERE no = #{gugunNo}), '%')
+        </if>
+    </select>
+
+    <!-- 키워드 기반 게시글 검색 -->
+    <select id="searchPlanPostsByKeyword" resultMap="PlanPostWithTagsResultMap">
+        SELECT DISTINCT
+        pp.no AS pp_no,
+        pp.user_nickname AS userNickname,
+        pp.title,
+        pp.description,
+        pp.created_at AS createdAt,
+        pp.updated_at AS updatedAt,
+        pp.user_no AS userNo,
+        pp.fork_count AS forkCount,
+        pp.view_count AS viewCount,
+        pp.liked_count AS likedCount,
+        pp.thumbnail,
+        pp.start_day AS startDay,
+        pp.end_day AS endDay,
+        pp.total_member AS totalMember,
+
+        ppt.no AS tag_no,
+        ppt.plan_post_no AS tag_plan_post_no,
+        ppt.name AS tag_name
+
+        FROM plan_post pp
+        LEFT JOIN plan_post_tag ppt ON pp.no = ppt.plan_post_no
+        LEFT JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
+        LEFT JOIN attractions a ON pad.attraction_no = a.no
+
+        WHERE (
+        pp.title LIKE CONCAT('%', #{keyword}, '%')
+        OR pp.user_nickname LIKE CONCAT('%', #{keyword}, '%')
+        OR pp.description LIKE CONCAT('%', #{keyword}, '%')
+        OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
+        OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')
+        OR a.address LIKE CONCAT('%', #{keyword}, '%')
+        )
+
+        ORDER BY pp.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+<!--        <if test="sidoNo != null">-->
+<!--            AND a.address LIKE CONCAT('%', (SELECT name FROM sido WHERE no = #{sidoNo}), '%')-->
+<!--        </if>-->
+<!--        <if test="gugunNo != null">-->
+<!--            AND a.address LIKE CONCAT('%', (SELECT name FROM gugun WHERE no = #{gugunNo}), '%')-->
+<!--        </if>-->
+
+    <!-- 키워드 기반 게시글 총 개수 -->
+    <select id="countPlanPostsByKeyword" resultType="int">
+        SELECT COUNT(DISTINCT pp.no)
+        FROM plan_post pp
+        LEFT JOIN plan_post_tag ppt ON pp.no = ppt.plan_post_no
+        LEFT JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
+        LEFT JOIN attractions a ON pad.attraction_no = a.no
+        WHERE (
+        pp.title LIKE CONCAT('%', #{keyword}, '%')
+        OR pp.description LIKE CONCAT('%', #{keyword}, '%')
+        OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
+        )
+        <if test="sidoNo != null">
+            AND a.address LIKE CONCAT('%', (SELECT name FROM sido WHERE no = #{sidoNo}), '%')
+        </if>
+        <if test="gugunNo != null">
+            AND a.address LIKE CONCAT('%', (SELECT name FROM gugun WHERE no = #{gugunNo}), '%')
+        </if>
+    </select>
+
+    <!-- 사용자별 게시글 목록 조회 -->
+    <select id="selectPlanPostsByUser" resultMap="PlanPostDtoResultMap">
+        SELECT
+            no, user_nickname, title, description, created_at, updated_at,
+            user_no, fork_count, view_count, liked_count, thumbnail,
+            start_day, end_day, total_member
+        FROM plan_post
+        WHERE user_no = #{userNo}
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 사용자별 게시글 총 개수 -->
+    <select id="countPlanPostsByUser" resultType="int">
+        SELECT COUNT(*) FROM plan_post WHERE user_no = #{userNo}
+    </select>
+
+    <!-- 조회수 증가 -->
+    <update id="increaseViewCount">
+        UPDATE plan_post
+        SET view_count = IFNULL(view_count, 0) + 1
+        WHERE no = #{postNo}
+    </update>
+
+    <!-- ===== plan_attraction_detail 테이블 관련 쿼리 ===== -->
+
+    <!-- 관광지 세부 계획 등록 -->
+    <insert id="insertPlanAttractionDetail" parameterType="com.ssafy.triplog.planpost.dto.PlanAttractionDetailDto"
+            useGeneratedKeys="true" keyProperty="no" keyColumn="no">
+        INSERT INTO plan_attraction_detail (
+            visite_date, start_time, end_time, move_time, attraction_title,
+            attraction_thumbnail, attraction_rating, writer_rating,
+            plan_post_no, attraction_no, review_no
+        ) VALUES (
+                     #{visitDate}, #{startTime}, #{endTime}, #{moveTime}, #{attractionTitle},
+                     #{attractionThumbnail}, #{attractionRating}, #{writerRating},
+                     #{planPostNo}, #{attractionNo}, #{reviewNo}
+                 )
+    </insert>
+
+    <!-- 관광지 세부 계획 일괄 등록 -->
+    <insert id="insertPlanAttractionDetails" parameterType="java.util.List">
+        INSERT INTO plan_attraction_detail (
+        visite_date, start_time, end_time, move_time, attraction_title,
+        attraction_thumbnail, attraction_rating, writer_rating,
+        plan_post_no, attraction_no, review_no
+        ) VALUES
+        <foreach collection="attractions" item="attraction" separator=",">
+            (
+            #{attraction.visitDate}, #{attraction.startTime}, #{attraction.endTime},
+            #{attraction.moveTime}, #{attraction.attractionTitle},
+            #{attraction.attractionThumbnail}, #{attraction.attractionRating},
+            #{attraction.writerRating}, #{attraction.planPostNo},
+            #{attraction.attractionNo}, #{attraction.reviewNo}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 게시글의 관광지 세부 계획 조회 -->
+    <select id="selectPlanAttractionDetailsByPostNo" resultMap="PlanAttractionDetailDtoResultMap">
+        SELECT
+            no, visite_date, start_time, end_time, move_time, attraction_title,
+            attraction_thumbnail, attraction_rating, writer_rating,
+            plan_post_no, attraction_no, review_no
+        FROM plan_attraction_detail
+        WHERE plan_post_no = #{postNo}
+        ORDER BY visite_date ASC, start_time ASC
+    </select>
+
+    <!-- 게시글의 모든 관광지 세부 계획 삭제 -->
+    <delete id="deletePlanAttractionDetailsByPostNo">
+        DELETE FROM plan_attraction_detail WHERE plan_post_no = #{postNo}
+    </delete>
+
+    <!-- ===== plan_post_tag 테이블 관련 쿼리 ===== -->
+
+    <!-- 게시글 태그 등록 -->
+    <insert id="insertPlanPostTag" parameterType="com.ssafy.triplog.planpost.dto.PlanPostTagDto"
+            useGeneratedKeys="true" keyProperty="no" keyColumn="no">
+        INSERT INTO plan_post_tag (plan_post_no, name)
+        VALUES (#{planPostNo}, #{name})
+    </insert>
+
+    <!-- 게시글 태그 일괄 등록 -->
+    <insert id="insertPlanPostTags" parameterType="java.util.List">
+        INSERT INTO plan_post_tag (plan_post_no, name) VALUES
+        <foreach collection="tags" item="tag" separator=",">
+            (#{tag.planPostNo}, #{tag.name})
+        </foreach>
+    </insert>
+
+    <!-- 게시글의 태그 목록 조회 -->
+    <select id="selectPlanPostTagsByPostNo" resultMap="PlanPostTagDtoResultMap">
+        SELECT no, plan_post_no, name
+        FROM plan_post_tag
+        WHERE plan_post_no = #{postNo}
+        ORDER BY no ASC
+    </select>
+
+    <!-- 게시글의 모든 태그 삭제 -->
+    <delete id="deletePlanPostTagsByPostNo">
+        DELETE FROM plan_post_tag WHERE plan_post_no = #{postNo}
+    </delete>
+
+    <!-- ===== like_post 테이블 관련 쿼리 ===== -->
+
+    <!-- 좋아요 등록 -->
+    <insert id="insertLikePost" parameterType="com.ssafy.triplog.planpost.dto.LikePostDto">
+        INSERT INTO like_post (user_no, plan_post_no, liked_at)
+        VALUES (#{userNo}, #{planPostNo}, #{likedAt})
+    </insert>
+
+    <!-- 좋아요 삭제 -->
+    <delete id="deleteLikePost">
+        DELETE FROM like_post
+        WHERE plan_post_no = #{postNo} AND user_no = #{userNo}
+    </delete>
+
+    <!-- 좋아요 존재 여부 확인 -->
+    <select id="existsLikePost" resultType="int">
+        SELECT COUNT(*)
+        FROM like_post
+        WHERE plan_post_no = #{postNo} AND user_no = #{userNo}
+    </select>
+
+    <!-- 게시글 좋아요 수 증가 -->
+    <update id="increaseLikedCount">
+        UPDATE plan_post
+        SET liked_count = IFNULL(liked_count, 0) + 1
+        WHERE no = #{postNo}
+    </update>
+
+    <!-- 게시글 좋아요 수 감소 -->
+    <update id="decreaseLikedCount">
+        UPDATE plan_post
+        SET liked_count = IFNULL(liked_count, 0) - 1
+        WHERE no = #{postNo} AND liked_count > 0
+    </update>
+
+</mapper>

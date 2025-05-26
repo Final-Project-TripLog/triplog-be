@@ -1,6 +1,7 @@
 package com.ssafy.triplog.planpost.service;
 
 import com.ssafy.triplog.planpost.controller.PlanPostController.PlanPostFromMyPlanRequest;
+import com.ssafy.triplog.planpost.dto.PlanPostDetailResponse;
 import com.ssafy.triplog.planpost.dto.PlanPostRequest;
 import com.ssafy.triplog.planpost.dto.PlanPostResponse;
 import java.util.List;
@@ -35,9 +36,17 @@ public interface PlanPostService {
     /**
      * 게시글 단건 조회
      * @param postNo 게시글 번호
-     * @return 게시글 상세 정보
+     * @return 게시글 기본 정보
      */
     PlanPostResponse getPlanPostById(Long postNo);
+
+    /**
+     * 게시글 상세 조회 (관광지 세부 계획 포함)
+     * @param postNo 게시글 번호
+     * @param currentUserNo 현재 사용자 번호 (좋아요 상태 확인용, null 가능)
+     * @return 게시글 상세 정보
+     */
+    PlanPostDetailResponse getPlanPostDetail(Long postNo, Long currentUserNo);
 
     /**
      * 게시글 수정

@@ -89,7 +89,7 @@ public interface PlanPostMapper {
      * @param limit 조회 건수
      * @return 게시글 목록
      */
-    List<PlanPostDto> searchPlanPostsByKeyword(@Param("keyword") String keyword,
+    List<PlanPostResponse> searchPlanPostsByKeyword(@Param("keyword") String keyword,
                                                @Param("sidoNo") Long sidoNo,
                                                @Param("gugunNo") Long gugunNo,
                                                @Param("offset") int offset,

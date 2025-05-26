@@ -61,13 +61,27 @@ public class SecurityConfig {
 
         // 경로별 권한 설정
         http.authorizeHttpRequests(auth -> auth
+                // ✅ 정적 파일 경로 - 인증 없이 접근 가능 (이미지, CSS, JS 등)
+                .requestMatchers(
+                        AntPathRequestMatcher.antMatcher("/**/uploads/**"),
+                        AntPathRequestMatcher.antMatcher("/**/triplog/uploads/**"),
+                        AntPathRequestMatcher.antMatcher("/uploads/**"),
+                        AntPathRequestMatcher.antMatcher("/triplog/uploads/**"),
+                        AntPathRequestMatcher.antMatcher("/static/**"),
+                        AntPathRequestMatcher.antMatcher("/css/**"),
+                        AntPathRequestMatcher.antMatcher("/js/**"),
+                        AntPathRequestMatcher.antMatcher("/images/**")
+                ).permitAll()
+
                 // Swagger 관련 경로는 인증 없이 접근 가능
                 .requestMatchers(
                         AntPathRequestMatcher.antMatcher("/**/swagger-ui/**"),
                         AntPathRequestMatcher.antMatcher("/**/swagger-ui.html"),
                         AntPathRequestMatcher.antMatcher("/**/v3/api-docs/**"),
-                        AntPathRequestMatcher.antMatcher("/**/api-docs/**")
+                        AntPathRequestMatcher.antMatcher("/**/api-docs/**"),
+                        AntPathRequestMatcher.antMatcher("/**/api/elastic/**")
                 ).permitAll()
+
                 // 인증이 필요 없는 API 경로들
                 .requestMatchers(
                         AntPathRequestMatcher.antMatcher("/**/api/users/signup"),
@@ -75,23 +89,26 @@ public class SecurityConfig {
                         AntPathRequestMatcher.antMatcher("/**/api/users/find-email"),
                         AntPathRequestMatcher.antMatcher("/**/api/users/find-password"),
                         AntPathRequestMatcher.antMatcher("/**/api/users/check-email"),
-                        AntPathRequestMatcher.antMatcher("/**/api/users/check-nickname")
+                        AntPathRequestMatcher.antMatcher("/**/api/users/check-nickname"),
+                        AntPathRequestMatcher.antMatcher("/**/api/review/**"),
+                        AntPathRequestMatcher.antMatcher("/**/api/attraction/**")
 //                        AntPathRequestMatcher.antMatcher("/**") // 테스트를 위해 일시적으로 모든 경로 허용 (실제 운영에서는 제거 필요)
                 ).permitAll()
+
                 // 관리자 기능 - ADMIN 역할을 가진 사용자만 접근 가능
                 .requestMatchers(
                         AntPathRequestMatcher.antMatcher("/**/api/admin/**")
                 ).hasRole("ADMIN")
+
                 // 인증된 사용자만 접근 가능한 경로들
                 .requestMatchers(
                         AntPathRequestMatcher.antMatcher("/**/api/users/{userNo}/**"),
-                        AntPathRequestMatcher.antMatcher("/**/api/attraction/**"),
-                        AntPathRequestMatcher.antMatcher("/**/api/review/**"),
                         AntPathRequestMatcher.antMatcher("/**/api/bookmarks/**"),
                         AntPathRequestMatcher.antMatcher("/**/api/myplans/**"),
                         AntPathRequestMatcher.antMatcher("/**/api/planposts/**"),
                         AntPathRequestMatcher.antMatcher("/**/api/plan-comments/**")
                 ).authenticated()
+
                 // 그 외 모든 요청은 인증 필요
                 .anyRequest().authenticated());
 
@@ -110,7 +127,6 @@ public class SecurityConfig {
         // 사용자 자원 소유권 필터 추가 - JWT 인증 이후 리소스 접근 권한 검증
         // JWTFilter 다음에 실행되어, 인증된 사용자의 리소스 접근 권한을 확인
         http.addFilterAfter(new UserResourceOwnershipFilter(jwtUtil), JWTFilter.class);
-
 
         // 세션 관리 설정 - JWT를 사용하므로 세션은 STATELESS로 설정
         http.sessionManagement(session -> session
@@ -154,5 +170,4 @@ public class SecurityConfig {
 
         return source;
     }
-
 }

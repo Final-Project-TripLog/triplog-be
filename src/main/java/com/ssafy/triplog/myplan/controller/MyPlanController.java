@@ -188,6 +188,8 @@ public class MyPlanController {
         try {
             // 권한 검사 + 일일 계획 조회
             List<MyDailyPlanDto> dailyPlans = myPlanService.getMyPlanDetail(planNo, userNo);
+
+            log.debug(dailyPlans.toString() + "************");
             return ResponseEntity.ok(dailyPlans);
 
         } catch (RuntimeException e) {

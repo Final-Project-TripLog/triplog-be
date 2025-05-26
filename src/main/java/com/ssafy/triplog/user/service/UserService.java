@@ -2,6 +2,9 @@
 package com.ssafy.triplog.user.service;
 
 import com.ssafy.triplog.user.dto.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
 
 public interface UserService {
@@ -46,4 +49,7 @@ public interface UserService {
 
     // 소셜 로그인 처리
     UserResponse handleSocialLogin(String provider, UserSocialLoginRequest request);
+
+    // UserService.java 인터페이스에 추가
+    String uploadProfileImage(Long userNo, MultipartFile image, String position) throws IOException;
 }

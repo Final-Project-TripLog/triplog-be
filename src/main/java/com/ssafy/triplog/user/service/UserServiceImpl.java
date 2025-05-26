@@ -3,15 +3,25 @@ package com.ssafy.triplog.user.service;
 
 import com.ssafy.triplog.user.dto.*;
 import com.ssafy.triplog.user.mapper.UserMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
@@ -282,13 +292,19 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("자기 자신을 팔로우할 수 없습니다.");
         }
 
+        // ⭐ 이미 팔로우 중인지 확인
+        if (userMapper.existsFollow(followingId, followerId) > 0) {
+            throw new RuntimeException("이미 팔로우 중인 사용자입니다.");
+        }
+
         try {
             userMapper.addFollow(followingId, followerId);
             userMapper.increaseFollowCount(followerId);
             userMapper.increaseFollowerCount(followingId);
             return true;
         } catch (Exception e) {
-            return false;
+//            log.error("팔로우 처리 중 오류 발생", e);
+            throw new RuntimeException("팔로우 처리 중 오류가 발생했습니다.");
         }
     }
 
@@ -304,13 +320,19 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("사용자를 찾을 수 없습니다.");
         }
 
+        // ⭐ 팔로우 관계가 존재하는지 확인
+        if (userMapper.existsFollow(followingId, followerId) == 0) {
+            throw new RuntimeException("팔로우 관계가 존재하지 않습니다.");
+        }
+
         try {
             userMapper.removeFollow(followingId, followerId);
             userMapper.decreaseFollowCount(followerId);
             userMapper.decreaseFollowerCount(followingId);
             return true;
         } catch (Exception e) {
-            return false;
+//            log.error("언팔로우 처리 중 오류 발생", e);
+            throw new RuntimeException("언팔로우 처리 중 오류가 발생했습니다.");
         }
     }
 
@@ -332,6 +354,76 @@ public class UserServiceImpl implements UserService {
 
         return processSocialLogin(provider.toUpperCase(), socialId, socialUserInfo);
     }
+
+    @Override
+    public String uploadProfileImage(Long userNo, MultipartFile image, String position) throws IOException {
+        // 파일 검증
+        if (image.isEmpty()) {
+            throw new RuntimeException("파일이 비어있습니다.");
+        }
+
+        // 허용된 파일 형식 확인
+        String contentType = image.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new RuntimeException("이미지 파일만 업로드 가능합니다.");
+        }
+
+        // 파일 크기 확인 (5MB 제한)
+        if (image.getSize() > 5 * 1024 * 1024) {
+            throw new RuntimeException("파일 크기가 5MB를 초과할 수 없습니다.");
+        }
+
+        // 사용자 존재 확인
+        UserDto user = userMapper.findById(userNo);
+        if (user == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+
+        // 업로드 디렉토리 생성 (profiles 하위 디렉토리 제거)
+        String uploadDir = System.getProperty("user.home") + "/triplog/uploads/";
+
+
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        // 파일명 생성 (중복 방지) - 확장자 처리 개선
+        String originalFileName = image.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFileName != null && originalFileName.contains(".")) {
+            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        } else {
+            // 확장자가 없는 경우 Content-Type에서 추출
+            if (contentType.equals("image/jpeg")) {
+                fileExtension = ".jpg";
+            } else if (contentType.equals("image/png")) {
+                fileExtension = ".png";
+            } else if (contentType.equals("image/gif")) {
+                fileExtension = ".gif";
+            } else {
+                fileExtension = ".jpg"; // 기본값
+            }
+        }
+
+        String newFileName = "profile_" + userNo + "_" + System.currentTimeMillis() + fileExtension;
+
+        // 파일 저장
+        Path filePath = Paths.get(uploadDir + newFileName);
+        Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // DB에 프로필 URL 업데이트 (경로 수정)
+        String profileUrl = "/triplog/uploads/" + newFileName;
+
+        // 프로필 URL만 업데이트하는 새로운 메서드 사용
+        userMapper.updateProfileImage(userNo, profileUrl);
+
+        log.info("프로필 이미지 업로드 완료: userNo={}, fileName={}, profileUrl={}",
+                userNo, newFileName, profileUrl);
+
+        return profileUrl;
+    }
+
 
     // 소셜 로그인 처리 (내부 메서드)
     private UserResponse processSocialLogin(String socialType, String socialId, UserServiceDto socialUserInfo) {

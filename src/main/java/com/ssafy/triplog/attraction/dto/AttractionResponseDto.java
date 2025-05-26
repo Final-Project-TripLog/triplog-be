@@ -17,4 +17,5 @@ public class AttractionResponseDto {
     private Integer reviewCount;
     private String attractionTypeName;  // DB 스키마에는 attraction_type_name
     private String address;
+    private String overview;
 }

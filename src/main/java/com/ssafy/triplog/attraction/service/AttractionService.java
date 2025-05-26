@@ -53,6 +53,8 @@ public interface AttractionService {
     List<AttractionResponseDto> getAttractionsByBookmarkType(
             Long bookmarkTypeNo, int page, int size);
 
+    List<String> getAttractionCategories();
+
     /**
      * 특정 관광지를 포함하는 여행 계획 목록을 조회합니다.
      *

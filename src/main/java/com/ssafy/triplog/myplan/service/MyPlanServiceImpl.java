@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -156,6 +157,7 @@ public class MyPlanServiceImpl implements MyPlanService {
     public List<MyPlanDto> getMyPlansByUser(Long userNo, int page, int size) {
         log.debug("MyPlanServiceImpl.getMyPlansByUser -----> userNo: {}, page: {}, size: {}", userNo, page, size);
 
+//        log.debug(startDate.toString(), endDate.toString());
         int offset = page * size;
         List<MyPlanDto> myPlans = myPlanMapper.selectMyPlansByUser(userNo, offset, size);
 
@@ -181,6 +183,7 @@ public class MyPlanServiceImpl implements MyPlanService {
         }
 
         // 3. 일일 계획 목록 조회
+        log.debug(myPlan.toString() + " Here");
         List<MyDailyPlanDto> dailyPlans = myPlanMapper.selectDailyPlansByPlanNo(planNo);
 
         log.debug("조회된 일일 계획 수: {}", dailyPlans.size());

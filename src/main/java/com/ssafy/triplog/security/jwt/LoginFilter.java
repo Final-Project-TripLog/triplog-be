@@ -69,11 +69,19 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         Long userNo = userDetails.getUserNo(); // 사용자 ID 가져오기
+        String nickname = userDetails.getNickname(); // ⭐ 사용자 닉네임 가져오기
+
         // 3. jwt에서 사용자 NO 가져오기
 
         // JWT 토큰 생성 (10시간 유효)
-        String token = jwtUtil.createJwt(userDetails.getUsername(), role,userNo, 60 * 60 * 10L * 1000);
-        // 4. 사용자 No를 추가해서 JWT 토큰 생성하기, userNo 넘겨주기
+        // ⭐ JWT 토큰 생성 (nickname 추가) - 10시간 유효
+        String token = jwtUtil.createJwt(
+                userDetails.getUsername(),  // 이메일
+                role,                      // 권한
+                userNo,                    // 사용자 번호
+                nickname,                  // 닉네임 추가
+                60 * 60 * 10L * 1000       // 10시간
+        );// 4. 사용자 No를 추가해서 JWT 토큰 생성하기, userNo 넘겨주기
 
         // 토큰 내용 디버깅
         printTokenInfo(token);
@@ -142,4 +150,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setContentType("application/json");
         response.getWriter().write("{\"error\":\"로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.\"}");
     }
+
+//    // ⭐ 기존 호환성을 위한 오버로드 메서드 (기존 코드가 깨지지 않도록)
+//    public String createJwt(String username, String role, Long userNo, Long expiredMs) {
+//        // 닉네임이 없는 경우 null로 처리
+//        return createJwt(username, role, userNo, null, expiredMs);
+//    }
 }

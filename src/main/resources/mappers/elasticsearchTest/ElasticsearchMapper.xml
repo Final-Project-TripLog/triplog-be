@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.triplog.elasticsearchTest.mapper.ElasticsearchTestMapper">
+
+    <!-- 🚀 PlanPostCacheFulltextDto ResultMap (FULLTEXT 캐시 테이블용) -->
+    <resultMap id="PlanPostCacheFulltextDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostCacheFulltextDto">
+        <id property="no" column="no"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="userNo" column="user_no"/>
+        <result property="forkCount" column="fork_count"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="likedCount" column="liked_count"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="startDay" column="start_day"/>
+        <result property="endDay" column="end_day"/>
+        <result property="totalMember" column="total_member"/>
+        <result property="tags" column="tags"/>
+        <result property="attractionTitles" column="attraction_titles"/>
+        <result property="addresses" column="addresses"/>
+        <result property="searchAll" column="search_all"/>
+        <result property="relevanceScore" column="relevance_score"/>
+    </resultMap>
+
+    <!-- 🔍 PlanPostCacheIndexedDto ResultMap (인덱스 캐시 테이블용) -->
+    <resultMap id="PlanPostCacheIndexedDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostCacheIndexedDto">
+        <id property="no" column="no"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="userNo" column="user_no"/>
+        <result property="forkCount" column="fork_count"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="likedCount" column="liked_count"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="startDay" column="start_day"/>
+        <result property="endDay" column="end_day"/>
+        <result property="totalMember" column="total_member"/>
+        <result property="tags" column="tags"/>
+        <result property="attractionTitles" column="attraction_titles"/>
+        <result property="addresses" column="addresses"/>
+        <result property="searchAll" column="search_all"/>
+    </resultMap>
+
+    <!-- 🗃️ PlanPostCacheDto ResultMap (사용자 캐시 테이블용) -->
+    <resultMap id="PlanPostCacheDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostCacheDto">
+        <id property="no" column="no"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="userNo" column="user_no"/>
+        <result property="forkCount" column="fork_count"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="likedCount" column="liked_count"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="startDay" column="start_day"/>
+        <result property="endDay" column="end_day"/>
+        <result property="totalMember" column="total_member"/>
+        <result property="tags" column="tags"/>
+        <result property="attractionTitles" column="attraction_titles"/>
+        <result property="addresses" column="addresses"/>
+    </resultMap>
+
+    <!-- 🏷️ PlanPostTagDto ResultMap (태그 개별 조회용) -->
+    <resultMap id="PlanPostTagDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto">
+        <id property="no" column="no"/>
+        <result property="planPostNo" column="plan_post_no"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <!-- ⚡ 4중 JOIN 해결 케이스용 ResultMap (Collection 사용) -->
+    <resultMap id="ElasticsearchTestResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostResponseDto">
+        <id property="no" column="pp_no"/>
+        <result property="userNickname" column="userNickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="updatedAt" column="updatedAt"/>
+        <result property="userNo" column="userNo"/>
+        <result property="forkCount" column="forkCount"/>
+        <result property="viewCount" column="viewCount"/>
+        <result property="likedCount" column="likedCount"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="startDay" column="startDay"/>
+        <result property="endDay" column="endDay"/>
+        <result property="totalMember" column="totalMember"/>
+
+        <!-- Collection으로 태그들을 한번에 매핑 -->
+        <collection property="tags" ofType="com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto">
+            <id property="no" column="tag_no"/>
+            <result property="planPostNo" column="tag_plan_post_no"/>
+            <result property="name" column="tag_name"/>
+        </collection>
+    </resultMap>
+
+    <!-- 👎 N+1 문제 발생 케이스: resultType으로 게시글만 단순 조회 -->
+    <select id="searchPlanPostsByKeyword" resultType="com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto">
+        SELECT DISTINCT
+            pp.no,
+            pp.user_nickname AS userNickname,
+            pp.title,
+            pp.description,
+            pp.created_at AS createdAt,
+            pp.updated_at AS updatedAt,
+            pp.thumbnail,
+            pp.user_no AS userNo,
+            pp.fork_count AS forkCount,
+            pp.liked_count AS likedCount,
+            pp.view_count AS viewCount,
+            pp.start_day AS startDay,
+            pp.end_day AS endDay,
+            pp.total_member AS totalMember
+        FROM plan_post pp
+        WHERE pp.no IN (
+            SELECT DISTINCT pp2.no
+            FROM plan_post pp2
+                     LEFT JOIN plan_post_tag ppt2 ON pp2.no = ppt2.plan_post_no
+                     LEFT JOIN plan_attraction_detail pad2 ON pp2.no = pad2.plan_post_no
+                     LEFT JOIN attractions a2 ON pad2.attraction_no = a2.no
+            WHERE (
+                      pp2.title LIKE CONCAT('%', #{keyword}, '%')
+                          OR pp2.user_nickname LIKE CONCAT('%', #{keyword}, '%')
+                          OR pp2.description LIKE CONCAT('%', #{keyword}, '%')
+                          OR ppt2.name LIKE CONCAT('%', #{keyword}, '%')
+                          OR pad2.attraction_title LIKE CONCAT('%', #{keyword}, '%')
+                          OR a2.address LIKE CONCAT('%', #{keyword}, '%')
+                      )
+        )
+        ORDER BY pp.created_at DESC
+    </select>
+
+    <!-- 👎 N+1 문제 발생: 태그 개별 조회 -->
+    <select id="selectPlanPostTagsByPostNo" resultMap="PlanPostTagDtoResultMap">
+        SELECT
+            no,
+            plan_post_no,
+            name
+        FROM plan_post_tag
+        WHERE plan_post_no = #{postNo}
+    </select>
+
+    <!-- 👍 N+1 문제 해결: 4중 JOIN으로 한번에 조회 -->
+    <select id="searchByFourJoin" resultMap="ElasticsearchTestResultMap">
+        SELECT DISTINCT
+            pp.no AS pp_no,
+            pp.user_nickname AS userNickname,
+            pp.title,
+            pp.description,
+            pp.created_at AS createdAt,
+            pp.updated_at AS updatedAt,
+            pp.user_no AS userNo,
+            pp.fork_count AS forkCount,
+            pp.view_count AS viewCount,
+            pp.liked_count AS likedCount,
+            pp.thumbnail,
+            pp.start_day AS startDay,
+            pp.end_day AS endDay,
+            pp.total_member AS totalMember,
+
+            ppt.no AS tag_no,
+            ppt.plan_post_no AS tag_plan_post_no,
+            ppt.name AS tag_name
+
+        FROM plan_post pp
+                 LEFT JOIN plan_post_tag ppt ON pp.no = ppt.plan_post_no
+                 LEFT JOIN plan_attraction_detail pad ON pp.no = pad.plan_post_no
+                 LEFT JOIN attractions a ON pad.attraction_no = a.no
+
+        WHERE (
+                  pp.title LIKE CONCAT('%', #{keyword}, '%')
+                      OR pp.user_nickname LIKE CONCAT('%', #{keyword}, '%')
+                      OR pp.description LIKE CONCAT('%', #{keyword}, '%')
+                      OR ppt.name LIKE CONCAT('%', #{keyword}, '%')
+                      OR pad.attraction_title LIKE CONCAT('%', #{keyword}, '%')
+                      OR a.address LIKE CONCAT('%', #{keyword}, '%')
+                  )
+
+        ORDER BY pp.created_at DESC
+    </select>
+
+    <!-- 🗃️ 캐시 테이블 LIKE 검색 (인덱스 없음) -->
+    <select id="searchByCache" resultMap="PlanPostCacheDtoResultMap">
+        SELECT
+            no,
+            user_nickname,
+            title,
+            description,
+            created_at,
+            updated_at,
+            user_no,
+            fork_count,
+            view_count,
+            liked_count,
+            thumbnail,
+            start_day,
+            end_day,
+            total_member,
+            tags,
+            attraction_titles,
+            addresses
+        FROM plan_post_cache
+        WHERE (
+                  title LIKE CONCAT('%', #{keyword}, '%')
+                      OR user_nickname LIKE CONCAT('%', #{keyword}, '%')
+                      OR description LIKE CONCAT('%', #{keyword}, '%')
+                      OR tags LIKE CONCAT('%', #{keyword}, '%')
+                      OR attraction_titles LIKE CONCAT('%', #{keyword}, '%')
+                      OR addresses LIKE CONCAT('%', #{keyword}, '%')
+                  )
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 🔍 인덱스 캐시 테이블 LIKE 검색 (각 컬럼별) -->
+    <select id="searchByCacheIndexed" resultMap="PlanPostCacheIndexedDtoResultMap">
+        SELECT
+            no,
+            user_nickname,
+            title,
+            description,
+            created_at,
+            updated_at,
+            user_no,
+            fork_count,
+            view_count,
+            liked_count,
+            thumbnail,
+            start_day,
+            end_day,
+            total_member,
+            tags,
+            attraction_titles,
+            addresses,
+            search_all
+        FROM plan_post_cache_indexed
+        WHERE (
+                  title LIKE CONCAT('%', #{keyword}, '%')
+                      OR user_nickname LIKE CONCAT('%', #{keyword}, '%')
+                      OR description LIKE CONCAT('%', #{keyword}, '%')
+                      OR tags LIKE CONCAT('%', #{keyword}, '%')
+                      OR attraction_titles LIKE CONCAT('%', #{keyword}, '%')
+                      OR addresses LIKE CONCAT('%', #{keyword}, '%')
+                  )
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 🚀 인덱스 캐시 테이블 최적화 검색 (통합 컬럼) -->
+    <select id="searchByCacheIndexedOptimized" resultMap="PlanPostCacheIndexedDtoResultMap">
+        SELECT
+            no,
+            user_nickname,
+            title,
+            description,
+            created_at,
+            updated_at,
+            user_no,
+            fork_count,
+            view_count,
+            liked_count,
+            thumbnail,
+            start_day,
+            end_day,
+            total_member,
+            tags,
+            attraction_titles,
+            addresses,
+            search_all
+        FROM plan_post_cache_indexed
+        WHERE search_all LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 🔍 FULLTEXT 자연어 검색 -->
+    <select id="searchByCacheFulltext" resultMap="PlanPostCacheFulltextDtoResultMap">
+        SELECT
+            no,
+            user_nickname,
+            title,
+            description,
+            created_at,
+            updated_at,
+            user_no,
+            fork_count,
+            view_count,
+            liked_count,
+            thumbnail,
+            start_day,
+            end_day,
+            total_member,
+            tags,
+            attraction_titles,
+            addresses,
+            search_all,
+            MATCH(search_all) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE) as relevance_score
+        FROM plan_post_cache_fulltext
+        WHERE MATCH(search_all) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE)
+        ORDER BY relevance_score DESC, created_at DESC
+    </select>
+
+    <!-- 🎯 FULLTEXT 불린 검색 -->
+    <select id="searchByCacheFulltextBoolean" resultMap="PlanPostCacheFulltextDtoResultMap">
+        SELECT
+            no,
+            user_nickname,
+            title,
+            description,
+            created_at,
+            updated_at,
+            user_no,
+            fork_count,
+            view_count,
+            liked_count,
+            thumbnail,
+            start_day,
+            end_day,
+            total_member,
+            tags,
+            attraction_titles,
+            addresses,
+            search_all,
+            1.0 as relevance_score
+        FROM plan_post_cache_fulltext
+        WHERE MATCH(search_all) AGAINST(#{keyword} IN BOOLEAN MODE)
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 🌟 FULLTEXT 관련도 점수 검색 -->
+    <select id="searchByCacheFulltextRelevance" resultMap="PlanPostCacheFulltextDtoResultMap">
+        SELECT
+            no,
+            user_nickname,
+            title,
+            description,
+            created_at,
+            updated_at,
+            user_no,
+            fork_count,
+            view_count,
+            liked_count,
+            thumbnail,
+            start_day,
+            end_day,
+            total_member,
+            tags,
+            attraction_titles,
+            addresses,
+            search_all,
+            MATCH(search_all) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE) as relevance_score
+        FROM plan_post_cache_fulltext
+        WHERE MATCH(search_all) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE)
+        HAVING relevance_score > 0
+        ORDER BY relevance_score DESC, created_at DESC
+        LIMIT 20
+    </select>
+
+</mapper>

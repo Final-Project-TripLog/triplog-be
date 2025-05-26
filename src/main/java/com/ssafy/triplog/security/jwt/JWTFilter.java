@@ -31,7 +31,21 @@ public class JWTFilter extends OncePerRequestFilter {
             "/v3/api-docs",
             "/api-docs",
             "/api/users/check-email",
-            "/api/users/check-nickname"
+            "/api/users/check-nickname",
+            "/api/attraction",
+            "/api/review",
+
+            //  정적 파일 경로 추가
+            "/uploads",
+            "/triplog/uploads",
+            "/static",
+            "/css",
+            "/js",
+            "/images",
+
+            // 엘라스틱 서치 - context path 고려하여 수정
+            "/api/elastic",
+            "/api/elastic/test"
     );
 
     public JWTFilter(JWTUtil jwtUtil) {
@@ -41,38 +55,71 @@ public class JWTFilter extends OncePerRequestFilter {
     // 필터 적용 여부 결정 - excludedPaths에 포함된 경로는 필터링하지 않음
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
+        // getRequestURI()를 사용하여 context path가 포함된 전체 URI 가져오기
+        String fullUri = request.getRequestURI();
 
-        // 컨텍스트 경로를 제외한 실제 요청 경로를 가져옴
+        // context path 추출
         String contextPath = request.getContextPath();
-        if (!contextPath.isEmpty() && path.startsWith(contextPath)) {
-            path = path.substring(contextPath.length());
+
+        // context path를 제거한 실제 서블릿 경로 추출
+        String servletPath = fullUri;
+        if (contextPath != null && !contextPath.isEmpty() && fullUri.startsWith(contextPath)) {
+            servletPath = fullUri.substring(contextPath.length());
         }
+
+        System.out.println("[DEBUG] Full URI: " + fullUri);
+        System.out.println("[DEBUG] Context Path: " + contextPath);
+        System.out.println("[DEBUG] Servlet Path: " + servletPath);
 
         // 제외된 경로에 대해서는 필터링하지 않음
         for (String excludedPath : excludedPaths) {
-            if (path.startsWith(excludedPath)) {
+            if (servletPath.startsWith(excludedPath)) {
+                System.out.println("[DEBUG] 경로 제외됨: " + servletPath + " (매칭 패턴: " + excludedPath + ")");
                 return true;
             }
         }
 
-        // 홈 경로는 필터링하지 않음
-        if (path.equals("/") || path.isEmpty()) {
+        // 정적 파일 확장자 체크 추가
+        if (isStaticResource(servletPath)) {
+            System.out.println("[DEBUG] 정적 리소스로 제외됨: " + servletPath);
             return true;
         }
 
+        // 홈 경로는 필터링하지 않음
+        if (servletPath.equals("/") || servletPath.isEmpty()) {
+            System.out.println("[DEBUG] 홈 경로로 제외됨: " + servletPath);
+            return true;
+        }
+
+        System.out.println("[DEBUG] JWT 필터 적용됨: " + servletPath);
+        return false;
+    }
+
+    // 정적 파일 확장자 체크 메서드 추가
+    private boolean isStaticResource(String path) {
+        String[] staticExtensions = {".png", ".jpg", ".jpeg", ".gif", ".css", ".js", ".ico", ".svg", ".webp"};
+        String lowerPath = path.toLowerCase();
+
+        for (String extension : staticExtensions) {
+            if (lowerPath.endsWith(extension)) {
+                return true;
+            }
+        }
         return false;
     }
 
     // 실제 필터 로직 구현
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        System.out.println("[DEBUG] JWT 필터 실행 중 - URI: " + request.getRequestURI());
+
         // 요청 헤더에서 Authorization 값 추출
         String authorization = request.getHeader("Authorization");
 
         // Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             // 인증 정보가 없으면 요청 거부 (401 Unauthorized)
+            System.out.println("[DEBUG] Authorization 헤더 없음 또는 잘못됨");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\":\"인증이 필요합니다. 로그인 후 이용해주세요.\"}");
@@ -85,6 +132,7 @@ public class JWTFilter extends OncePerRequestFilter {
         // 토큰 만료 여부 검증
         if (jwtUtil.isExpired(token)) {
             // 토큰이 만료되었으면 요청 거부 (401 Unauthorized)
+            System.out.println("[DEBUG] JWT 토큰 만료됨");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\":\"인증 토큰이 만료되었습니다. 다시 로그인해주세요.\"}");
@@ -95,15 +143,16 @@ public class JWTFilter extends OncePerRequestFilter {
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
         Long userNo = jwtUtil.getUserNo(token);
-        // 5. jwtUtil에 구현해둔 함수로 토큰에서 UserNo 뽑아내서 userNo로 저장
+        String nickname = jwtUtil.getNickname(token);
+
+        System.out.println("[DEBUG] JWT 토큰에서 추출한 사용자 정보 - UserNo: " + userNo + ", Email: " + username);
 
         // 임시 UserDto 객체 생성 (DB 조회 결과가 아니라 토큰에서 추출한 정보만 담음)
         UserDto userDto = new UserDto();
         userDto.setEmail(username);
         userDto.setRole(role);
-        // 6. DTO에 Set 해주기
         userDto.setNo(userNo);
-
+        userDto.setNickname(nickname);
 
         // CustomUserDetails에 사용자 정보 삽입
         CustomUserDetails customUserDetails = new CustomUserDetails(userDto);

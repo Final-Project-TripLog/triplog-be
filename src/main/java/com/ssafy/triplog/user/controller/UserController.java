@@ -7,10 +7,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -115,7 +120,7 @@ public class UserController {
         return ResponseEntity.ok("임시 비밀번호가 발급되었습니다: " + temporaryPassword);
     }
 
-    @Operation(summary = "회원 정보 조회", description = "지정한 회원 번호에 해당하는 회원의 상세 정보를 조회합니다. - ok 근데 자기꺼만 됨 권한 풀어줘야함")
+    @Operation(summary = "회원 정보 조회 - ok", description = "지정한 회원 번호에 해당하는 회원의 상세 정보를 조회합니다. -  자기꺼만 됨 ")
     @GetMapping("/{userNo}")
     public ResponseEntity<UserServiceDto> getUserById(@PathVariable Long userNo) {
         log.debug("getUserById -----> userNo : {} ", userNo);
@@ -123,7 +128,7 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
-    @Operation(summary = "나의 팔로워 조회", description = "userNo 팔로워 list 를 조회합니다.")
+    @Operation(summary = "나의 팔로워 조회 - ok", description = "userNo 팔로워 list 를 조회합니다.")
     @GetMapping("/{userNo}/follower")
     public ResponseEntity<List<UserFollowInfoResponse>> getAllFollowers(@PathVariable Long userNo) {
         log.debug("getAllFollowers -----> userNo : {} ", userNo);
@@ -131,7 +136,7 @@ public class UserController {
         return ResponseEntity.ok(followers);
     }
 
-    @Operation(summary = "나의 팔로우 조회", description = "userNo 팔로우 list 를 조회합니다.")
+    @Operation(summary = "나의 팔로우 조회 - ok ", description = "userNo 팔로우 list 를 조회합니다.")
     @GetMapping("/{userNo}/follow")
     public ResponseEntity<List<UserFollowInfoResponse>> getAllFollows(@PathVariable Long userNo) {
         log.debug("getAllFollows -----> userNo : {} ", userNo);
@@ -139,7 +144,7 @@ public class UserController {
         return ResponseEntity.ok(following);
     }
 
-    @Operation(summary = "사용자 팔로우", description = "특정 사용자를 팔로우합니다.")
+    @Operation(summary = "사용자 팔로우 - ok", description = "특정 사용자를 팔로우합니다.")
     @PostMapping("/{userNo}/follow/{targetUserNo}")
     public ResponseEntity<String> followUser(
             @PathVariable Long userNo,
@@ -155,7 +160,7 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "사용자 언팔로우", description = "특정 사용자를 언팔로우합니다.")
+    @Operation(summary = "사용자 언팔로우 - ok", description = "특정 사용자를 언팔로우합니다.")
     @DeleteMapping("/{userNo}/follow/{targetUserNo}")
     public ResponseEntity<String> unfollowUser(
             @PathVariable Long userNo,
@@ -170,4 +175,32 @@ public class UserController {
             return ResponseEntity.badRequest().body("언팔로우 처리 중 오류가 발생했습니다.");
         }
     }
+
+    // UserController.java에 추가할 메서드들
+
+    @PostMapping("/{userNo}/profile-image")
+    public ResponseEntity<Map<String, String>> uploadProfileImage(
+            @PathVariable Long userNo,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "position", required = false) String position) {
+
+        log.info("프로필 이미지 업로드 요청: userNo={}, fileName={}, fileSize={}",
+                userNo, image.getOriginalFilename(), image.getSize());
+
+        try {
+            String imageUrl = userService.uploadProfileImage(userNo, image, position);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("imageUrl", imageUrl);
+            response.put("profileUrl", imageUrl);
+
+            log.info("프로필 이미지 업로드 성공: userNo={}, imageUrl={}", userNo, imageUrl);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("프로필 이미지 업로드 실패: userNo={}, error={}", userNo, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "이미지 업로드 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
 }

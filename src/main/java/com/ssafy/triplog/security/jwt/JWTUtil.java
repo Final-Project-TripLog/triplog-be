@@ -35,6 +35,13 @@ public class JWTUtil {
     public Boolean isExpired(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
+    // ⭐ 토큰에서 사용자 닉네임 추출 (새로 추가)
+    public String getNickname(String token) {
+        return Jwts.parser().verifyWith(secretKey).build()
+                .parseSignedClaims(token).getPayload()
+                .get("nickname", String.class);
+    }
+
     // 토큰에서 사용자 ID 추출하는 메서드 추가
     // 2. 토큰에서 사용자 ID 추출하기 함수 구현하기
     public Long getUserNo(String token) {
@@ -43,11 +50,12 @@ public class JWTUtil {
                 .get("userNo", Long.class);
     }
     // JWT 토큰 생성
-    public String createJwt(String username, String role,Long userNo, Long expiredMs) {
+    public String createJwt(String username, String role,Long userNo, String nickname,Long expiredMs) {
         return Jwts.builder()
                 .claim("username", username) // 사용자 이름(이메일) 저장
                 .claim("role", role) // 역할(권한) 저장
                 .claim("userNo", userNo) // 사용자 PK 추가
+                .claim("nickname", nickname) // 사용자 닉네임 추가
                 // 1. UserNo 추가해서 JWT 발급 받기 함수 구현하기
                 .issuedAt(new Date(System.currentTimeMillis())) // 발급 시간
                 .expiration(new Date(System.currentTimeMillis() + expiredMs)) // 만료 시간

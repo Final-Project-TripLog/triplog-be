@@ -38,7 +38,9 @@ public interface UserMapper {
     void increaseFollowerCount(@Param("userNo") Long userNo);
     void decreaseFollowCount(@Param("userNo") Long userNo);
     void decreaseFollowerCount(@Param("userNo") Long userNo);
-
+    int existsFollow(@Param("followId") Long followId, @Param("followerId") Long followerId);
     // 소셜 로그인
     UserDto findBySocialIdAndType(@Param("socialId") String socialId, @Param("socialType") String socialType);
+
+    void updateProfileImage(@Param("userNo") Long userNo, @Param("profileUrl") String profileUrl);
 }
