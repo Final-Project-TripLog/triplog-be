@@ -1,11 +1,7 @@
 // 🔧 ElasticsearchTestMapper.java (수정된 버전)
 package com.ssafy.triplog.elasticsearchTest.mapper;
 
-import com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto;
-import com.ssafy.triplog.elasticsearchTest.dto.PlanPostResponseDto;
-import com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto;
-import com.ssafy.triplog.elasticsearchTest.dto.PlanPostCacheDto;
-import com.ssafy.triplog.elasticsearchTest.dto.PlanPostCacheIndexedDto; // 🆕 추가
+import com.ssafy.triplog.elasticsearchTest.dto.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -24,4 +20,9 @@ public interface ElasticsearchTestMapper {
     // 🔍 인덱스 캐시 테이블 검색 메소드들 (수정된 반환 타입)
     List<PlanPostCacheIndexedDto> searchByCacheIndexed(@Param("keyword") String keyword);
     List<PlanPostCacheIndexedDto> searchByCacheIndexedOptimized(@Param("keyword") String keyword);
+
+    // FULLTEXT 캐시 테이블 검색 메소드들
+    List<PlanPostCacheFulltextDto> searchByCacheFulltext(@Param("keyword") String keyword);
+    List<PlanPostCacheFulltextDto> searchByCacheFulltextBoolean(@Param("keyword") String keyword);
+    List<PlanPostCacheFulltextDto> searchByCacheFulltextRelevance(@Param("keyword") String keyword);
 }

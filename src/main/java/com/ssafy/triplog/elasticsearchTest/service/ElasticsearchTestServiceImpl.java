@@ -251,4 +251,105 @@ public class ElasticsearchTestServiceImpl implements ElasticsearchTestService {
         return response;
     }
 
+    // FULLTEXT 자연어 검색
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlanPostResponseDto> searchByCacheFulltext(String keyword) {
+        log.info("🔍 [FULLTEXT 자연어] 검색 시작 - keyword: {}", keyword);
+
+        long startTime = System.currentTimeMillis();
+
+        log.info("📊 [쿼리 1] FULLTEXT 자연어 검색 실행");
+        List<PlanPostCacheFulltextDto> cacheDtos = elasticsearchTestMapper.searchByCacheFulltext(keyword);
+
+        List<PlanPostResponseDto> result = cacheDtos.stream()
+                .map(this::convertCacheFulltextDtoToResponseDto)
+                .collect(Collectors.toList());
+
+        long endTime = System.currentTimeMillis();
+        log.info("✅ [FULLTEXT 자연어] 완료 - 총 1개 쿼리, {}개 결과, {}ms",
+                result.size(), endTime - startTime);
+
+        return result;
+    }
+
+    // FULLTEXT 불린 검색
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlanPostResponseDto> searchByCacheFulltextBoolean(String keyword) {
+        log.info("🎯 [FULLTEXT 불린] 검색 시작 - keyword: {}", keyword);
+
+        long startTime = System.currentTimeMillis();
+
+        log.info("📊 [쿼리 1] FULLTEXT 불린 검색 실행");
+        List<PlanPostCacheFulltextDto> cacheDtos = elasticsearchTestMapper.searchByCacheFulltextBoolean(keyword);
+
+        List<PlanPostResponseDto> result = cacheDtos.stream()
+                .map(this::convertCacheFulltextDtoToResponseDto)
+                .collect(Collectors.toList());
+
+        long endTime = System.currentTimeMillis();
+        log.info("✅ [FULLTEXT 불린] 완료 - 총 1개 쿼리, {}개 결과, {}ms",
+                result.size(), endTime - startTime);
+
+        return result;
+    }
+
+    // FULLTEXT 관련도 점수 검색
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlanPostResponseDto> searchByCacheFulltextRelevance(String keyword) {
+        log.info("🌟 [FULLTEXT 관련도] 검색 시작 - keyword: {}", keyword);
+
+        long startTime = System.currentTimeMillis();
+
+        log.info("📊 [쿼리 1] FULLTEXT 관련도 점수 검색 실행");
+        List<PlanPostCacheFulltextDto> cacheDtos = elasticsearchTestMapper.searchByCacheFulltextRelevance(keyword);
+
+        List<PlanPostResponseDto> result = cacheDtos.stream()
+                .map(this::convertCacheFulltextDtoToResponseDto)
+                .collect(Collectors.toList());
+
+        long endTime = System.currentTimeMillis();
+        log.info("✅ [FULLTEXT 관련도] 완료 - 총 1개 쿼리, {}개 결과, {}ms",
+                result.size(), endTime - startTime);
+
+        return result;
+    }
+
+    /**
+     * FULLTEXT 캐시 DTO를 ResponseDto로 변환
+     */
+    private PlanPostResponseDto convertCacheFulltextDtoToResponseDto(PlanPostCacheFulltextDto cacheDto) {
+        PlanPostResponseDto response = new PlanPostResponseDto();
+
+        // 기본 필드 매핑
+        response.setNo(cacheDto.getNo());
+        response.setUserNo(cacheDto.getUserNo());
+        response.setUserNickname(cacheDto.getUserNickname());
+        response.setTitle(cacheDto.getTitle());
+        response.setDescription(cacheDto.getDescription());
+        response.setThumbnail(cacheDto.getThumbnail());
+        response.setCreatedAt(cacheDto.getCreatedAt());
+        response.setUpdatedAt(cacheDto.getUpdatedAt());
+        response.setStartDay(cacheDto.getStartDay());
+        response.setEndDay(cacheDto.getEndDay());
+        response.setTotalMember(cacheDto.getTotalMember().longValue());
+        response.setForkCount(cacheDto.getForkCount());
+        response.setLikedCount(cacheDto.getLikedCount());
+        response.setViewCount(cacheDto.getViewCount());
+
+        // 🔥 콤마 구분된 태그를 List로 변환
+        List<PlanPostTagDto> tags = convertTagNamesToTagDtos(cacheDto.getTags(), cacheDto.getNo());
+        response.setTags(tags);
+
+        log.debug("🌟 [FULLTEXT] 게시글 ID {} - 관련도 점수: {}, 태그 {}개: [{}]",
+                cacheDto.getNo(),
+                cacheDto.getRelevanceScore(),
+                tags.size(),
+                tags.stream().map(PlanPostTagDto::getName).collect(Collectors.joining(", ")));
+
+        return response;
+    }
+
 }

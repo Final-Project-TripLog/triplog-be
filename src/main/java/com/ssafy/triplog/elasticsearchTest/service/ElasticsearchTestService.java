@@ -12,4 +12,8 @@ public interface ElasticsearchTestService {
     List<PlanPostResponseDto> searchByCacheLike(String keyword);
     List<PlanPostResponseDto> searchByCacheIndexed(String keyword);
     List<PlanPostResponseDto> searchByCacheIndexedOptimized(String keyword);
+    List<PlanPostResponseDto> searchByCacheFulltext(String keyword);
+    List<PlanPostResponseDto> searchByCacheFulltextBoolean(String keyword);
+    List<PlanPostResponseDto> searchByCacheFulltextRelevance(String keyword);
+
 }
