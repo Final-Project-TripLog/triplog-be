@@ -2,6 +2,49 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.triplog.elasticsearchTest.mapper.ElasticsearchTestMapper">
 
+    <!-- 🆕 PlanPostCacheIndexedDto ResultMap (인덱스 캐시 테이블용) -->
+    <resultMap id="PlanPostCacheIndexedDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostCacheIndexedDto">
+        <id property="no" column="no"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="userNo" column="user_no"/>
+        <result property="forkCount" column="fork_count"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="likedCount" column="liked_count"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="startDay" column="start_day"/>
+        <result property="endDay" column="end_day"/>
+        <result property="totalMember" column="total_member"/>
+        <result property="tags" column="tags"/>
+        <result property="attractionTitles" column="attraction_titles"/>
+        <result property="addresses" column="addresses"/>
+        <result property="searchAll" column="search_all"/>
+    </resultMap>
+
+    <!-- PlanPostCacheDto ResultMap (사용자 캐시 테이블용) -->
+    <resultMap id="PlanPostCacheDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostCacheDto">
+        <id property="no" column="no"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="userNo" column="user_no"/>
+        <result property="forkCount" column="fork_count"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="likedCount" column="liked_count"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="startDay" column="start_day"/>
+        <result property="endDay" column="end_day"/>
+        <result property="totalMember" column="total_member"/>
+        <result property="tags" column="tags"/>
+        <result property="attractionTitles" column="attraction_titles"/>
+        <result property="addresses" column="addresses"/>
+    </resultMap>
+
     <!-- PlanPostTagDto ResultMap (태그 개별 조회용) -->
     <resultMap id="PlanPostTagDtoResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto">
         <id property="no" column="no"/>
@@ -9,7 +52,7 @@
         <result property="name" column="name"/>
     </resultMap>
 
-    <!--  4중 JOIN 해결 케이스용 ResultMap (Collection 사용) -->
+    <!-- 4중 JOIN 해결 케이스용 ResultMap (Collection 사용) -->
     <resultMap id="ElasticsearchTestResultMap" type="com.ssafy.triplog.elasticsearchTest.dto.PlanPostResponseDto">
         <id property="no" column="pp_no"/>
         <result property="userNickname" column="userNickname"/>
@@ -34,7 +77,7 @@
         </collection>
     </resultMap>
 
-    <!--  N+1 문제 발생 케이스: resultType으로 게시글만 단순 조회 -->
+    <!-- N+1 문제 발생 케이스: resultType으로 게시글만 단순 조회 -->
     <select id="searchPlanPostsByKeyword" resultType="com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto">
         SELECT DISTINCT
             pp.no,
@@ -71,7 +114,7 @@
         ORDER BY pp.created_at DESC
     </select>
 
-    <!--  N+1 문제 발생: 태그 개별 조회 (resultMap 사용) -->
+    <!-- N+1 문제 발생: 태그 개별 조회 (resultMap 사용) -->
     <select id="selectPlanPostTagsByPostNo" resultMap="PlanPostTagDtoResultMap">
         SELECT
             no,
@@ -81,7 +124,7 @@
         WHERE plan_post_no = #{postNo}
     </select>
 
-    <!--  N+1 문제 해결: 4중 JOIN으로 한번에 조회 (resultMap + Collection 사용) -->
+    <!-- N+1 문제 해결: 4중 JOIN으로 한번에 조회 (resultMap + Collection 사용) -->
     <select id="searchByFourJoin" resultMap="ElasticsearchTestResultMap">
         SELECT DISTINCT
             pp.no AS pp_no,
@@ -118,6 +161,97 @@
                   )
 
         ORDER BY pp.created_at DESC
+    </select>
+
+    <!-- 캐시 테이블 LIKE 검색 (사용자 테이블 구조) -->
+    <select id="searchByCache" resultMap="PlanPostCacheDtoResultMap">
+        SELECT
+            no,
+            user_nickname,
+            title,
+            description,
+            created_at,
+            updated_at,
+            user_no,
+            fork_count,
+            view_count,
+            liked_count,
+            thumbnail,
+            start_day,
+            end_day,
+            total_member,
+            tags,
+            attraction_titles,
+            addresses
+        FROM plan_post_cache
+        WHERE (
+                  title LIKE CONCAT('%', #{keyword}, '%')
+                      OR user_nickname LIKE CONCAT('%', #{keyword}, '%')
+                      OR description LIKE CONCAT('%', #{keyword}, '%')
+                      OR tags LIKE CONCAT('%', #{keyword}, '%')
+                      OR attraction_titles LIKE CONCAT('%', #{keyword}, '%')
+                      OR addresses LIKE CONCAT('%', #{keyword}, '%')
+                  )
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 🔍 인덱스 캐시 테이블 LIKE 검색 (각 컬럼별, 인덱스 사용) -->
+    <select id="searchByCacheIndexed" resultMap="PlanPostCacheIndexedDtoResultMap">
+        SELECT
+            no,
+            user_nickname,
+            title,
+            description,
+            created_at,
+            updated_at,
+            user_no,
+            fork_count,
+            view_count,
+            liked_count,
+            thumbnail,
+            start_day,
+            end_day,
+            total_member,
+            tags,
+            attraction_titles,
+            addresses,
+            search_all
+        FROM plan_post_cache_indexed
+        WHERE (
+                  title LIKE CONCAT('%', #{keyword}, '%')
+                      OR user_nickname LIKE CONCAT('%', #{keyword}, '%')
+                      OR description LIKE CONCAT('%', #{keyword}, '%')
+                      OR tags LIKE CONCAT('%', #{keyword}, '%')
+                      OR attraction_titles LIKE CONCAT('%', #{keyword}, '%')
+                      OR addresses LIKE CONCAT('%', #{keyword}, '%')
+                  )
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 🚀 인덱스 캐시 테이블 최적화 검색 (통합 컬럼 사용, 인덱스 최적화) -->
+    <select id="searchByCacheIndexedOptimized" resultMap="PlanPostCacheIndexedDtoResultMap">
+        SELECT
+            no,
+            user_nickname,
+            title,
+            description,
+            created_at,
+            updated_at,
+            user_no,
+            fork_count,
+            view_count,
+            liked_count,
+            thumbnail,
+            start_day,
+            end_day,
+            total_member,
+            tags,
+            attraction_titles,
+            addresses,
+            search_all
+        FROM plan_post_cache_indexed
+        WHERE search_all LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY created_at DESC
     </select>
 
 </mapper>

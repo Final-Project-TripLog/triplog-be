@@ -1,8 +1,6 @@
 package com.ssafy.triplog.elasticsearchTest.service;
 
-import com.ssafy.triplog.elasticsearchTest.dto.PlanPostDto;
-import com.ssafy.triplog.elasticsearchTest.dto.PlanPostResponseDto;
-import com.ssafy.triplog.elasticsearchTest.dto.PlanPostTagDto;
+import com.ssafy.triplog.elasticsearchTest.dto.*;
 import com.ssafy.triplog.elasticsearchTest.mapper.ElasticsearchTestMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,4 +95,160 @@ public class ElasticsearchTestServiceImpl implements ElasticsearchTestService {
 
         return posts;
     }
+    // 캐시 테이블 LIKE 검색 (사용자 테이블 구조)
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlanPostResponseDto> searchByCacheLike(String keyword) {
+        log.info("🗃️ [캐시 테이블 LIKE] 검색 시작 - keyword: {}", keyword);
+
+        long startTime = System.currentTimeMillis();
+
+        log.info("📊 [쿼리 1] 캐시 테이블 LIKE 검색 실행");
+        List<PlanPostCacheDto> cacheDtos = elasticsearchTestMapper.searchByCache(keyword);
+
+        List<PlanPostResponseDto> result = cacheDtos.stream()
+                .map(this::convertCacheDtoToResponseDto)
+                .collect(Collectors.toList());
+
+        long endTime = System.currentTimeMillis();
+        log.info("✅ [캐시 LIKE] 완료 - 총 1개 쿼리, {}개 결과, {}ms",
+                result.size(), endTime - startTime);
+
+        return result;
+    }
+
+    /**
+     * 캐시 DTO를 ResponseDto로 변환 (사용자 테이블 구조)
+     */
+    private PlanPostResponseDto convertCacheDtoToResponseDto(PlanPostCacheDto cacheDto) {
+        PlanPostResponseDto response = new PlanPostResponseDto();
+
+        // 기본 필드 매핑
+        response.setNo(cacheDto.getNo());
+        response.setUserNo(cacheDto.getUserNo());
+        response.setUserNickname(cacheDto.getUserNickname());
+        response.setTitle(cacheDto.getTitle());
+        response.setDescription(cacheDto.getDescription());
+        response.setThumbnail(cacheDto.getThumbnail());
+        response.setCreatedAt(cacheDto.getCreatedAt());
+        response.setUpdatedAt(cacheDto.getUpdatedAt());
+        response.setStartDay(cacheDto.getStartDay());
+        response.setEndDay(cacheDto.getEndDay());
+        response.setTotalMember(cacheDto.getTotalMember().longValue()); // INT → Long 변환
+        response.setForkCount(cacheDto.getForkCount());
+        response.setLikedCount(cacheDto.getLikedCount());
+        response.setViewCount(cacheDto.getViewCount());
+
+        // 🔥 콤마 구분된 태그를 List로 변환 (사용자 테이블: tags 컬럼)
+        List<PlanPostTagDto> tags = convertTagNamesToTagDtos(cacheDto.getTags(), cacheDto.getNo());
+        response.setTags(tags);
+
+        log.debug("🏷️ 게시글 ID {} - 태그 {}개 변환: [{}]",
+                cacheDto.getNo(), tags.size(),
+                tags.stream().map(PlanPostTagDto::getName).collect(Collectors.joining(", ")));
+
+        log.debug("🎯 관광지: [{}]", cacheDto.getAttractionTitles());
+        log.debug("📍 주소: [{}]", cacheDto.getAddresses());
+
+        return response;
+    }
+
+    /**
+     * 콤마 구분된 태그명을 PlanPostTagDto 리스트로 변환
+     */
+    private List<PlanPostTagDto> convertTagNamesToTagDtos(String tagNames, Long planPostNo) {
+        if (tagNames == null || tagNames.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(tagNames.split(","))
+                .map(String::trim)
+                .filter(name -> !name.isEmpty())
+                .map(name -> {
+                    PlanPostTagDto tagDto = new PlanPostTagDto();
+                    tagDto.setNo(null); // 캐시에서는 태그 PK를 저장하지 않음
+                    tagDto.setPlanPostNo(planPostNo);
+                    tagDto.setName(name);
+                    return tagDto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    // 인덱스 캐시 테이블 각 컬럼별 LIKE 검색
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlanPostResponseDto> searchByCacheIndexed(String keyword) {
+        log.info("🔍 [인덱스 캐시 LIKE] 검색 시작 - keyword: {}", keyword);
+
+        long startTime = System.currentTimeMillis();
+
+        log.info("📊 [쿼리 1] 인덱스 캐시 테이블 각 컬럼별 LIKE 검색 실행");
+        List<PlanPostCacheIndexedDto> cacheDtos = elasticsearchTestMapper.searchByCacheIndexed(keyword);
+
+        List<PlanPostResponseDto> result = cacheDtos.stream()
+                .map(this::convertCacheIndexedDtoToResponseDto)
+                .collect(Collectors.toList());
+
+        long endTime = System.currentTimeMillis();
+        log.info("✅ [인덱스 캐시 LIKE] 완료 - 총 1개 쿼리, {}개 결과, {}ms",
+                result.size(), endTime - startTime);
+
+        return result;
+    }
+
+    // 인덱스 캐시 테이블 통합 컬럼 LIKE 검색 (최적화)
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlanPostResponseDto> searchByCacheIndexedOptimized(String keyword) {
+        log.info("🚀 [인덱스 캐시 최적화] 검색 시작 - keyword: {}", keyword);
+
+        long startTime = System.currentTimeMillis();
+
+        log.info("📊 [쿼리 1] 인덱스 캐시 테이블 통합 컬럼 검색 실행");
+        List<PlanPostCacheIndexedDto> cacheDtos = elasticsearchTestMapper.searchByCacheIndexedOptimized(keyword);
+
+        List<PlanPostResponseDto> result = cacheDtos.stream()
+                .map(this::convertCacheIndexedDtoToResponseDto)
+                .collect(Collectors.toList());
+
+        long endTime = System.currentTimeMillis();
+        log.info("✅ [인덱스 캐시 최적화] 완료 - 총 1개 쿼리, {}개 결과, {}ms",
+                result.size(), endTime - startTime);
+
+        return result;
+    }
+
+    /**
+     * 인덱스 캐시 DTO를 ResponseDto로 변환
+     */
+    private PlanPostResponseDto convertCacheIndexedDtoToResponseDto(PlanPostCacheIndexedDto cacheDto) {
+        PlanPostResponseDto response = new PlanPostResponseDto();
+
+        // 기본 필드 매핑
+        response.setNo(cacheDto.getNo());
+        response.setUserNo(cacheDto.getUserNo());
+        response.setUserNickname(cacheDto.getUserNickname());
+        response.setTitle(cacheDto.getTitle());
+        response.setDescription(cacheDto.getDescription());
+        response.setThumbnail(cacheDto.getThumbnail());
+        response.setCreatedAt(cacheDto.getCreatedAt());
+        response.setUpdatedAt(cacheDto.getUpdatedAt());
+        response.setStartDay(cacheDto.getStartDay());
+        response.setEndDay(cacheDto.getEndDay());
+        response.setTotalMember(cacheDto.getTotalMember().longValue());
+        response.setForkCount(cacheDto.getForkCount());
+        response.setLikedCount(cacheDto.getLikedCount());
+        response.setViewCount(cacheDto.getViewCount());
+
+        // 🔥 콤마 구분된 태그를 List로 변환
+        List<PlanPostTagDto> tags = convertTagNamesToTagDtos(cacheDto.getTags(), cacheDto.getNo());
+        response.setTags(tags);
+
+        log.debug("🏷️ [인덱스 캐시] 게시글 ID {} - 태그 {}개 변환: [{}]",
+                cacheDto.getNo(), tags.size(),
+                tags.stream().map(PlanPostTagDto::getName).collect(Collectors.joining(", ")));
+
+        return response;
+    }
+
 }
