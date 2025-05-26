@@ -1,142 +1,206 @@
 package com.ssafy.triplog.user.controller;
 
-//회원가입	POST	/api/users/signup
-//회원탈퇴	DELETE	/api/users
-//로그인 (로컬)	POST	/api/users/login
-//로그인 (소셜)	POST	/api/users/login/{google, kakao}
-//회원정보 수정	PUT	/api/users
-//회원 전체 조회 (Admin)	GET	/api/admin/users
-//아이디(이메일) 찾기	POST	/api/users/find-email
-//비밀번호 찾기	POST	/api/users/find-password
-//특정 회원 정보 조회	GET	/api/users/{userNo}
-
 import com.ssafy.triplog.user.dto.*;
+import com.ssafy.triplog.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "User API", description = "사용자 관리 API")
 @RequiredArgsConstructor
 @Slf4j
+//@CrossOrigin(origins = "http://localhost:8080", allowedHeaders = "*")
 public class UserController {
 
-    @Operation(summary = "회원가입", description = "사용자 이메일과 비밀번호 등 기본 정보를 이용하여 회원가입을 처리합니다.")
+    private final UserService userService;
+
+    @Operation(summary = "회원가입 - ok", description = "사용자 이메일과 비밀번호 등 기본 정보를 이용하여 회원가입을 처리합니다. - ok")
     @PostMapping("/signup")
     public ResponseEntity<UserResponse> signup(@Valid @RequestBody UserServiceDto request) {
         log.debug("signup -----> request : {} ", request);
-        return ResponseEntity.ok(new UserResponse());
+        UserResponse response = userService.registerUser(request);
+        return ResponseEntity.ok(response);
+    }
+    @Operation(summary = "이메일 중복 확인 - ok", description = "입력된 이메일의 사용 가능 여부를 확인합니다. - ok")
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmailDuplicate(@RequestParam String email) {
+        log.debug("checkEmailDuplicate -----> email: {}", email);
+        boolean isDuplicate = userService.checkEmailDuplicate(email);
+        return ResponseEntity.ok(isDuplicate);
     }
 
+    @Operation(summary = "닉네임 중복 확인 - ok", description = "입력된 닉네임의 사용 가능 여부를 확인합니다. - ok")
+    @GetMapping("/check-nickname")
+    public ResponseEntity<Boolean> checkNicknameDuplicate(@RequestParam String nickname) {
+        log.debug("checkNicknameDuplicate -----> nickname: {}", nickname);
+        boolean isDuplicate = userService.checkNicknameDuplicate(nickname);
+        return ResponseEntity.ok(isDuplicate);
+    }
+    @Operation(summary = "회원탈퇴 - ok", description = "인증된 사용자가 자신의 계정을 탈퇴합니다. - ok ")
+    @DeleteMapping("/{userNo}")
+    public ResponseEntity<String> withdrawUser(@PathVariable Long userNo, @RequestBody String password) {
+        log.debug("withdrawUser -----> userNo : {}", userNo);
 
-    @Operation(summary = "회원탈퇴", description = "인증된 사용자가 자신의 계정을 탈퇴합니다. no는 토큰 사용 시 삭제될 예정입니다. ")
-    @DeleteMapping()
-    public ResponseEntity<String> withdrawUser(@Valid String password, Long no) {
-        log.debug("withdrawUser -----> password : {} ", password);
-        log.debug("withdrawUser -----> no : {} ", no);
-        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+        // 실제 애플리케이션에서는 토큰에서 사용자 ID를 추출하여 사용해야 함
+        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        // Long authenticatedUserNo = userDetails.getUserNo();
+
+        boolean result = userService.withdrawUser(userNo, password);
+
+        if (result) {
+            return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("회원 탈퇴 처리 중 오류가 발생했습니다.");
+        }
     }
 
-    @Operation(summary = "로컬 로그인", description = "로컬 디비를 바탕으로 로그인 처리를 합니다.")
+    // 로그인 API는 LoginFilter에서 처리되므로 컨트롤러에서는 기본 응답만 제공
+    @Operation(summary = "로컬 로그인 - ok", description = "로컬 디비를 바탕으로 로그인 처리를 합니다. - ok")
     @PostMapping("/login")
     public ResponseEntity<UserResponse> login(@Valid @RequestBody UserLoginRequest request) {
         log.debug("login -----> request : {} ", request);
+        // 실제 인증은 LoginFilter에서 처리됨
         return ResponseEntity.ok(new UserResponse());
     }
 
+    @Operation(summary = "소셜 로그인", description = "OAuth2 인증 코드를 이용하여 소셜 로그인 처리를 합니다.")
+    @PostMapping("/login/{provider}")
+    public ResponseEntity<UserResponse> socialLogin(
+            @PathVariable String provider,
+            @Valid @RequestBody UserSocialLoginRequest request) {
+        log.debug("socialLogin -----> provider: {}, request : {} ", provider, request);
 
-    //4. 소셜 로그인 : POST : /api/users/login/{provider}
-//   → summary: "소셜 로그인"
-//            → description: "OAuth2 인증 코드를 이용하여 소셜 로그인 처리를 합니다. (provider: google, kakao, naver)"
-//            → method name: socialLogin
-
-    // 인풋값 정리할 필요 있어 보임!!! 어떤 로직인지 확인해보고 결정해야할 듯
-    ////////이거 나중에 해야지이이이이
-    @Operation(summary = "소셜 로그인", description = "OAuth2 인증 코드를 이용하여 소셜 로그인 처리를 합니다. (provider: google, kakao, naver)" +
-            "인풋값 정리할 필요 있어 보임!!! 어떤 로직인지 확인해보고 결정해야할 듯"
-    )
-    @PostMapping("/login/google")
-    public ResponseEntity<UserResponse> googleSocialLogin(@Valid @RequestBody UserSocialLoginRequest request) {
-        log.debug("googleSocialLogin -----> request : {} ", request);
-        return ResponseEntity.ok(new UserResponse());
+        UserResponse response = userService.handleSocialLogin(provider.toLowerCase(), request);
+        return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "회원정보 수정", description = "로그인한 사용자가 자신의 회원 정보를 수정합니다.")
+    @Operation(summary = "회원정보 수정 - ok 조금더 확인필요", description = "로그인한 사용자가 자신의 회원 정보를 수정합니다. - ok 어느정도는 되는데 몇개안됨 수정필요")
     @PutMapping("/{userNo}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable Long userNo, @Valid @RequestBody UserDto request) {
-        log.debug("updateUser -----> request : {} ", request);
-        return ResponseEntity.ok(new UserResponse());
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable Long userNo,
+            @Valid @RequestBody UserDto request) {
+        log.debug("updateUser -----> userNo: {}, request : {} ", userNo, request);
+
+        // 실제 애플리케이션에서는 토큰에서 사용자 ID를 추출하여 사용자 본인 확인 필요
+        UserResponse response = userService.updateUser(userNo, request);
+        return ResponseEntity.ok(response);
     }
-
-
-    //6. 회원 전체 조회 (어드민 전용) : GET : /api/admin/users //기능 없음
-//   → summary: "전체 회원 조회"
-//            → description: "관리자 권한으로 모든 회원 목록을 조회합니다."
-//            → method name: getAllUsers
-
 
     @Operation(summary = "아이디(이메일) 찾기", description = "전화번호, 이름 등의 정보를 입력받아 등록된 이메일을 찾습니다.")
     @PostMapping("/find-email")
     public ResponseEntity<UserFindEmailResponse> findEmail(@Valid @RequestBody UserFindEmailRequest request) {
         log.debug("findEmail -----> request : {} ", request);
-        return ResponseEntity.ok(new UserFindEmailResponse());
+        UserFindEmailResponse response = userService.findUserEmail(request);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "비밀번호 찾기", description = "등록된 이메일을 기반으로 임시 비밀번호를 전송합니다.")
     @PostMapping("/find-password")
     public ResponseEntity<String> findPassword(@Valid @RequestBody UserFindPasswordRequest request) {
         log.debug("findPassword -----> request : {} ", request);
-        return ResponseEntity.ok("임시 비밀번호 전송이 완료되었습니다. ");
+
+        // 실제 애플리케이션에서는 임시 비밀번호를 이메일로 전송하고 성공 메시지만 반환
+        // 테스트 용도로 임시 비밀번호를 응답으로 반환
+        String temporaryPassword = userService.findUserPassword(request);
+
+        return ResponseEntity.ok("임시 비밀번호가 발급되었습니다: " + temporaryPassword);
     }
 
-    @Operation(summary = "회원 정보 조회", description = "지정한 회원 번호에 해당하는 회원의 상세 정보를 조회합니다.")
+    @Operation(summary = "회원 정보 조회 - ok", description = "지정한 회원 번호에 해당하는 회원의 상세 정보를 조회합니다. -  자기꺼만 됨 ")
     @GetMapping("/{userNo}")
     public ResponseEntity<UserServiceDto> getUserById(@PathVariable Long userNo) {
         log.debug("getUserById -----> userNo : {} ", userNo);
-        return ResponseEntity.ok(new UserServiceDto());
+        UserServiceDto userDto = userService.getUserDetail(userNo);
+        return ResponseEntity.ok(userDto);
     }
 
-    @Operation(summary = "나의 팔로워 조회", description = "userNo 팔로워 list 를 조회합니다. ")
+    @Operation(summary = "나의 팔로워 조회 - ok", description = "userNo 팔로워 list 를 조회합니다.")
     @GetMapping("/{userNo}/follower")
     public ResponseEntity<List<UserFollowInfoResponse>> getAllFollowers(@PathVariable Long userNo) {
         log.debug("getAllFollowers -----> userNo : {} ", userNo);
-        return ResponseEntity.ok(List.of(new UserFollowInfoResponse(), new UserFollowInfoResponse()));
+        List<UserFollowInfoResponse> followers = userService.getUserFollowers(userNo);
+        return ResponseEntity.ok(followers);
     }
 
-    @Operation(summary = "나의 팔로우 조회", description = "userNo 팔로우 list 를 조회합니다. ")
+    @Operation(summary = "나의 팔로우 조회 - ok ", description = "userNo 팔로우 list 를 조회합니다.")
     @GetMapping("/{userNo}/follow")
     public ResponseEntity<List<UserFollowInfoResponse>> getAllFollows(@PathVariable Long userNo) {
-        log.debug("getAllFollowers -----> userNo : {} ", userNo);
-        return ResponseEntity.ok(List.of(new UserFollowInfoResponse(), new UserFollowInfoResponse()));
+        log.debug("getAllFollows -----> userNo : {} ", userNo);
+        List<UserFollowInfoResponse> following = userService.getUserFollowing(userNo);
+        return ResponseEntity.ok(following);
     }
 
+    @Operation(summary = "사용자 팔로우 - ok", description = "특정 사용자를 팔로우합니다.")
+    @PostMapping("/{userNo}/follow/{targetUserNo}")
+    public ResponseEntity<String> followUser(
+            @PathVariable Long userNo,
+            @PathVariable Long targetUserNo) {
+        log.debug("followUser -----> userNo: {}, targetUserNo: {}", userNo, targetUserNo);
 
-//    @Operation(summary = "소셜 로그인", description = "OAuth2 인증 코드를 이용하여 소셜 로그인 처리를 합니다.")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "로그인 성공",
-//                    content = @Content(mediaType = "application/json",
-//                            schema = @Schema(implementation = LoginResponse.class))),
-//            @ApiResponse(responseCode = "401", description = "OAuth 인증 실패 (잘못된 인가 코드)",
-//                    content = @Content(mediaType = "application/json",
-//                            schema = @Schema(implementation = ErrorResponse.class))),
-//            @ApiResponse(responseCode = "409", description = "이미 가입된 번호",
-//                    content = @Content(mediaType = "application/json",
-//                            schema = @Schema(implementation = ErrorResponse.class))),
-//            @ApiResponse(responseCode = "500", description = "서버 오류 발생",
-//                    content = @Content(mediaType = "application/json",
-//                            schema = @Schema(implementation = ErrorResponse.class)))
-//    })
-//    @PostMapping("/oauth")
-//    public ResponseEntity<LoginResponse> socialLogin(@Valid @RequestBody OAuthRequest request) {
-//        LoginResponse loginResponse = authService.socialLogin(request);
-//        return ResponseEntity.ok(loginResponse);
-//    }
+        boolean result = userService.followUser(userNo, targetUserNo);
+
+        if (result) {
+            return ResponseEntity.ok("팔로우가 완료되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("팔로우 처리 중 오류가 발생했습니다.");
+        }
+    }
+
+    @Operation(summary = "사용자 언팔로우 - ok", description = "특정 사용자를 언팔로우합니다.")
+    @DeleteMapping("/{userNo}/follow/{targetUserNo}")
+    public ResponseEntity<String> unfollowUser(
+            @PathVariable Long userNo,
+            @PathVariable Long targetUserNo) {
+        log.debug("unfollowUser -----> userNo: {}, targetUserNo: {}", userNo, targetUserNo);
+
+        boolean result = userService.unfollowUser(userNo, targetUserNo);
+
+        if (result) {
+            return ResponseEntity.ok("언팔로우가 완료되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("언팔로우 처리 중 오류가 발생했습니다.");
+        }
+    }
+
+    // UserController.java에 추가할 메서드들
+
+    @PostMapping("/{userNo}/profile-image")
+    public ResponseEntity<Map<String, String>> uploadProfileImage(
+            @PathVariable Long userNo,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "position", required = false) String position) {
+
+        log.info("프로필 이미지 업로드 요청: userNo={}, fileName={}, fileSize={}",
+                userNo, image.getOriginalFilename(), image.getSize());
+
+        try {
+            String imageUrl = userService.uploadProfileImage(userNo, image, position);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("imageUrl", imageUrl);
+            response.put("profileUrl", imageUrl);
+
+            log.info("프로필 이미지 업로드 성공: userNo={}, imageUrl={}", userNo, imageUrl);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("프로필 이미지 업로드 실패: userNo={}, error={}", userNo, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "이미지 업로드 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
 }
-
-
-

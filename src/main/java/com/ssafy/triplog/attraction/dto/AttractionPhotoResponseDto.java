@@ -7,7 +7,6 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class SidoDto {
-    private Integer no;     // 시도 pk
-    private String name;    // 시도명
+public class AttractionPhotoResponseDto {
+    private String imageUrl;
 }

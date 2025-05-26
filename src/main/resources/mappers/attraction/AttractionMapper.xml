@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.triplog.attraction.mapper.AttractionMapper">
+
+    <resultMap id="PlanPostWithTagsResultMap" type="com.ssafy.triplog.planpost.dto.PlanPostResponse">
+        <id property="no" column="pp_no"/>
+        <result property="userNickname" column="userNickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="updatedAt" column="updatedAt"/>
+        <result property="userNo" column="userNo"/>
+        <result property="forkCount" column="forkCount"/>
+        <result property="likedCount" column="likedCount"/>
+        <result property="viewCount" column="viewCount"/>
+        <result property="startDay" column="startDay"/>
+        <result property="endDay" column="endDay"/>
+        <result property="totalMember" column="totalMember"/>
+
+        <collection property="tags" ofType="com.ssafy.triplog.planpost.dto.PlanPostTagDto">
+            <id property="no" column="tag_no"/>
+            <result property="planPostNo" column="tag_plan_post_no"/>
+            <result property="name" column="tag_name"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="findAttractionCategories" resultType="String">
+        SELECT name FROM attraction_types
+    </select>
+
+    <!-- 관광지 목록 조회 -->
+    <select id="findAttractions" resultType="com.ssafy.triplog.attraction.dto.AttractionResponseDto">
+        SELECT
+        no, title, latitude, longitude, thumbnail,
+        ratingSum, reviewCount, attraction_type_name as attractionTypeName, address
+        FROM
+        attractions
+        WHERE
+        1=1
+        <if test="types != null and types.size() > 0">
+            AND attraction_type_name IN
+            <foreach collection="types" item="type" open="(" separator="," close=")">
+                #{type}
+            </foreach>
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%')
+            OR address LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'ratingSum'">ratingSum DESC</when>
+            <when test="sortBy == 'reviewCount'">reviewCount DESC</when>
+            <otherwise>no DESC</otherwise>
+        </choose>
+        LIMIT #{size} OFFSET #{page}
+    </select>
+
+    <!-- 관광지 상세 조회 -->
+    <select id="findById" resultType="com.ssafy.triplog.attraction.dto.AttractionResponseDto">
+        SELECT
+            no, title, overview, map_level as mapLevel, latitude, longitude,
+            tel, address, address_detail as addressDetail, homepage,
+            api_id as apiId, thumbnail, ratingSum, reviewCount,
+            attraction_type_name as attractionTypeName, overview
+        FROM
+            attractions
+        WHERE
+            no = #{attractionNo}
+    </select>
+
+    <!-- 관광지 이미지 조회 -->
+    <select id="findImagesByAttractionId" resultType="com.ssafy.triplog.attraction.dto.AttractionImageResponseDto">
+        SELECT
+            no, image_url as imageUrl, review_image_order as reviewImageOrder,
+            attraction_no as attractionNo, attraction_review_no as attractionReviewNo
+        FROM
+            attraction_image
+        WHERE
+            attraction_no = #{attractionNo}
+        ORDER BY
+            review_image_order ASC
+    </select>
+
+    <!-- 관광지를 포함하는 여행 계획 조회 -->
+    <select id="findPlansByAttractionId" resultMap="PlanPostWithTagsResultMap">
+        SELECT
+            pp.no AS pp_no,
+            pp.user_nickname AS userNickname,
+            pp.title,
+            pp.description,
+            pp.thumbnail,
+            pp.created_at AS createdAt,
+            pp.updated_at AS updatedAt,
+            pp.user_no AS userNo,
+            pp.fork_count AS forkCount,
+            pp.liked_count AS likedCount,
+            pp.view_count AS viewCount,
+            pp.start_day AS startDay,
+            pp.end_day AS endDay,
+            pp.total_member AS totalMember,
+
+            pt.no AS tag_no,
+            pt.plan_post_no AS tag_plan_post_no,
+            pt.name AS tag_name
+
+        FROM
+            plan_post pp
+                JOIN
+            plan_attraction_detail pad ON pp.no = pad.plan_post_no
+            LEFT JOIN
+            plan_post_tag pt ON pp.no = pt.plan_post_no
+
+        WHERE
+            pad.attraction_no = #{attractionNo}
+
+        ORDER BY
+            pp.created_at DESC
+            LIMIT #{size} OFFSET #{offset}
+    </select>
+
+
+    <select id="findTagsByPlanPostId" resultType="com.ssafy.triplog.planpost.dto.PlanPostTagDto">
+        SELECT
+            no, plan_post_no as planPostNo, name
+        FROM
+            plan_post_tag
+        WHERE
+            plan_post_no = #{planPostNo}
+    </select>
+    <!-- 북마크 타입에 포함된 관광지 조회 -->
+    <select id="findAttractionsByBookmarkType" resultType="com.ssafy.triplog.attraction.dto.AttractionResponseDto">
+        SELECT
+            a.no, a.title, a.latitude, a.longitude, a.thumbnail,
+            a.ratingSum, a.reviewCount, a.attraction_type_name as attractionTypeName, a.address
+        FROM
+            attractions a
+                INNER JOIN
+            bookmark b ON a.no = b.attraction_no
+        WHERE
+            b.bookmark_type_no = #{bookmarkTypeNo}
+        ORDER BY
+            b.order ASC
+            LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 평점 관련 업데이트 -->
+    <update id="increaseRatingSum">
+        UPDATE attractions
+        SET ratingSum = IFNULL(ratingSum, 0) + #{rating}
+        WHERE no = #{attractionNo}
+    </update>
+
+    <update id="decreaseRatingSum">
+        UPDATE attractions
+        SET ratingSum = IFNULL(ratingSum, 0) - #{rating}
+        WHERE no = #{attractionNo}
+    </update>
+
+    <update id="increaseReviewCount">
+        UPDATE attractions
+        SET reviewCount = IFNULL(reviewCount, 0) + 1
+        WHERE no = #{attractionNo}
+    </update>
+
+    <update id="decreaseReviewCount">
+        UPDATE attractions
+        SET reviewCount = IFNULL(reviewCount, 0) - 1
+        WHERE no = #{attractionNo}
+    </update>
+</mapper>
