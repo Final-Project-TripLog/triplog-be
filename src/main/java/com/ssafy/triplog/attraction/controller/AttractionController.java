@@ -1,6 +1,7 @@
 package com.ssafy.triplog.attraction.controller;
 
 import com.ssafy.triplog.attraction.dto.*;
+import com.ssafy.triplog.attraction.engine.RecommendEngine;
 import com.ssafy.triplog.attraction.service.AttractionService;
 import com.ssafy.triplog.attraction.service.BookmarkService;
 import com.ssafy.triplog.attraction.service.ReviewService;
@@ -24,7 +25,16 @@ public class AttractionController {
     private final AttractionService attractionService;
     private final ReviewService reviewService;
     private final BookmarkService bookmarkService;
-
+    private final RecommendEngine recommendEngine;
+    
+    @Operation(summary = "추천 시스템", description = "관광지 카테고리 보여주기.")
+    @GetMapping("/recommend/{attractionNo}")
+    public ResponseEntity<List<AttractionResponseDto>> getRecommend(
+            @PathVariable Long attractionNo
+    ) {
+        List<AttractionResponseDto> dtos = recommendEngine.recommend(attractionNo, 3);
+        return ResponseEntity.ok(dtos);
+    }
 
     @Operation(summary = "관광지 카테고리 조회", description = "관광지 카테고리 보여주기.")
     @GetMapping("/category")
