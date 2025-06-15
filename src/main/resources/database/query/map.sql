@@ -1,10 +1,11 @@
--- DROP database triplog;
+-- DROP database triplog2;
 CREATE database triplog2;
 
 use triplog2;
 
 
 show tables;
+
 
 
 -- 모든 테이블 생성
@@ -110,4 +111,61 @@ VALUES
     ('https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U', 1, 8, NULL),
     ('https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U', 1, 9, NULL),
     ('https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U', 1, 10, NULL);
+
+
+
+-- 첫 번째 여행 계획
+INSERT INTO my_plan (
+    no, title, description, start_day, end_day, updated_at, total_member
+) VALUES (
+             1, 'test', 'test', '2025-06-02 00:00:01', '2025-06-04 23:59:00', '2025-06-15 08:46:52', 1
+         );
+
+-- 두 번째 여행 계획
+INSERT INTO my_plan (
+    no, title, description, start_day, end_day, updated_at, total_member
+) VALUES (
+             2, 'test2', 'test2', '2025-06-25 00:00:01', '2025-06-26 23:59:00', '2025-06-15 08:48:33', 1
+         );
+
+
+INSERT INTO my_daily_plan (
+    no, visited_date, start_time, end_time, move_time,
+    attraction_title, attraction_thumbnail,
+    attraction_latitude, attraction_longitude, attraction_rating,
+    memo, attraction_no, my_plan_no
+) VALUES
+      (1, '2025-06-02', '07:00:00', '09:00:00', 1, '한라산',
+       'https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U',
+       33.36170000000000000, 126.52920000000000000, 48.3, '', 10, 1),
+      (2, '2025-06-02', '10:55:00', '12:55:00', 1, '부산타워',
+       'https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U',
+       35.10139800000000000, 129.03275300000000000, 29.2, '', 3, 1),
+      (3, '2025-06-03', '07:00:00', '09:00:00', 1, '롯데월드타워',
+       'https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U',
+       37.51310000000000000, 127.10250000000000000, 42.5, '', 9, 1),
+      (4, '2025-06-03', '11:54:00', '13:54:00', 40, '에버랜드',
+       'https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U',
+       37.29400000000000000, 127.20210000000000000, 44.2, '', 8, 1),
+      (5, '2025-06-04', '07:00:00', '09:00:00', 1, '독립기념관',
+       'https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U',
+       36.77650000000000000, 127.22250000000000000, 35.0, '', 7, 1),
+      (6, '2025-06-04', '11:59:00', '13:59:00', 95, '전주한옥마을',
+       'https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U',
+       35.81505900000000000, 127.15252900000000000, 41.3, '', 4, 1),
+      (7, '2025-06-25', '07:00:00', '09:00:00', 1, '롯데월드타워',
+       'https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U',
+       37.51310000000000000, 127.10250000000000000, 42.5, '', 9, 2),
+      (8, '2025-06-25', '10:16:00', '12:16:00', 33, '국립중앙박물관',
+       'https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U',
+       37.52300000000000000, 126.98000000000000000, 50.0, '', 6, 2),
+      (9, '2025-06-26', '07:00:00', '09:00:00', 1, '청계천',
+       'https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U',
+       37.56960000000000000, 126.97710000000000000, 32.1, '', 5, 2),
+      (10, '2025-06-26', '11:27:00', '13:27:00', 8, '남산타워',
+       'https://lh4.googleusercontent.com/proxy/2-1aYixQlQBuadB9TrGNwxHcvCNdsip88b075l_sQnpMe-iwTEwic8rCXp5jRLckxW05xhC9RrSlNWXgMAe1oxn7awKOwH4Llhug_rr4GvXZaoFbqLBMpPJ-mMdMGQ1rvttPpKKOu3ng1s_1H4Kl24HzMar6oYG4InEwdm7RxCrLQLQpXXqZfXpESWmtYF4D-YU6gFL-LPMu-0GDCHCxmyreQZCeUFMq7ChkkM2E1rSPOEXqKYZeTPwvo6U',
+       37.55116900000000000, 126.98822700000000000, 38.7, '', 2, 2);
+
+
+commit;
 
