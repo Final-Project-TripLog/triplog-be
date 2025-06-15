@@ -27,4 +27,15 @@ public class WebConfig implements WebMvcConfigurer {
 
         log.info("정적 파일 경로 설정: {}", uploadPath);
     }
+
+    // ✅ CORS 설정: localhost:5173만 허용
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:5173")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
+    }
 }

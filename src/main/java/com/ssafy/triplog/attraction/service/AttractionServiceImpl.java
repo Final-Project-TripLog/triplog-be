@@ -3,7 +3,7 @@ package com.ssafy.triplog.attraction.service;
 import com.ssafy.triplog.attraction.dto.AttractionImageResponseDto;
 import com.ssafy.triplog.attraction.dto.AttractionResponseDto;
 import com.ssafy.triplog.attraction.mapper.AttractionMapper;
-import com.ssafy.triplog.planpost.dto.PlanPostResponse;
+//import com.ssafy.triplog.planpost.dto.PlanPostResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -66,31 +66,31 @@ public class AttractionServiceImpl implements AttractionService {
         return attractionMapper.findImagesByAttractionId(attractionNo);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<AttractionResponseDto> getAttractionsByBookmarkType(Long bookmarkTypeNo, int page, int size) {
-        log.debug("getAttractionsByBookmarkType: bookmarkTypeNo={}, page={}, size={}",
-                bookmarkTypeNo, page, size);
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<AttractionResponseDto> getAttractionsByBookmarkType(Long bookmarkTypeNo, int page, int size) {
+//        log.debug("getAttractionsByBookmarkType: bookmarkTypeNo={}, page={}, size={}",
+//                bookmarkTypeNo, page, size);
+//
+//        // 페이지 번호를 오프셋으로 변환
+//        int offset = page * size;
+//
+//        return attractionMapper.findAttractionsByBookmarkType(bookmarkTypeNo, size, offset);
+//    }
 
-        // 페이지 번호를 오프셋으로 변환
-        int offset = page * size;
-
-        return attractionMapper.findAttractionsByBookmarkType(bookmarkTypeNo, size, offset);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<PlanPostResponse> getPlansContainingAttraction(Long attractionNo, int page, int size) {
-        log.debug("getPlansContainingAttraction: attractionNo={}, page={}, size={}",
-                attractionNo, page, size);
-        // 관광지 존재 여부 확인
-        if (attractionMapper.findById(attractionNo) == null) {
-            throw new RuntimeException("관광지 정보를 찾을 수 없습니다: " + attractionNo);
-        }
-        // 페이지를 오프셋으로 변환
-        int offset = page * size;
-        // 관광지를 포함하는 여행 계획 조회
-        return attractionMapper.findPlansByAttractionId(attractionNo, size, offset);
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<PlanPostResponse> getPlansContainingAttraction(Long attractionNo, int page, int size) {
+//        log.debug("getPlansContainingAttraction: attractionNo={}, page={}, size={}",
+//                attractionNo, page, size);
+//        // 관광지 존재 여부 확인
+//        if (attractionMapper.findById(attractionNo) == null) {
+//            throw new RuntimeException("관광지 정보를 찾을 수 없습니다: " + attractionNo);
+//        }
+//        // 페이지를 오프셋으로 변환
+//        int offset = page * size;
+//        // 관광지를 포함하는 여행 계획 조회
+//        return attractionMapper.findPlansByAttractionId(attractionNo, size, offset);
+//    }
 
 }

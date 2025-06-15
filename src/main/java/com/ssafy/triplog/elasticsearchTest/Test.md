@@ -1,6 +1,0 @@
-12:11:32 [WARN] c.s.t.e.c.ElasticsearchTestController 1️⃣ MySQL 인덱스 최적화:        4ms (2개 결과)
-12:11:32 [WARN] c.s.t.e.c.ElasticsearchTestController 2️⃣ MySQL FULLTEXT:            6ms (2개 결과)
-12:11:32 [WARN] c.s.t.e.c.ElasticsearchTestController 3️⃣ MySQL 4중 JOIN:            6ms (2개 결과)
-12:11:32 [WARN] c.s.t.e.c.ElasticsearchTestController 4️⃣ Elasticsearch 쿼리:        18ms (2개 결과)
-12:11:32 [WARN] c.s.t.e.c.ElasticsearchTestController 5️⃣ Elasticsearch Match:       13ms (2개 결과)
-12:11:32 [WARN] c.s.t.e.c.ElasticsearchTestController 6️⃣ Elasticsearch Multi-Match: 28ms (2개 결과)

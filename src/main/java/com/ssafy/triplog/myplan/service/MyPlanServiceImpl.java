@@ -25,13 +25,12 @@ public class MyPlanServiceImpl implements MyPlanService {
     private final MyPlanMapper myPlanMapper;
 
     @Override
-    public Long createMyPlan(Long userNo, MyPlanRequest request) {
-        log.debug("MyPlanServiceImpl.createMyPlan -----> userNo: {}, request: {}", userNo, request);
+    public Long createMyPlan(MyPlanRequest request) {
+        log.debug("MyPlanServiceImpl.createMyPlan -----> userNo: {}, request: {}", request);
 
         try {
             // 1. 기본 여행 계획 생성
             MyPlanDto myPlanDto = MyPlanDto.builder()
-                    .userNo(userNo)
                     .title(request.getTitle())
                     .description(request.getDescription())
                     .startTime(request.getStartTime())
@@ -73,19 +72,18 @@ public class MyPlanServiceImpl implements MyPlanService {
     }
 
     @Override
-    public Long updateMyPlan(Long planNo, Long userNo, MyPlanRequest request) {
-        log.debug("MyPlanServiceImpl.updateMyPlan -----> planNo: {}, userNo: {}, request: {}", planNo, userNo, request);
+    public Long updateMyPlan(Long planNo, MyPlanRequest request) {
+        log.debug("MyPlanServiceImpl.updateMyPlan -----> planNo: {}, request: {}", planNo, request);
 
         // 권한 확인
-        if (!isPlanOwner(planNo, userNo)) {
-            throw new RuntimeException("여행 계획을 수정할 권한이 없습니다.");
-        }
+//        if (!isPlanOwner(planNo, userNo)) {
+//            throw new RuntimeException("여행 계획을 수정할 권한이 없습니다.");
+//        }
 
         try {
             // 1. 기본 여행 계획 수정
             MyPlanDto updateDto = MyPlanDto.builder()
                     .no(planNo)
-                    .userNo(userNo)
                     .title(request.getTitle())
                     .description(request.getDescription())
                     .startTime(request.getStartTime())
@@ -124,13 +122,13 @@ public class MyPlanServiceImpl implements MyPlanService {
     }
 
     @Override
-    public void deleteMyPlan(Long planNo, Long userNo) {
-        log.debug("MyPlanServiceImpl.deleteMyPlan -----> planNo: {}, userNo: {}", planNo, userNo);
+    public void deleteMyPlan(Long planNo) {
+        log.debug("MyPlanServiceImpl.deleteMyPlan -----> planNo: {}, userNo: {}", planNo);
 
         // 권한 확인
-        if (!isPlanOwner(planNo, userNo)) {
-            throw new RuntimeException("여행 계획을 삭제할 권한이 없습니다.");
-        }
+//        if (!isPlanOwner(planNo)) {
+//            throw new RuntimeException("여행 계획을 삭제할 권한이 없습니다.");
+//        }
 
         try {
             // 1. 관련된 일일 계획들 먼저 삭제
@@ -139,7 +137,7 @@ public class MyPlanServiceImpl implements MyPlanService {
 
             // 2. 여행 계획 삭제
             log.debug("여행 계획 삭제 중...");
-            int result = myPlanMapper.deleteMyPlan(planNo, userNo);
+            int result = myPlanMapper.deleteMyPlan(planNo);
             if (result == 0) {
                 throw new RuntimeException("여행 계획을 찾을 수 없습니다.");
             }
@@ -154,12 +152,11 @@ public class MyPlanServiceImpl implements MyPlanService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MyPlanDto> getMyPlansByUser(Long userNo, int page, int size) {
-        log.debug("MyPlanServiceImpl.getMyPlansByUser -----> userNo: {}, page: {}, size: {}", userNo, page, size);
+    public List<MyPlanDto> getMyPlans(int page, int size) {
+        log.debug("MyPlanServiceImpl.getMyPlansByUser -----> page: {}, size: {}", page, size);
 
-//        log.debug(startDate.toString(), endDate.toString());
         int offset = page * size;
-        List<MyPlanDto> myPlans = myPlanMapper.selectMyPlansByUser(userNo, offset, size);
+        List<MyPlanDto> myPlans = myPlanMapper.selectMyPlans(offset, size);
 
         log.debug("조회된 여행 계획 수: {}", myPlans.size());
         return myPlans;
@@ -167,8 +164,8 @@ public class MyPlanServiceImpl implements MyPlanService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MyDailyPlanDto> getMyPlanDetail(Long planNo, Long userNo) {
-        log.debug("MyPlanServiceImpl.getMyPlanDetail -----> planNo: {}, userNo: {}", planNo, userNo);
+    public List<MyDailyPlanDto> getMyPlanDetail(Long planNo) {
+        log.debug("MyPlanServiceImpl.getMyPlanDetail -----> planNo: {}, userNo: {}", planNo);
 
         // 1. 여행 계획 존재 여부 및 권한 확인
         MyPlanDto myPlan = myPlanMapper.selectMyPlanById(planNo);
@@ -178,9 +175,9 @@ public class MyPlanServiceImpl implements MyPlanService {
         }
 
         // 2. 권한 확인
-        if (!myPlan.getUserNo().equals(userNo)) {
-            throw new RuntimeException("해당 여행 계획에 접근할 권한이 없습니다. planNo: " + planNo);
-        }
+//        if (!myPlan.getUserNo().equals(userNo)) {
+//            throw new RuntimeException("해당 여행 계획에 접근할 권한이 없습니다. planNo: " + planNo);
+//        }
 
         // 3. 일일 계획 목록 조회
         log.debug(myPlan.toString() + " Here");
@@ -190,15 +187,15 @@ public class MyPlanServiceImpl implements MyPlanService {
         return dailyPlans;
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public boolean isPlanOwner(Long planNo, Long userNo) {
-        log.debug("MyPlanServiceImpl.isPlanOwner -----> planNo: {}, userNo: {}", planNo, userNo);
-
-        MyPlanDto myPlan = myPlanMapper.selectMyPlanById(planNo);
-        boolean isOwner = myPlan != null && myPlan.getUserNo().equals(userNo);
-
-        log.debug("계획 소유자 확인 결과: {}", isOwner);
-        return isOwner;
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public boolean isPlanOwner(Long planNo) {
+//        log.debug("MyPlanServiceImpl.isPlanOwner -----> planNo: {}, userNo: {}", planNo, userNo);
+//
+//        MyPlanDto myPlan = myPlanMapper.selectMyPlanById(planNo);
+//        boolean isOwner = myPlan != null && myPlan.getUserNo().equals(userNo);
+//
+//        log.debug("계획 소유자 확인 결과: {}", isOwner);
+//        return isOwner;
+//    }
 }

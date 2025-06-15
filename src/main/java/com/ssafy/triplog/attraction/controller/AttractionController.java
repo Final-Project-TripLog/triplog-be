@@ -3,15 +3,10 @@ package com.ssafy.triplog.attraction.controller;
 import com.ssafy.triplog.attraction.dto.*;
 import com.ssafy.triplog.attraction.engine.RecommendEngine;
 import com.ssafy.triplog.attraction.service.AttractionService;
-import com.ssafy.triplog.attraction.service.BookmarkService;
-import com.ssafy.triplog.attraction.service.ReviewService;
-import com.ssafy.triplog.planpost.dto.PlanPostResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,10 +18,10 @@ import java.util.List;
 public class AttractionController {
 
     private final AttractionService attractionService;
-    private final ReviewService reviewService;
-    private final BookmarkService bookmarkService;
+    //    private final ReviewService reviewService;
+//    private final BookmarkService bookmarkService;
     private final RecommendEngine recommendEngine;
-    
+
     @Operation(summary = "추천 시스템", description = "관광지 카테고리 보여주기.")
     @GetMapping("/recommend/{attractionNo}")
     public ResponseEntity<List<AttractionResponseDto>> getRecommend(
@@ -79,25 +74,25 @@ public class AttractionController {
         return ResponseEntity.ok(images);
     }
 
-    @Operation(summary = "관광지 리뷰 조회 - ok", description = "관광지에 작성된 리뷰를 조회합니다.")
-    @GetMapping("/{attractionNo}/reviews")
-    public ResponseEntity<List<AttractionReviewResponseDto>> getAttractionReviews(
-            @PathVariable Long attractionNo,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        log.debug("getAttractionReviews -----> attractionNo: {}, page: {}, size: {}",
-                attractionNo, page, size);
-
-        // 인증 정보 로깅
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        log.info("현재 인증 정보: {}", auth);
-
-        List<AttractionReviewResponseDto> reviews = reviewService.getReviewsByAttraction(
-                attractionNo, page, size);
-
-        return ResponseEntity.ok(reviews);
-    }
+//    @Operation(summary = "관광지 리뷰 조회 - ok", description = "관광지에 작성된 리뷰를 조회합니다.")
+//    @GetMapping("/{attractionNo}/reviews")
+//    public ResponseEntity<List<AttractionReviewResponseDto>> getAttractionReviews(
+//            @PathVariable Long attractionNo,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size) {
+//
+//        log.debug("getAttractionReviews -----> attractionNo: {}, page: {}, size: {}",
+//                attractionNo, page, size);
+//
+//        // 인증 정보 로깅
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        log.info("현재 인증 정보: {}", auth);
+//
+//        List<AttractionReviewResponseDto> reviews = reviewService.getReviewsByAttraction(
+//                attractionNo, page, size);
+//
+//        return ResponseEntity.ok(reviews);
+//    }
 
     @Operation(summary = "관광지 상세 정보와 이미지 함께 조회 - ok", description = "관광지 상세 정보와 이미지를 함께 조회합니다.")
     @GetMapping("/{attractionNo}/detail-with-images")
@@ -116,19 +111,4 @@ public class AttractionController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "관광지 포함 여행 계획 조회 - ok", description = "특정 관광지를 포함하는 여행 계획 목록을 조회합니다.")
-    @GetMapping("/{attractionNo}/plans")
-    public ResponseEntity<List<PlanPostResponse>> getPlansContainingAttraction(
-            @PathVariable Long attractionNo,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        log.debug("getPlansContainingAttraction -----> attractionNo: {}, page: {}, size: {}",
-                attractionNo, page, size);
-
-        List<PlanPostResponse> plans = attractionService.getPlansContainingAttraction(
-                attractionNo, page, size);
-
-        return ResponseEntity.ok(plans);
-    }
 }

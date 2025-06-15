@@ -15,51 +15,52 @@ public interface MyPlanService {
 
     /**
      * 여행 계획 생성
-     * @param userNo 사용자 번호
+     *
      * @param request 여행 계획 생성 요청 정보
      * @return 생성된 여행 계획 번호
      */
-    Long createMyPlan(Long userNo, MyPlanRequest request);
+    Long createMyPlan(MyPlanRequest request);
 
     /**
      * 여행 계획 수정
-     * @param planNo 여행 계획 번호
-     * @param userNo 사용자 번호
+     *
+     * @param planNo  여행 계획 번호
      * @param request 여행 계획 수정 요청 정보
      * @return 수정된 여행 계획 번호
      */
-    Long updateMyPlan(Long planNo, Long userNo, MyPlanRequest request);
+    Long updateMyPlan(Long planNo, MyPlanRequest request);
 
     /**
      * 여행 계획 삭제
+     *
      * @param planNo 여행 계획 번호
-     * @param userNo 사용자 번호
      */
-    void deleteMyPlan(Long planNo, Long userNo);
+    void deleteMyPlan(Long planNo);
 
     /**
      * 사용자별 여행 계획 목록 조회
-     * @param userNo 사용자 번호
+     *
      * @param page 페이지 번호
      * @param size 페이지 크기
      * @return 여행 계획 목록
      */
-    List<MyPlanDto> getMyPlansByUser(Long userNo, int page, int size);
+    List<MyPlanDto> getMyPlans(int page, int size);
 
     /**
      * 여행 계획 상세 조회 (일일 계획 포함)
+     *
      * @param planNo 여행 계획 번호
-     * @param userNo 사용자 번호 (권한 검사용)
      * @return 일일 여행 계획 목록
      * @throws RuntimeException 권한이 없거나 계획이 존재하지 않는 경우
      */
-    List<MyDailyPlanDto> getMyPlanDetail(Long planNo, Long userNo);
+    List<MyDailyPlanDto> getMyPlanDetail(Long planNo);
 
-    /**
-     * 여행 계획 소유자 확인
-     * @param planNo 여행 계획 번호
-     * @param userNo 사용자 번호
-     * @return 소유자이면 true, 아니면 false
-     */
-    boolean isPlanOwner(Long planNo, Long userNo);
+//    /**
+//     * 여행 계획 소유자 확인
+//     *
+//     * @param planNo 여행 계획 번호
+//     * @param userNo 사용자 번호
+//     * @return 소유자이면 true, 아니면 false
+//     */
+//    boolean isPlanOwner(Long planNo, Long userNo);
 }
